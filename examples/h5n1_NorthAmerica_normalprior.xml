@@ -510,7 +510,7 @@ name="alignment"/>
                 <!-- Case count likelihood -->
                 <distribution id="caseCountLikelihood.t:H5N1_HA_mascot" spec="mascot.distribution.CaseCountLikelihood"
                              caseCounts="@caseCounts.t:H5N1_HA_mascot"
-                             dynamics="@StructuredSkyline.t:H5N1_HA_mascot"
+                             NeDynamics="@NeDynamicsList.t:H5N1_HA_mascot"
                              dispersion="@caseCounts.dispersion:H5N1_HA_mascot"
                              />
                             
@@ -827,6 +827,16 @@ name="alignment"/>
                     
             <operator idref="AVMNOperator.Mascot.H5N1_HA_mascot"/>
                 
+        </operator>
+
+        <operator id="dispersionScaler.s:H5N1_HA_mascot" spec="AdaptableOperatorSampler" weight="0.05">
+            <parameter idref="caseCounts.dispersion:H5N1_HA_mascot"/>
+            <operator idref="AVMNOperator.H5N1_HA_mascot"/>
+            <operator id="dispersionScalerX.s:H5N1_HA_mascot" spec="kernel.BactrianScaleOperator" 
+                    parameter="@caseCounts.dispersion:H5N1_HA_mascot" 
+                    scaleFactor="0.5" 
+                    upper="10.0" 
+                    weight="0.1"/>
         </operator>
             
         <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">

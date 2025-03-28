@@ -5,12 +5,11 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.inference.parameter.RealParameter;
-import beast.base.evolution.tree.TreeInterface;
 
 @Description("Manages case count data with timestamps for each trait")
 public class CaseCountData extends BEASTObject {
     final public Input<RealParameter> caseCounts = new Input<>("caseCounts", "Case counts for each observation", Validate.REQUIRED);
-    final public Input<RealParameter> observationTimes = new Input<>("observationTimes", "Times of case count observations", Validate.REQUIRED);
+    final public Input<RealParameter> observationTimes = new Input<>("observationTimes", "Times of case count observations in years relative to the most recent sample", Validate.REQUIRED);
     final public Input<RealParameter> traitIndices = new Input<>("traitIndices", "Trait index for each observation (0-based)", Validate.REQUIRED);
     
     protected Double[] counts;
