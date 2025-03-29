@@ -605,6 +605,17 @@ name="alignment"/>
                     </Normal>
                                 
                 </prior>
+
+                <prior id="DispersionPrior.s:H5N1_HA_mascot" name="distribution" x="@caseCounts.dispersion:H5N1_HA_mascot">
+                    <LogNormal id="LogNormalDistributionModel.3" name="distr">
+                                            
+                        <parameter id="RealParameter.100" spec="parameter.RealParameter" estimate="false" name="M">0</parameter>
+                                            
+                        <parameter id="RealParameter.101" spec="parameter.RealParameter" estimate="false" name="S">0.5</parameter>
+                                        
+                    </LogNormal>
+                                
+                </prior>
                             
                 <prior id="FrequenciesPrior.s:H5N1_HA_mascot" name="distribution" x="@freqParameter.s:H5N1_HA_mascot">
                                     
