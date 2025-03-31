@@ -508,11 +508,18 @@ name="alignment"/>
             <distribution id="prior" spec="CompoundDistribution">
 
                 <!-- Case count likelihood -->
-                <distribution id="caseCountLikelihood.t:H5N1_HA_mascot" spec="mascot.distribution.CaseCountLikelihood"
+                <!-- <distribution id="caseCountLikelihood.t:H5N1_HA_mascot" spec="mascot.distribution.CaseCountLikelihood"
                              caseCounts="@caseCounts.t:H5N1_HA_mascot"
                              NeDynamics="@NeDynamicsList.t:H5N1_HA_mascot"
                              dispersion="@caseCounts.dispersion:H5N1_HA_mascot"
-                             />
+                             /> -->
+
+                <distribution id="caseCountLikelihood.t:H5N1_HA_mascot" spec="mascot.distribution.CaseCountLikelihood"
+                            caseCounts="@caseCounts.t:H5N1_HA_mascot"
+                            NeDynamics="@NeDynamicsList.t:H5N1_HA_mascot">
+                    <distribution id="negBinomDist.t:H5N1_HA_mascot" spec="mascot.distribution.NegativeBinomialDistribution"
+                                dispersion="@caseCounts.dispersion:H5N1_HA_mascot"/>
+                </distribution>
                             
                 <distribution id="Mascot.t:H5N1_HA_mascot" spec="mascot.distribution.Mascot" tree="@Tree.t:H5N1_HA_mascot">
                                     

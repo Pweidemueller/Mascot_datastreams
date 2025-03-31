@@ -5,32 +5,28 @@ import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.inference.Distribution;
 import beast.base.inference.State;
+import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
 import mascot.parameterdynamics.NeDynamicsList;
 
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.math.special.Gamma;
-
-@Description("Calculates likelihood of observing case counts given Ne values using negative binomial distribution")
+@Description("Calculates likelihood of observing case counts given Ne values using a specified distribution")
 public class CaseCountLikelihood extends Distribution {
-    // final public Input<Dynamics> dynamicsInput = new Input<>("dynamics", "Input of Ne dynamics", Validate.REQUIRED);
     public Input<NeDynamicsList> parametricFunctionInput = new Input<>(
-    		"NeDynamics", "input of the log effective population sizes", Validate.REQUIRED);  
+            "NeDynamics", "input of the log effective population sizes", Validate.REQUIRED);  
     final public Input<CaseCountData> caseCountInput = new Input<>("caseCounts", "Case count data", Validate.REQUIRED);
-    final public Input<RealParameter> dispersionInput = new Input<>("dispersion", "Dispersion parameter for negative binomial distribution", Validate.REQUIRED);
+    final public Input<ParametricDistribution> distInput = new Input<>("distribution", "Distribution used to calculate likelihood", Validate.REQUIRED);
     
     protected CaseCountData caseCountData;
-    protected double dispersion;
-    // protected Dynamics dynamics;
+    protected ParametricDistribution dist;
     protected NeDynamicsList parametricFunction;
     
     @Override
     public void initAndValidate() {
         caseCountData = caseCountInput.get();
-        dispersion = dispersionInput.get().getValue();
-        // dynamics = dynamicsInput.get();
+        dist = distInput.get();
         parametricFunction = parametricFunctionInput.get();
         calculateLogP();
     }
@@ -46,19 +42,32 @@ public class CaseCountLikelihood extends Distribution {
             double caseCount = caseCountData.getCaseCount(i);
             
             // Get Ne for this trait at this time
-            
             double neValue = parametricFunction.get(trait).getNeTime(t);
             
             // Validate parameters
-            if (neValue <= 0.0 || dispersion <= 0.0 || caseCount < 0.0) {
-                System.err.println("Warning: Invalid parameters - Ne: " + neValue + ", dispersion: " + dispersion + ", caseCount: " + caseCount);
+            if (neValue <= 0.0 || caseCount < 0.0) {
+                System.err.println("Warning: Invalid parameters - Ne: " + neValue + ", caseCount: " + caseCount);
                 return Double.NEGATIVE_INFINITY;
             }
             
-            // Calculate negative binomial log likelihood
-            double intervalLogP = calculateNegBinomLogP(caseCount, neValue, dispersion);
+            // Set the mean parameter for the distribution (based on Ne)
+            if (dist instanceof NegativeBinomialDistribution) {
+                RealParameter meanParam = new RealParameter(new Double[]{neValue});
+                ((NegativeBinomialDistribution) dist).meanInput.setValue(meanParam, dist);
+            }
+            
+            // Calculate log likelihood using the specified distribution
+            double intervalLogP = dist.calcLogP(new RealParameter(new Double[]{caseCount}));
+            if (dist instanceof NegativeBinomialDistribution) {
+                NegativeBinomialDistribution nbDist = (NegativeBinomialDistribution) dist;
+                System.out.println("Mean: " + nbDist.meanInput.get().getArrayValue() + 
+                                 ", Dispersion: " + nbDist.dispersionInput.get().getArrayValue() + 
+                                 ", neValue: " + neValue + 
+                                 ", Case count: " + caseCount + 
+                                 ", LogP: " + intervalLogP);
+            }
             if (Double.isNaN(intervalLogP)) {
-                System.err.println("Warning: NaN likelihood for observation " + i + ": caseCount=" + caseCount + ", Ne=" + neValue + ", dispersion=" + dispersion);
+                System.err.println("Warning: NaN likelihood for observation " + i + ": caseCount=" + caseCount + ", Ne=" + neValue);
                 return Double.NEGATIVE_INFINITY;
             }
             
@@ -66,24 +75,6 @@ public class CaseCountLikelihood extends Distribution {
         }
         
         return logP;
-    }
-    
-    private double calculateNegBinomLogP(double x, double mean, double dispersion) {
-        // Negative binomial probability calculation
-        // We parameterise the negative binomial distribution as
-        // P(X=k) = Binom(k+r-1, k) * p^r * (1-p)^k
-        // where
-        // r = # successes until experiment stops
-        // p = success probability
-        // k = number of failures
-        // Given dispersion alpha and mean, we have
-        // r = 1/alpha
-        // p = 1/(mean*alpha+1)
-        double p = 1.0 / (mean * dispersion + 1.0);
-        double r = 1.0 / dispersion;
-    
-        return Gamma.logGamma(x + r) - Gamma.logGamma(r) - Gamma.logGamma(x + 1) + 
-               r * Math.log(p) + x * Math.log(1 - p);
     }
 
 	@Override
