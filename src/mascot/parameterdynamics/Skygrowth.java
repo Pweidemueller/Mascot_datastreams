@@ -9,7 +9,7 @@ import mascot.dynamics.RateShifts;
 /**
  * @author Nicola F. Mueller
  */
-@Description("Populaiton function with values at certain time points that are interpolated in between. Parameter has to be in log space")
+@Description("Population function with values at certain time points that are interpolated in between. Parameter has to be in log space")
 public class Skygrowth extends NeDynamics {
 	
     final public Input<RealParameter> NeInput = new Input<>("logNe",
@@ -60,9 +60,10 @@ public class Skygrowth extends NeDynamics {
 	
 	private int getIntervalNr(double t) {
 		// check which interval t + offset is in
-		for (int i = 0; i < rateShifts.getDimension(); i++)
+		for (int i = 0; i < rateShifts.getDimension(); i++) {
 			if (t<rateShifts.getValue(i))
 				return i;
+		}
 		
 		// after the last interval, just keep using the last element
 		return rateShifts.getDimension();					

@@ -58,14 +58,6 @@ public class CaseCountLikelihood extends Distribution {
             
             // Calculate log likelihood using the specified distribution
             double intervalLogP = dist.calcLogP(new RealParameter(new Double[]{caseCount}));
-            if (dist instanceof NegativeBinomialDistribution) {
-                NegativeBinomialDistribution nbDist = (NegativeBinomialDistribution) dist;
-                System.out.println("Mean: " + nbDist.meanInput.get().getArrayValue() + 
-                                 ", Dispersion: " + nbDist.dispersionInput.get().getArrayValue() + 
-                                 ", neValue: " + neValue + 
-                                 ", Case count: " + caseCount + 
-                                 ", LogP: " + intervalLogP);
-            }
             if (Double.isNaN(intervalLogP)) {
                 System.err.println("Warning: NaN likelihood for observation " + i + ": caseCount=" + caseCount + ", Ne=" + neValue);
                 return Double.NEGATIVE_INFINITY;
