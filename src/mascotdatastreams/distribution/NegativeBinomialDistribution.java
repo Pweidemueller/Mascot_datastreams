@@ -1,4 +1,4 @@
-package mascot.distribution;
+package mascotdatastreams.distribution;
 
 import org.apache.commons.math.distribution.PascalDistributionImpl;
 import org.apache.commons.math.distribution.Distribution;
@@ -14,7 +14,7 @@ import beast.base.inference.parameter.RealParameter;
  * Implementation of the Negative Binomial distribution (also known as Pascal distribution)
  * 
  * The probability mass function is given by
- * P(X = k) = C(k + r - 1, r - 1) * p^r * (1 - p)^k,
+ * P(X = k) = Binom(k+r-1, k) * p^r * (1 - p)^k,
  * where r is the number of successes, p is the probability of success, and X is the total number of failures.
  * 
  * The mean and variance of X are
@@ -22,9 +22,10 @@ import beast.base.inference.parameter.RealParameter;
  * Finally, the cumulative distribution function is given by
  * P(X <= k) = I(p, r, k + 1), where I is the regularized incomplete Beta function. 
  * 
- * Parameterized by mean and dispersion (alpha)
+ * Parameterized by mean and overdispersion (alpha)
  * Where r = 1/alpha (number of successes)
  * and p = 1/(mean*alpha + 1) (probability of success)
+ * such that E(X) = mean and var(X) = mean + mean^2 * alpha
  */
 @Description("A negative binomial distribution parameterized by mean and dispersion.")
 public class NegativeBinomialDistribution extends ParametricDistribution {
@@ -75,7 +76,6 @@ public class NegativeBinomialDistribution extends ParametricDistribution {
     /**
      * Make sure internal state is up to date
      */
-    @SuppressWarnings("deprecation")
     void refresh() {
         double mean = meanInput.get() == null ? 1.0 : meanInput.get().getArrayValue();
         double dispersion = dispersionInput.get() == null ? 1.0 : dispersionInput.get().getArrayValue();

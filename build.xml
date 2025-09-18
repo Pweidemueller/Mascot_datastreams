@@ -11,9 +11,9 @@
     <property name="local-beast-source-root" location="../beast2"/>
     <property name="local-beastfx-source-root" location="../BeastFX"/>
 
-    <!-- BEAST 2 currently uses Java 1.8 -->
-    <property name="sourceVersion" value="1.8"/>
-    <property name="targetVersion" value="1.8"/>
+    <!-- BEAST 2 currently uses Java 17 -->
+    <property name="sourceVersion" value="17"/>
+    <property name="targetVersion" value="17"/>
 
     <!-- Directories necessary for all BEAST 2 packages -->
     <property name="doc" location="doc"/>
@@ -161,7 +161,6 @@
             source="${sourceVersion}"
             target="${targetVersion}"
             includeantruntime="false"
-            encoding="UTF-8"
             fork="yes">
             <classpath>
                 <pathelement path="${classpath}"/>
@@ -173,24 +172,37 @@
         </javac>
     </target>
 
-<!--    <target name="install-dependencies" depends="build-beast">-->
-<!--      <mkdir dir="deps"/>-->
-<!--      <java fork="true" classname="beast.pkgmgmt.PackageManager">-->
-<!--        <jvmarg line="-Dbeast.user.package.dir=./deps"/>-->
-<!--        <arg line="-add feast"/>-->
-<!--        <classpath>-->
-<!--          <pathelement path="${build-beast}"/>-->
-<!--        </classpath>-->
-<!--      </java>-->
-<!--    </target>-->
+    <target name="install-dependencies" depends="build-beast">
+      <mkdir dir="deps"/>
+      <!-- Install BEAST_CLASSIC -->
+      <java fork="true" classname="beast.pkgmgmt.PackageManager" failonerror="true">
+        <jvmarg line="-Dbeast.user.package.dir=./deps"/>
+        <arg value="-add"/>
+        <arg value="BEAST_CLASSIC"/>
+        <classpath>
+          <pathelement path="${build-beast}"/>
+        </classpath>
+      </java>
+      <!-- Install Mascot -->
+      <java fork="true" classname="beast.pkgmgmt.PackageManager" failonerror="true">
+        <jvmarg line="-Dbeast.user.package.dir=./deps"/>
+        <arg value="-add"/>
+        <arg value="Mascot"/>
+        <classpath>
+          <pathelement path="${build-beast}"/>
+        </classpath>
+      </java>
+    </target>
+
+	
 
     <!-- Compile -->
-<!--    <target name="compile" depends="build-beast,build-beastfx,install-dependencies">-->
-    <target name="compile" depends="build-beast,build-beastfx">
+    <target name="compile" depends="build-beast,build-beastfx,install-dependencies">
+<!--    <target name="compile" depends="build-beast,build-beastfx">-->
 
       <javac target="${targetVersion}" source="${sourceVersion}"
              srcdir="${src}" destdir="${build}"
-             includeantruntime="false" fork="yes" encoding="UTF-8">
+             includeantruntime="false" fork="yes">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${lib}" includes="**/*.jar"/>
@@ -199,7 +211,8 @@
                 <fileset dir="${beastfx-source-root}/locallib" includes="**/*.jar"/>
                 <pathelement path="${build-beastfx}"/>
                 <fileset dir="${env.JAVA_FX_HOME}" includes="**/*.jar"/>
-<!--                <fileset dir="deps/feast" includes="**/*.jar"/>-->
+                <fileset dir="deps/BEAST_CLASSIC" includes="**/*.jar"/>
+                <fileset dir="deps/Mascot" includes="**/*.jar"/>
             </classpath>
         </javac>
     </target>
@@ -417,27 +430,5 @@
         <echo>That's it!  Happy coding!</echo>
 
     </target>
-
- 	<condition property="isWindows"><os family="windows" /></condition>
-	<condition property="isLinux"><and><os family="unix"/><not><os family="mac"/></not></and></condition>
-	<condition property="isMac"><os family="mac" /></condition>
-
-	<target name="installLinux" depends="build" if="isLinux">
-	        <mkdir dir="${user.home}/.beast/2.7/${projName}"/>
-			<unzip src="${dist}/${fullName}.zip" dest="${user.home}/.beast/2.7/${projName}"/>
-	</target>
-
-	<target name="installMac" depends="build" if="isMac">
-	        <mkdir dir="${user.home}/.beast/2.7/${projName}"/>
-			<unzip src="${dist}/${fullName}.zip" dest="${user.home}/Library/Application Support/BEAST/2.7/${projName}"/>
-	</target>
-
-	<target name="installWindows" depends="build" if="isWindows">
-	        <mkdir dir="${user.home}/BEAST/2.7/${projName}"/>
-			<unzip src="${dist}/${fullName}.zip" dest="${user.home}/BEAST/2.7/${projName}"/>
-	</target>
-
-	<target name="install" depends="installWindows,installMac,installLinux">
-	</target>
 
 </project>

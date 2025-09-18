@@ -1,4 +1,4 @@
-package mascot.distribution;
+package mascotdatastreams.distribution;
 
 import beast.base.core.Description;
 import beast.base.core.Input;
