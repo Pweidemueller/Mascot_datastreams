@@ -51,7 +51,10 @@ public class CaseCountLikelihood extends Distribution {
             }
             
             // Set the mean parameter for the distribution (based on Ne)
-            if (dist instanceof NegativeBinomialDistribution) {
+            if (dist instanceof GammaPoisson) {
+                RealParameter meanParam = new RealParameter(new Double[]{neValue});
+                ((GammaPoisson) dist).meanInput.setValue(meanParam, dist);
+            } else if (dist instanceof NegativeBinomialDistribution) { // backward compatibility if present
                 RealParameter meanParam = new RealParameter(new Double[]{neValue});
                 ((NegativeBinomialDistribution) dist).meanInput.setValue(meanParam, dist);
             }
