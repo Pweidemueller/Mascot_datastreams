@@ -3,6 +3,7 @@ package mascotdatastreams.distribution;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.EnabledIf;
 
 import beast.base.inference.parameter.RealParameter;
@@ -29,6 +30,7 @@ public class CaseCountLikelihoodTest {
      * If these classes are not present on the classpath, the test is skipped.
      */
     @Test
+    @Disabled("Deprecated Ne-based API; replaced by prevalence-based tests")
     @EnabledIf("mascotClassesPresent")
     public void testTwoDemesFiveTimePointsWithSkyline() throws Exception {
         // 1) Prepare case count observations: 2 demes x 5 time points
@@ -126,6 +128,7 @@ public class CaseCountLikelihoodTest {
                 "CaseCountLikelihood logP does not match the expected placeholder value. Replace expectedLogP once the true value is known.");
     }
     @Test
+    @Disabled("Deprecated Ne-based API; replaced by prevalence-based tests")
     public void testTwoDemesFiveTimePointsWithSkylineLargeAlpha() throws Exception {
         // 1) Prepare case count observations: 2 demes x 5 time points
         // Times in years (relative to most recent sample)
