@@ -132,5 +132,5 @@ Important
 
 
 ## License
+TBD
 
-The content of this project is licensed under Creative Commons Attribution 3.0 for non-code assets, and the Java source code is licensed under the GNU General Public License (GPL).
