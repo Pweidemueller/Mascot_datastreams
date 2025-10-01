@@ -10,6 +10,8 @@ Mascot Datastreams is an extension to [BEAST2](http://beast2.org)’s MASCOT pac
 
 This README summarizes the modeling assumptions, parameterization, and how to use the package from Java and conceptually from BEAST XMLs.
 
+> Note: A prevalence-based workflow is now available and preferred for case counts. `CaseCountLikelihood` expects prevalence inputs (`prevalence`) and treats the mean as I(t) = exp(log I(t)). The legacy Ne-based input is deprecated.
+
 
 ## What this package assumes
 
@@ -44,6 +46,13 @@ The overall log-likelihood is the sum over observations of the log PMF at the re
 
 At evaluation time, for each observation the likelihood sets the distribution mean μ to the current Ne for that deme and time.
 
+### Current Ne dynamics expectations
+
+- **Rate-shift handling**: `NeDynamicsList` stores one `NeDynamics` per deme; each `Skygrowth` instance binds a log-scale `RealParameter` and matching `RateShifts`. The parameter vector is dimension `rateShifts + 1`, describing log Ne values at breakpoints.
+- **Time indexing**: `getNeTime(t)` expects *forward* times measured in years before the most recent sample (identical scale as tree heights). Internally, `Skygrowth.getNeTime(t)` locates the interval containing `t` by scanning `RateShifts` in ascending order.
+- **Interpolation**: `Skygrowth` converts the log-scale control points into per-interval growth rates (piecewise exponential interpolation). Within interval `i`, it evaluates `Ne(t) = exp(logNe_i - growth_i · (t - rateShift_{i-1}))`, matching MASCOT’s convention of backward-time smoothing.
+- **Per-deme access**: callers select the relevant deme with `NeDynamicsList.get(demeIndex)`; demes must be ordered consistently with trait indices. `InitializedNeDynamicsList` relaxes the input requirement so BEAUti can instantiate empty lists before values are bound.
+
 
 ## Provided classes (API)
 
@@ -61,8 +70,14 @@ At evaluation time, for each observation the likelihood sets the distribution me
   - Internally casts r ≈ round(1/α) to satisfy the Pascal distribution’s integer requirement.
 
 - `mascotdatastreams.distribution.CaseCountLikelihood`
-  - Inputs: `NeDynamics` (MASCOT `NeDynamicsList` or `InitializedNeDynamicsList`), `caseCounts` (`CaseCountData`), `distribution` (`ParametricDistribution`, typically `GammaPoisson`).
-  - For each observation: μ ← Ne_deme(t), then contributes log PMF at the observed count.
+  - Inputs: `prevalence` (`mascotdatastreams.dynamics.PrevalenceDynamicsList`), `caseCounts` (`CaseCountData`), `distribution` (`ParametricDistribution`, typically `GammaPoisson`).
+  - For each observation: μ ← I_deme(t) = exp(log I(t)), then contributes log PMF at the observed count.
+
+- `mascotdatastreams.dynamics.PrevalenceDynamicsList`
+  - Container for per-deme log-prevalence dynamics.
+
+- `mascotdatastreams.dynamics.PrevalenceSkygrowth`
+  - Log-prevalence skyline with `mascot.dynamics.RateShifts`, mirroring `mascot.parameterdynamics.Skygrowth` semantics.
 
 
 ## Usage from Java (authoritative example)
@@ -93,6 +108,24 @@ While the provided example XMLs in this repository are outdated, the conceptual 
     </caseCounts>
     <distribution id="CaseCountDist" spec="mascotdatastreams.distribution.GammaPoisson">
         <!-- The mean is overwritten per observation from Ne_deme(t); provide any positive placeholder. -->
+        <mean spec="beast.base.inference.parameter.RealParameter" value="1.0"/>
+        <dispersion spec="beast.base.inference.parameter.RealParameter" value="0.5"/>
+    </distribution>
+</distribution>
+```
+
+Prevalence-based wiring (preferred):
+
+```xml
+<distribution id="CaseCountLikelihood" spec="mascotdatastreams.distribution.CaseCountLikelihood">
+    <prevalence idref="PrevList"/>
+    <caseCounts id="CaseData" spec="mascotdatastreams.distribution.CaseCountData">
+        <caseCounts spec="beast.base.inference.parameter.RealParameter" value="5 7 6 8 10 3 4 5 6 8"/>
+        <observationTimes spec="beast.base.inference.parameter.RealParameter" value="0.0 0.1 0.11 0.24 0.3  0.0 0.15 0.16 0.25 0.37"/>
+        <traitIndices spec="beast.base.inference.parameter.RealParameter" value="0 0 0 0 0  1 1 1 1 1"/>
+    </caseCounts>
+    <distribution id="CaseCountDist" spec="mascotdatastreams.distribution.GammaPoisson">
+        <!-- The mean is overwritten per observation from I_deme(t); provide any positive placeholder. -->
         <mean spec="beast.base.inference.parameter.RealParameter" value="1.0"/>
         <dispersion spec="beast.base.inference.parameter.RealParameter" value="0.5"/>
     </distribution>

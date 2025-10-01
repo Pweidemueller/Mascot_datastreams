@@ -1,0 +1,40 @@
+<!-- Minimal conceptual example of prevalence wiring for CaseCountLikelihood -->
+<beast version="2.7" namespace="beast.base:beast.evolution:beast.inference:beast.core:mascotdatastreams.distribution:mascotdatastreams.dynamics:mascot.parameterdynamics:mascot.dynamics">
+
+    <!-- Prevalence dynamics per deme -->
+    <PrevalenceDynamicsList id="PrevList" spec="mascotdatastreams.dynamics.PrevalenceDynamicsList">
+        <prevalence>
+            <PrevalenceSkygrowth id="PrevDeme1" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
+                <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.6094 1.9459 2.1972"/>
+                <rateShifts id="rs1" spec="mascot.dynamics.RateShifts" value="0.1 0.3"/>
+            </PrevalenceSkygrowth>
+        </prevalence>
+        <prevalence>
+            <PrevalenceSkygrowth id="PrevDeme2" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
+                <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.0986 1.3863 1.6094"/>
+                <rateShifts id="rs2" spec="mascot.dynamics.RateShifts" value="0.2 0.35"/>
+            </PrevalenceSkygrowth>
+        </prevalence>
+    </PrevalenceDynamicsList>
+
+    <!-- Case count data -->
+    <CaseCountData id="CaseData" spec="mascotdatastreams.distribution.CaseCountData">
+        <caseCounts spec="beast.base.inference.parameter.RealParameter" value="5 7 6 8 10 3 4 5 6 8"/>
+        <observationTimes spec="beast.base.inference.parameter.RealParameter" value="0.0 0.1 0.11 0.24 0.3  0.0 0.15 0.16 0.25 0.37"/>
+        <traitIndices spec="beast.base.inference.parameter.RealParameter" value="0 0 0 0 0  1 1 1 1 1"/>
+    </CaseCountData>
+
+    <!-- Count distribution -->
+    <GammaPoisson id="CaseCountDist" spec="mascotdatastreams.distribution.GammaPoisson">
+        <mean spec="beast.base.inference.parameter.RealParameter" value="1.0"/>
+        <dispersion spec="beast.base.inference.parameter.RealParameter" value="0.5"/>
+    </GammaPoisson>
+
+    <!-- Likelihood -->
+    <distribution id="CaseCountLikelihood" spec="mascotdatastreams.distribution.CaseCountLikelihood">
+        <prevalence idref="PrevList"/>
+        <caseCounts idref="CaseData"/>
+        <distribution idref="CaseCountDist"/>
+    </distribution>
+
+</beast>

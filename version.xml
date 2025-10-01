@@ -8,5 +8,9 @@
     <provider classname="mascotdatastreams.distribution.CaseCountData"/>
     <provider classname="mascotdatastreams.distribution.CaseCountLikelihood"/>
     <provider classname="mascotdatastreams.distribution.NegativeBinomialDistribution"/>
+    <provider classname="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth"/>
+    <provider classname="mascotdatastreams.dynamics.PrevalenceDynamicsList"/>
+    <provider classname="mascotdatastreams.dynamics.PrevalenceSkygrowth"/>
+
   </service>
 </package>

@@ -1,0 +1,27 @@
+<!-- Demonstrates mapping log-prevalence to Ne(t) using PrevalenceToNeSkygrowth and assembling an Ne list. -->
+<beast version="2.7" namespace="beast.base:beast.evolution:beast.inference:beast.core:mascotdatastreams.dynamics:mascot.parameterdynamics:mascot.dynamics:mascot.util">
+
+    <!-- Per-deme log-prevalence skygrowth -->
+    <PrevalenceToNeSkygrowth id="NeFromPrevDeme1" spec="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth">
+        <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.6094 1.9459 2.1972"/>
+        <rateShifts id="rs1" spec="mascot.dynamics.RateShifts" value="0.1 0.3"/>
+        <uninfectiousRate spec="beast.base.inference.parameter.RealParameter" value="0.2"/>
+        <coalescentScale spec="beast.base.inference.parameter.RealParameter" value="2.0"/>
+    </PrevalenceToNeSkygrowth>
+
+    <PrevalenceToNeSkygrowth id="NeFromPrevDeme2" spec="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth">
+        <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.0986 1.3863 1.6094"/>
+        <rateShifts id="rs2" spec="mascot.dynamics.RateShifts" value="0.2 0.35"/>
+        <uninfectiousRate spec="beast.base.inference.parameter.RealParameter" value="0.2"/>
+        <coalescentScale spec="beast.base.inference.parameter.RealParameter" value="2.0"/>
+    </PrevalenceToNeSkygrowth>
+
+    <!-- Assemble into an NeDynamics list compatible with StructuredSkyline -->
+    <InitializedNeDynamicsList id="NeList" spec="mascot.util.InitializedNeDynamicsList">
+        <neDynamics idref="NeFromPrevDeme1"/>
+        <neDynamics idref="NeFromPrevDeme2"/>
+    </InitializedNeDynamicsList>
+
+    <!-- Downstream components (e.g., StructuredSkyline) would consume NeList as usual. -->
+
+</beast>

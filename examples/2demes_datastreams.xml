@@ -254,22 +254,19 @@
                     
             
       <parameter id="migrationRatesSkyline.t:SimDataset" spec="parameter.RealParameter" dimension="2" lower="0.0" name="stateNode">1.0</parameter>
-      
-                    
-            
-      <parameter id="SkylineNe.Deme1.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="Infinity">0.0</parameter>
-      
-                    
-            
-      <parameter id="SkylineNe.Deme2.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="Infinity">0.0</parameter>
-      
 
             
       <parameter id="SkylineNeSigma.t:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">1.0</parameter>
+
+      <parameter id="SkylinePrev.Deme1.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="Infinity">0.0</parameter>
+
+      <parameter id="SkylinePrev.Deme2.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="Infinity">0.0</parameter>
       
 
             
       <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">5</parameter>
+
+      
       
                 
         
@@ -295,18 +292,39 @@
         
     </init>
     
-            
         
     <distribution id="posterior" spec="CompoundDistribution">
       
                     
             
       <distribution id="prior" spec="CompoundDistribution">
+
         
 
                 
                 
-        <distribution id="caseCountLikelihood.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood" caseCounts="@caseCounts.t:SimDataset" NeDynamics="@NeDynamicsList.t:SimDataset">
+        <distribution id="caseCountLikelihood.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
+          
+                            
+                    
+          <prevalence id="PrevalenceList.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceDynamicsList">
+
+            <prevalence id="Prev.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
+                    <logPrevalence idref="SkylinePrev.Deme1.t:SimDataset"/>
+                    <rateShifts id="PrevRateShifts.Deme1" spec="mascot.dynamics.RateShifts">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
+            </prevalence>
+            
+            
+            <prevalence id="Prev.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
+                    <logPrevalence idref="SkylinePrev.Deme2.t:SimDataset"/>
+                    <rateShifts id="PrevRateShifts.Deme2" spec="mascot.dynamics.RateShifts">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
+            </prevalence>
+          </prevalence>
+            
+          
+                            
+                    
+          <caseCounts idref="caseCounts.t:SimDataset"/>
           
                             
                     
@@ -329,11 +347,23 @@
               
                                                     
                             
-              <neDynamics id="NeDynamics.Deme1.t:SimDataset" spec="mascot.parameterdynamics.Skygrowth" logNe="@SkylineNe.Deme1.t:SimDataset">
+              <neDynamics id="NeDynamics.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth">
                 
                                                             
                                 
-                <rateShifts id="SkygrowthRateShifts.Deme1" spec="mascot.dynamics.RateShifts" tree="@Tree.t:SimDataset">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
+                    <logPrevalence idref="SkylinePrev.Deme1.t:SimDataset"/>
+                    
+                                                                
+                                    
+                    <rateShifts idref="PrevRateShifts.Deme1"/>
+                    
+                                                                
+                                    
+                    <uninfectiousRate spec="parameter.RealParameter">73.0</uninfectiousRate>
+                    
+                                                                
+                                    
+                    <coalescentScale spec="parameter.RealParameter">2.0</coalescentScale>
                 
                                                         
                             
@@ -341,11 +371,23 @@
               
                                                     
                             
-              <neDynamics id="NeDynamics.Deme2.t:SimDataset" spec="mascot.parameterdynamics.Skygrowth" logNe="@SkylineNe.Deme2.t:SimDataset">
+              <neDynamics id="NeDynamics.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth">
                 
                                                             
                                 
-                <rateShifts id="SkygrowthRateShifts.Deme2" spec="mascot.dynamics.RateShifts" tree="@Tree.t:SimDataset">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
+                    <logPrevalence idref="SkylinePrev.Deme2.t:SimDataset"/>
+                    
+                                                                
+                                    
+                    <rateShifts idref="PrevRateShifts.Deme2"/>
+                    
+                                                                
+                                    
+                    <uninfectiousRate spec="parameter.RealParameter">73.0</uninfectiousRate>
+                    
+                                                                
+                                    
+                    <coalescentScale spec="parameter.RealParameter">2.0</coalescentScale>
                 
                                                         
                             
@@ -408,11 +450,11 @@
         
                             
                 
-        <prior id="SkylineNe.Deme1.Prior.t:SimDataset" name="distribution">
+        <prior id="SkylinePrev.Deme1.Prior.t:SimDataset" name="distribution">
           
                                     
                     
-          <x id="diff.SkylineNe.Deme1.t:SimDataset" spec="mascot.util.Difference" arg="@SkylineNe.Deme1.t:SimDataset"/>
+          <x id="diff.SkylinePrev.Deme1.t:SimDataset" spec="mascot.util.Difference" arg="@SkylinePrev.Deme1.t:SimDataset"/>
           
                                     
                     
@@ -433,11 +475,11 @@
         
                             
                 
-        <prior id="SkylineNe.Deme2.Prior.t:SimDataset" name="distribution">
+        <prior id="SkylinePrev.Deme2.Prior.t:SimDataset" name="distribution">
           
                                     
                     
-          <x id="diff.SkylineNe.Deme2.t:SimDataset" spec="mascot.util.Difference" arg="@SkylineNe.Deme2.t:SimDataset"/>
+          <x id="diff.SkylinePrev.Deme2.t:SimDataset" spec="mascot.util.Difference" arg="@SkylinePrev.Deme2.t:SimDataset"/>
           
                                     
                     
@@ -458,11 +500,11 @@
         
                             
                 
-        <prior id="SkylineNe.Deme1.FirstPrior.t:SimDataset" name="distribution">
+        <prior id="SkylinePrev.Deme1.FirstPrior.t:SimDataset" name="distribution">
           
                                     
                     
-          <x id="first.SkylineNe.Deme1.t:SimDataset" spec="mascot.util.First" arg="@SkylineNe.Deme1.t:SimDataset"/>
+          <x id="first.SkylinePrev.Deme1.t:SimDataset" spec="mascot.util.Final" arg="@SkylinePrev.Deme1.t:SimDataset"/>
           
                                     
                     
@@ -483,11 +525,11 @@
         
                             
                 
-        <prior id="SkylineNe.Deme2.FirstPrior.t:SimDataset" name="distribution">
+        <prior id="SkylinePrev.Deme2.FirstPrior.t:SimDataset" name="distribution">
           
                                     
                     
-          <x id="first.SkylineNe.Deme2.t:SimDataset" spec="mascot.util.First" arg="@SkylineNe.Deme2.t:SimDataset"/>
+          <x id="first.SkylinePrev.Deme2.t:SimDataset" spec="mascot.util.Final" arg="@SkylinePrev.Deme2.t:SimDataset"/>
           
                                     
                     
@@ -880,11 +922,11 @@
           
                                     
                     
-          <parameter idref="SkylineNe.Deme1.t:SimDataset" name="f"/>
+          <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="f"/>
           
                                     
                     
-          <parameter idref="SkylineNe.Deme2.t:SimDataset" name="f"/>
+          <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="f"/>
           
                                 
                 
@@ -940,15 +982,15 @@
     
             
         
-    <operator id="SkylineNe.Deme1.Scaler.t:SimDataset" spec="AdaptableOperatorSampler" weight="1.0">
+    <operator id="SkylinePrev.Deme1.Scaler.t:SimDataset" spec="AdaptableOperatorSampler" weight="1.0">
       
                     
             
-      <parameter idref="SkylineNe.Deme1.t:SimDataset"/>
+      <parameter idref="SkylinePrev.Deme1.t:SimDataset"/>
       
                     
             
-      <operator id="SkylineNe.Deme1.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylineNe.Deme1.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
+      <operator id="SkylinePrev.Deme1.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme1.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
       
                     
             
@@ -960,15 +1002,15 @@
     
             
         
-    <operator id="SkylineNe.Deme2.Scaler.t:SimDataset" spec="AdaptableOperatorSampler" weight="1.0">
+    <operator id="SkylinePrev.Deme2.Scaler.t:SimDataset" spec="AdaptableOperatorSampler" weight="1.0">
       
                     
             
-      <parameter idref="SkylineNe.Deme2.t:SimDataset"/>
+      <parameter idref="SkylinePrev.Deme2.t:SimDataset"/>
       
                     
             
-      <operator id="SkylineNe.Deme2.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylineNe.Deme2.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
+      <operator id="SkylinePrev.Deme2.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme2.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
       
                     
             
@@ -1062,20 +1104,11 @@
             
       <log idref="StructuredSkyline.t:SimDataset"/>
       
-                    
-            
-      <parameter idref="SkylineNe.Deme1.t:SimDataset" name="log"/>
+        <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="log"/>
+        <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="log"/>     
+     
+        <parameter idref="SkylineNeSigma.t:SimDataset" name="log"/>
       
-                    
-            
-      <parameter idref="SkylineNe.Deme2.t:SimDataset" name="log"/>
-      
-            
-            
-      <parameter idref="SkylineNeSigma.t:SimDataset" name="log"/>
-      
-                
-        
     </logger>
     
             

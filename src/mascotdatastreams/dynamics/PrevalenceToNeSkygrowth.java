@@ -14,8 +14,8 @@ import mascot.parameterdynamics.NeDynamics;
  *   backward-time growth rate per interval.
  * - Let g_bwd be the backward-time slope of log I in the current interval.
  * - Forward-time derivative: d/dt_fwd log I = -g_bwd, so dI/dt = I * (-g_bwd).
- * - Transmission rate: beta(t) = dI/dt / I + gamma = -g_bwd + gamma.
- * - Coalescent effective population size: Ne(t) = I(t) / (c * beta(t)), with c defaulting to 2.
+ * - Transmission rate: transmission_rate(t) = dI/dt / I + gamma = -g_bwd + gamma.
+ * - Coalescent effective population size: Ne(t) = I(t) / (c * transmission_rate(t)), with c defaulting to 2.
  */
 @Description("Prevalence-to-Ne mapping with Skygrowth-style log-prevalence and RateShifts; implements NeDynamics.")
 public class PrevalenceToNeSkygrowth extends NeDynamics {
@@ -31,15 +31,17 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
 
     // Optional: coalescent scaling constant c (default 2)
     public final Input<RealParameter> coalescentScaleInput = new Input<>(
-            "coalescentScale", "coalescent scaling constant c in Ne = I / (c * beta)", Input.Validate.OPTIONAL);
+            "coalescentScale", "coalescent scaling constant c in Ne = I / (c * transmission_rate)", Input.Validate.OPTIONAL);
 
     private RealParameter logPrevalence;
     private RateShifts rateShifts;
     private RealParameter uninfectiousRate;
     private RealParameter coalescentScale; // optional; if null -> use 2.0
 
-    private double[] growth;        // backward-time slopes of log I per interval
+    private double[] growth;        // forward-time slopes of log I per interval
     private double[] growth_stored;
+
+    boolean isValid = true;
 
     @Override
     public void initAndValidate() {
@@ -57,42 +59,51 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
 
     @Override
     public double getNeTime(double t) {
+        isValid = true;
         int interval = getIntervalNr(t);
 
         // Compute log I(t)
         double logI_t;
+        // Forward-time slope in the interval
+        double g_fwd;
         if (interval >= rateShifts.getDimension()) {
             logI_t = logPrevalence.getArrayValue(logPrevalence.getDimension() - 1);
+            g_fwd = growth[rateShifts.getDimension()-1];
         } else {
             double timediff = t;
             if (interval > 0) timediff -= rateShifts.getValue(interval - 1);
             logI_t = logPrevalence.getArrayValue(interval) - growth[interval] * timediff;
+            g_fwd = growth[interval];
         }
         double I_t = Math.exp(logI_t);
         if (!(I_t > 0.0)) {
-            throw new IllegalArgumentException("PrevalenceToNeSkygrowth: Non-positive prevalence encountered at t=" + t + ".");
+            // Signal infeasible state instead of aborting the run
+            isValid = false;
+            return Double.POSITIVE_INFINITY;
         }
 
-        // Backward-time slope in the interval (or 0 after last interval)
-        double g_bwd = (interval >= rateShifts.getDimension()) ? 0.0 : growth[interval];
-
-        // Forward-time beta = -g_bwd + gamma
+        // Forward-time transmission_rate = g_fwd + gamma
         double gamma = uninfectiousRate.getArrayValue();
         if (!(gamma >= 0.0)) {
-            throw new IllegalArgumentException("PrevalenceToNeSkygrowth: uninfectiousRate (gamma) must be >= 0, got " + gamma);
+            // Invalid gamma: penalize instead of throwing
+            isValid = false;
+            return Double.POSITIVE_INFINITY;
         }
-        double beta = -g_bwd + gamma;
-        if (!(beta > 0.0)) {
-            throw new IllegalArgumentException("PrevalenceToNeSkygrowth: implied transmission rate beta <= 0 at t=" + t +
-                    ". Ensure log-prevalence smoothing and gamma produce positive beta.");
+        double transmission_rate = g_fwd + gamma;
+        if (!(transmission_rate > 0.0)) {
+            // Negative/zero transmission rate: penalize
+            isValid = false;
+            return Double.POSITIVE_INFINITY;
         }
 
         double c = (coalescentScale != null) ? coalescentScale.getArrayValue() : 2.0;
         if (!(c > 0.0)) {
-            throw new IllegalArgumentException("PrevalenceToNeSkygrowth: coalescentScale c must be > 0, got " + c);
+            // Invalid coalescent scaling constant: penalize
+            isValid = false;
+            return Double.POSITIVE_INFINITY;
         }
 
-        return I_t / (c * beta);
+        return I_t / (c * transmission_rate);
     }
 
     private int getIntervalNr(double t) {
@@ -103,6 +114,7 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
     }
 
     private void recalcGrowth() {
+        // Growth is calculated forwards in time (t is expressed backwards in time)
         growth = new double[rateShifts.getDimension()];
         double curr_time = 0.0;
         for (int i = 1; i < logPrevalence.getDimension(); i++) {
