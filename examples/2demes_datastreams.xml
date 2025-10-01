@@ -258,9 +258,9 @@
             
       <parameter id="SkylineNeSigma.t:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">1.0</parameter>
 
-      <parameter id="SkylinePrev.Deme1.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="Infinity">0.0</parameter>
+      <parameter id="SkylinePrev.Deme1.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="10">0.0</parameter>
 
-      <parameter id="SkylinePrev.Deme2.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="Infinity">0.0</parameter>
+      <parameter id="SkylinePrev.Deme2.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="10">0.0</parameter>
       
 
             
@@ -341,7 +341,7 @@
           
                                     
                     
-          <dynamics id="StructuredSkyline.t:SimDataset" spec="mascot.dynamics.StructuredSkyline" dimension="2" forwardsMigration="@migrationRatesSkyline.t:SimDataset" fromBeauti="true">
+          <dynamics id="StructuredSkyline.t:SimDataset" spec="mascot.dynamics.StructuredSkyline" dimension="2" forwardsMigration="@migrationRatesSkyline.t:SimDataset" fromBeauti="true" maxRate="1000">
             
                                             
                         
