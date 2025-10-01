@@ -266,6 +266,8 @@
             
       <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">5</parameter>
 
+      <parameter id="uninfectiousRate.t:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">73.0</parameter>
+
       
       
                 
@@ -359,7 +361,7 @@
                     
                                                                 
                                     
-                    <uninfectiousRate spec="parameter.RealParameter">73.0</uninfectiousRate>
+                    <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
                     
                                                                 
                                     
@@ -383,7 +385,7 @@
                     
                                                                 
                                     
-                    <uninfectiousRate spec="parameter.RealParameter">73.0</uninfectiousRate>
+                    <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
                     
                                                                 
                                     

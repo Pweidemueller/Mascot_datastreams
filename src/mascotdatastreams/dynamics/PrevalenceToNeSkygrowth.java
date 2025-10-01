@@ -43,6 +43,13 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
 
     boolean isValid = true;
 
+    // Numerical safety clamps
+    private static final double EPS = 1e-8;
+    private static final double I_MIN = 1e-12;
+    private static final double I_MAX = 1e12;
+    private static final double NE_MIN = 1e-6;
+    private static final double NE_MAX = 1e12;
+
     @Override
     public void initAndValidate() {
         logPrevalence = logPrevalenceInput.get();
@@ -76,34 +83,40 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
             g_fwd = growth[interval];
         }
         double I_t = Math.exp(logI_t);
-        if (!(I_t > 0.0)) {
-            // Signal infeasible state instead of aborting the run
-            isValid = false;
-            return Double.POSITIVE_INFINITY;
-        }
+        // Infeasible I(t): clamp to small positive
+        if (I_t < I_MIN) { isValid = false; I_t = I_MIN; }
+        if (I_t > I_MAX) { isValid = false; I_t = I_MAX; }
 
         // Forward-time transmission_rate = g_fwd + gamma
         double gamma = uninfectiousRate.getArrayValue();
         if (!(gamma >= 0.0)) {
-            // Invalid gamma: penalize instead of throwing
+            // Invalid gamma: clamp to nonnegative
             isValid = false;
-            return Double.POSITIVE_INFINITY;
+            gamma = 0.0;
         }
         double transmission_rate = g_fwd + gamma;
         if (!(transmission_rate > 0.0)) {
-            // Negative/zero transmission rate: penalize
+            // Negative/zero transmission rate: clamp to EPS
             isValid = false;
-            return Double.POSITIVE_INFINITY;
+            transmission_rate = Math.max(transmission_rate, EPS);
         }
 
         double c = (coalescentScale != null) ? coalescentScale.getArrayValue() : 2.0;
         if (!(c > 0.0)) {
-            // Invalid coalescent scaling constant: penalize
+            // Invalid coalescent scaling constant: clamp to EPS
             isValid = false;
-            return Double.POSITIVE_INFINITY;
+            c = EPS;
         }
 
-        return I_t / (c * transmission_rate);
+        double Ne = I_t / (c * transmission_rate);
+        if (Double.isNaN(Ne) || Double.isInfinite(Ne)) {
+            isValid = false;
+            Ne = (Ne >= 0.0) ? NE_MAX : NE_MIN;
+        }
+        if (Ne < NE_MIN) { isValid = false; Ne = NE_MIN; }
+        if (Ne > NE_MAX) { isValid = false; Ne = NE_MAX; }
+
+        return Ne;
     }
 
     private int getIntervalNr(double t) {
