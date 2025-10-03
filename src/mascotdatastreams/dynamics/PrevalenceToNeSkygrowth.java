@@ -43,6 +43,12 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
     private double[] growth;        // forward-time slopes of log I per interval
     private double[] growth_stored;
 
+    // Precomputed Ne at control points (in log-space) and their interval growth
+    private double[] logNeCtrl;            // length = rateShifts.getDimension() + 1
+    private double[] logNeCtrl_stored;
+    private double[] neGrowth;             // length = rateShifts.getDimension()
+    private double[] neGrowth_stored;
+
     boolean isValid = true;
 
     // Numerical safety clamps
@@ -63,67 +69,26 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
         logPrevalence.setDimension(rateShifts.getDimension() + 1);
         growth = new double[rateShifts.getDimension()];
         recalcGrowth();
+        recalcNeBreakpoints();
         isTime = true;
     }
 
     @Override
     public double getNeTime(double t) {
-        isValid = true;
+        // Interpolate on Ne level (log-space), akin to mascot.parameterdynamics.Skygrowth
         int interval = getIntervalNr(t);
-
-        // Compute log I(t)
-        double logI_t;
-        // Forward-time slope in the interval
-        double g_fwd;
+        double Ne;
         if (interval >= rateShifts.getDimension()) {
-            logI_t = logPrevalence.getArrayValue(logPrevalence.getDimension() - 1);
-            g_fwd = growth[rateShifts.getDimension()-1];
+            Ne = Math.exp(logNeCtrl[logNeCtrl.length - 1]);
         } else {
             double timediff = t;
             if (interval > 0) timediff -= rateShifts.getValue(interval - 1);
-            logI_t = logPrevalence.getArrayValue(interval) - growth[interval] * timediff;
-            // if t is right on a break point we should use the future (smaller) interval
-            // if t is within an interval we should use the current interval
-            // for when t is the most recent sample (t=0, interval=0) we need to use the smallest (=0) interval
-            if (timediff == 0.0 && interval > 0) {
-                interval--;
-            }
-            g_fwd = growth[interval];
+            double logNe_t = logNeCtrl[interval] - neGrowth[interval] * timediff;
+            Ne = Math.exp(logNe_t);
+            
         }
-        double I_t = Math.exp(logI_t);
-        // Infeasible I(t): clamp to small positive
-        if (I_t < I_MIN) { isValid = false; I_t = I_MIN; }
-        if (I_t > I_MAX) { isValid = false; I_t = I_MAX; }
-
-        // Forward-time transmission_rate = g_fwd + gamma
-        double gamma = uninfectiousRate.getArrayValue();
-        if (!(gamma >= 0.0)) {
-            // Invalid gamma: clamp to nonnegative
-            isValid = false;
-            gamma = 0.0;
-        }
-        double transmission_rate = g_fwd + gamma;
-        if (!(transmission_rate > 0.0)) {
-            // Negative/zero transmission rate: clamp to EPS
-            isValid = false;
-            transmission_rate = Math.max(transmission_rate, EPS);
-        }
-
-        double c = (coalescentScale != null) ? coalescentScale.getArrayValue() : 2.0;
-        if (!(c > 0.0)) {
-            // Invalid coalescent scaling constant: clamp to EPS
-            isValid = false;
-            c = EPS;
-        }
-
-        double Ne = I_t / (c * transmission_rate);
-        if (Double.isNaN(Ne) || Double.isInfinite(Ne)) {
-            isValid = false;
-            Ne = (Ne >= 0.0) ? NE_MAX : NE_MIN;
-        }
-        if (Ne < NE_MIN) { isValid = false; Ne = NE_MIN; }
-        if (Ne > NE_MAX) { isValid = false; Ne = NE_MAX; }
-
+        if (Ne < NE_MIN) Ne = NE_MIN;
+        if (Ne > NE_MAX) Ne = NE_MAX;
         return Ne;
     }
 
@@ -145,9 +110,54 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
         }
     }
 
+    // Precompute log Ne at control points using right-hand interval slope, then interval growth on log Ne
+    private void recalcNeBreakpoints() {
+        int nIntervals = rateShifts.getDimension();
+        int nCtrl = nIntervals + 1;
+        if (logNeCtrl == null || logNeCtrl.length != nCtrl) {
+            logNeCtrl = new double[nCtrl];
+        }
+        if (neGrowth == null || neGrowth.length != nIntervals) {
+            neGrowth = new double[nIntervals];
+        }
+
+        isValid = true;
+        double gamma = uninfectiousRate.getArrayValue();
+        if (!(gamma >= 0.0)) { isValid = false; gamma = 0.0; }
+        double c = (coalescentScale != null) ? coalescentScale.getArrayValue() : 2.0;
+        if (!(c > 0.0)) { isValid = false; c = EPS; }
+
+        // Compute log Ne values at control points
+        for (int i = 0; i < nCtrl; i++) {
+            double logI = logPrevalence.getArrayValue(i);
+            // clamp I in log-space
+            if (logI < Math.log(I_MIN)) { isValid = false; logI = Math.log(I_MIN); }
+            if (logI > Math.log(I_MAX)) { isValid = false; logI = Math.log(I_MAX); }
+
+            double g_point = (i < nIntervals) ? growth[i] : growth[nIntervals - 1];
+            double transmission = g_point + gamma;
+            if (!(transmission > 0.0)) { isValid = false; transmission = Math.max(transmission, EPS); }
+
+            double logNe = logI - Math.log(c) - Math.log(transmission);
+            // clamp Ne bounds in log-space
+            if (logNe < Math.log(NE_MIN)) { isValid = false; logNe = Math.log(NE_MIN); }
+            if (logNe > Math.log(NE_MAX)) { isValid = false; logNe = Math.log(NE_MAX); }
+            logNeCtrl[i] = logNe;
+        }
+
+        // Compute growth on log Ne per interval
+        double curr_time = 0.0;
+        for (int i = 1; i < nCtrl; i++) {
+            double dt = rateShifts.getValue(i - 1) - curr_time;
+            neGrowth[i - 1] = (logNeCtrl[i - 1] - logNeCtrl[i]) / dt;
+            curr_time = rateShifts.getValue(i - 1);
+        }
+    }
+
     @Override
     public boolean requiresRecalculation() {
         recalcGrowth();
+        recalcNeBreakpoints();
         return super.requiresRecalculation();
     }
 
@@ -155,18 +165,35 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
     public void store() {
         growth_stored = new double[growth.length];
         System.arraycopy(growth, 0, growth_stored, 0, growth.length);
+        if (logNeCtrl != null) {
+            logNeCtrl_stored = new double[logNeCtrl.length];
+            System.arraycopy(logNeCtrl, 0, logNeCtrl_stored, 0, logNeCtrl.length);
+        }
+        if (neGrowth != null) {
+            neGrowth_stored = new double[neGrowth.length];
+            System.arraycopy(neGrowth, 0, neGrowth_stored, 0, neGrowth.length);
+        }
         super.store();
     }
 
     @Override
     public void restore() {
         System.arraycopy(growth_stored, 0, growth, 0, growth_stored.length);
+        if (logNeCtrl_stored != null) {
+            logNeCtrl = new double[logNeCtrl_stored.length];
+            System.arraycopy(logNeCtrl_stored, 0, logNeCtrl, 0, logNeCtrl_stored.length);
+        }
+        if (neGrowth_stored != null) {
+            neGrowth = new double[neGrowth_stored.length];
+            System.arraycopy(neGrowth_stored, 0, neGrowth, 0, neGrowth_stored.length);
+        }
         super.restore();
     }
 
     @Override
     public void recalculate() {
         recalcGrowth();
+        recalcNeBreakpoints();
     }
 
     @Override
