@@ -16,7 +16,9 @@ public class PrevalenceSkygrowth extends PrevalenceDynamics {
     public final Input<RealParameter> logPrevalenceInput = new Input<>(
             "logPrevalence", "log-prevalence values at breakpoints", Input.Validate.REQUIRED);
     public final Input<RateShifts> rateShiftsInput = new Input<>(
-            "rateShifts", "time breakpoints (ascending, years before most recent sample)", Input.Validate.REQUIRED);
+            "rateShifts",
+            "time breakpoints provided via RateShifts; values are specified as fractions of the tree root height (0..1) and resolved to absolute times (ascending, years before most recent sample)",
+            Input.Validate.REQUIRED);
 
     RealParameter logPrevalence;
     RateShifts rateShifts;

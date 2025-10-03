@@ -24,7 +24,9 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
             "logPrevalence", "log-prevalence values at breakpoints", Input.Validate.REQUIRED);
 
     public final Input<RateShifts> rateShiftsInput = new Input<>(
-            "rateShifts", "time breakpoints (ascending, years before most recent sample)", Input.Validate.REQUIRED);
+            "rateShifts",
+            "time breakpoints provided via RateShifts; values are specified as fractions of the tree root height (0..1) and resolved to absolute times (ascending, years before most recent sample)",
+            Input.Validate.REQUIRED);
 
     public final Input<RealParameter> uninfectiousRateInput = new Input<>(
             "uninfectiousRate", "global uninfectious rate (gamma)", Input.Validate.REQUIRED);
@@ -80,6 +82,12 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
             double timediff = t;
             if (interval > 0) timediff -= rateShifts.getValue(interval - 1);
             logI_t = logPrevalence.getArrayValue(interval) - growth[interval] * timediff;
+            // if t is right on a break point we should use the future (smaller) interval
+            // if t is within an interval we should use the current interval
+            // for when t is the most recent sample (t=0, interval=0) we need to use the smallest (=0) interval
+            if (timediff == 0.0 && interval > 0) {
+                interval--;
+            }
             g_fwd = growth[interval];
         }
         double I_t = Math.exp(logI_t);
