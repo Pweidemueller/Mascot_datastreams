@@ -1,40 +1,63 @@
-<!-- Minimal conceptual example of prevalence wiring for CaseCountLikelihood -->
-<beast version="2.7" namespace="beast.base:beast.evolution:beast.inference:beast.core:mascotdatastreams.distribution:mascotdatastreams.dynamics:mascot.parameterdynamics:mascot.dynamics">
+<!-- Example of prevalence modeling with skygrowth for CaseCountLikelihood -->
+    <beast version="2.7" namespace="beast.base:beast.evolution:beast.inference:beast.core:mascotdatastreams.distribution:mascotdatastreams.dynamics:mascot.parameterdynamics:mascot.dynamics">
 
-    <!-- Prevalence dynamics per deme -->
-    <PrevalenceDynamicsList id="PrevList" spec="mascotdatastreams.dynamics.PrevalenceDynamicsList">
-        <prevalence>
-            <PrevalenceSkygrowth id="PrevDeme1" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
-                <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.6094 1.9459 2.1972"/>
-                <rateShifts id="rs1" spec="mascot.dynamics.RateShifts" value="0.1 0.3"/>
-            </PrevalenceSkygrowth>
-        </prevalence>
-        <prevalence>
-            <PrevalenceSkygrowth id="PrevDeme2" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
-                <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.0986 1.3863 1.6094"/>
-                <rateShifts id="rs2" spec="mascot.dynamics.RateShifts" value="0.2 0.35"/>
-            </PrevalenceSkygrowth>
-        </prevalence>
-    </PrevalenceDynamicsList>
+    <!-- Prevalence dynamics for each deme using skygrowth model -->
+    <!-- Deme 0 -->
+    <PrevalenceSkygrowth id="PrevDeme1" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
+        <!-- Log-prevalence values at rate shift points (log of case counts) -->
+        <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.6094 1.9459 2.1972"/>
+        <!-- Time points where the log-prevalence changes (as fractions of tree height) -->
+        <rateShifts id="rs1" spec="mascot.dynamics.RateShifts" value="0.5 1.0"/>
+    </PrevalenceSkygrowth>
+    
+    <!-- Deme 1 -->
+    <PrevalenceSkygrowth id="PrevDeme2" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
+        <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.0986 1.3863 1.6094"/>
+        <rateShifts id="rs2" spec="mascot.dynamics.RateShifts" value="0.5 1.0"/>
+    </PrevalenceSkygrowth>
 
-    <!-- Case count data -->
+    <!-- Case count data: observations of case counts at different times for each deme -->
     <CaseCountData id="CaseData" spec="mascotdatastreams.distribution.CaseCountData">
+        <!-- Observed case counts (5 for deme 0, 5 for deme 1) -->
         <caseCounts spec="beast.base.inference.parameter.RealParameter" value="5 7 6 8 10 3 4 5 6 8"/>
+        <!-- Observation times corresponding to each count -->
         <observationTimes spec="beast.base.inference.parameter.RealParameter" value="0.0 0.1 0.11 0.24 0.3  0.0 0.15 0.16 0.25 0.37"/>
+        <!-- Which deme each observation belongs to (0 or 1) -->
         <traitIndices spec="beast.base.inference.parameter.RealParameter" value="0 0 0 0 0  1 1 1 1 1"/>
     </CaseCountData>
 
-    <!-- Count distribution -->
+    <!-- Distribution for the case counts (Gamma-Poisson / Negative Binomial) -->
     <GammaPoisson id="CaseCountDist" spec="mascotdatastreams.distribution.GammaPoisson">
+        <!-- Mean of the distribution (will be scaled by prevalence) -->
         <mean spec="beast.base.inference.parameter.RealParameter" value="1.0"/>
+        <!-- Dispersion parameter (smaller = more overdispersed) -->
         <dispersion spec="beast.base.inference.parameter.RealParameter" value="0.5"/>
     </GammaPoisson>
 
-    <!-- Likelihood -->
-    <distribution id="CaseCountLikelihood" spec="mascotdatastreams.distribution.CaseCountLikelihood">
-        <prevalence idref="PrevList"/>
+    <!-- Likelihood components per deme (single-deme mode) -->
+    <distribution id="CaseCountLikelihoodDeme0" spec="mascotdatastreams.distribution.CaseCountLikelihood">
+        <prevalence idref="PrevDeme1"/>
         <caseCounts idref="CaseData"/>
         <distribution idref="CaseCountDist"/>
+        <demeIndex>0</demeIndex>
+    </distribution>
+    <distribution id="CaseCountLikelihoodDeme1" spec="mascotdatastreams.distribution.CaseCountLikelihood">
+        <prevalence idref="PrevDeme2"/>
+        <caseCounts idref="CaseData"/>
+        <distribution idref="CaseCountDist"/>
+        <demeIndex>1</demeIndex>
     </distribution>
 
-</beast>
+    <!-- Optional: Loggers for MCMC output -->
+    <run id="mcmc" spec="MCMC" chainLength="1000000">
+        <logger id="screenlog" logEvery="1000">
+            <log idref="CaseCountLikelihoodDeme0"/>
+            <log idref="CaseCountLikelihoodDeme1"/>
+        </logger>
+        <logger id="tracelog" fileName="prevalence.log" logEvery="1000" mode="tree">
+            <log idref="CaseCountLikelihoodDeme0"/>
+            <log idref="CaseCountLikelihoodDeme1"/>
+            <log idref="PrevDeme1.logPrevalence"/>
+            <log idref="PrevDeme2.logPrevalence"/>
+        </logger>
+    </run>
