@@ -5,13 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import beast.base.inference.parameter.RealParameter;
-import mascotdatastreams.dynamics.PrevalenceConstant;
-import mascotdatastreams.dynamics.PrevalenceDynamicsList;
+import mascotdatastreams.dynamics.PrevalenceSkygrowth;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Sequence;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.TraitSet;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeParser;
 
 public class CaseCountLikelihoodPrevalenceTest {
 
     @Test
-    public void testConstantPrevalenceTwoDemes() throws Exception {
+    public void testSkygrowthPrevalenceTwoDemes() throws Exception {
         // Observations: 2 demes x 5 time points
         Double[] times = new Double[] {0.0, 0.1, 0.11, 0.24, 0.3,
                                        0.0, 0.15, 0.16, 0.25, 0.37};
@@ -27,14 +32,23 @@ public class CaseCountLikelihoodPrevalenceTest {
                 "traitIndices", new RealParameter(traits)
         );
 
-        // Prevalence: constant log I = log(5) for both demes
-        PrevalenceConstant prev1 = new PrevalenceConstant();
-        PrevalenceConstant prev2 = new PrevalenceConstant();
-        prev1.initByName("logPrevalence", new RealParameter(new Double[]{Math.log(5.0)}));
-        prev2.initByName("logPrevalence", new RealParameter(new Double[]{Math.log(5.0)}));
-
-        PrevalenceDynamicsList prevList = new PrevalenceDynamicsList();
-        prevList.initByName("prevalence", prev1, "prevalence", prev2);
+        // Prevalence: dynamic skygrowth with fractional shifts at 0.5 and 1.0 (root height = 2.0 in helper)
+        Object rateShifts = buildRateShifts("0.5 1.0");
+        // 3 control points per deme (dimension = shifts + 1)
+        Double[] logI_deme0 = new Double[] { Math.log(5.0), Math.log(10.0), Math.log(3.0) };
+        Double[] logI_deme1 = new Double[] { Math.log(3.0), Math.log(4.0), Math.log(2.0) };
+        PrevalenceSkygrowth prev1 = new PrevalenceSkygrowth();
+        PrevalenceSkygrowth prev2 = new PrevalenceSkygrowth();
+        prev1.initByName(
+                "logPrevalence", new RealParameter(logI_deme0),
+                "rateShifts", rateShifts
+        );
+        prev2.initByName(
+                "logPrevalence", new RealParameter(logI_deme1),
+                "rateShifts", rateShifts
+        );
+        prev1.initAndValidate();
+        prev2.initAndValidate();
 
         // Distribution with dispersion alpha; mean will be overwritten per obs by the likelihood
         RealParameter initMean = new RealParameter(new Double[]{1.0});
@@ -42,24 +56,70 @@ public class CaseCountLikelihoodPrevalenceTest {
         GammaPoisson gp = new GammaPoisson(initMean, alpha);
         gp.initAndValidate();
 
-        // Likelihood
-        CaseCountLikelihood llik = new CaseCountLikelihood();
-        llik.initByName(
-                "prevalence", prevList,
+        // Likelihood per deme (single-deme mode)
+        CaseCountLikelihood llikDeme0 = new CaseCountLikelihood();
+        llikDeme0.initByName(
+                "prevalence", prev1,
                 "caseCounts", caseData,
+                "demeIndex", 0,
                 "distribution", gp
         );
-        llik.initAndValidate();
-        double logP = llik.calculateLogP();
+        llikDeme0.initAndValidate();
+        double logP0 = llikDeme0.calculateLogP();
 
-        // Expected: sum of log PMF with mean = 5 for all observations
+        CaseCountLikelihood llikDeme1 = new CaseCountLikelihood();
+        llikDeme1.initByName(
+                "prevalence", prev2,
+                "caseCounts", caseData,
+                "demeIndex", 1,
+                "distribution", gp
+        );
+        llikDeme1.initAndValidate();
+        double logP1 = llikDeme1.calculateLogP();
+        double logP = logP0 + logP1;
+
+        // Expected: sum of log PMF with mean = exp(logI(t)) per observation using the appropriate deme's prevalence
         double expected = 0.0;
-        for (Double x : counts) {
-            // Set mean to 5 for the distribution and compute log PMF
-            gp.meanInput.setValue(new RealParameter(new Double[]{5.0}), gp);
-            expected += gp.logPmf(x.intValue());
+        for (int i = 0; i < counts.length; i++) {
+            double t = times[i];
+            int deme = traits[i].intValue();
+            PrevalenceSkygrowth prev = (deme == 0) ? prev1 : prev2;
+            double meanI = Math.exp(prev.getPrevalenceTime(t));
+            gp.meanInput.setValue(new RealParameter(new Double[]{meanI}), gp);
+            expected += gp.logPmf(counts[i].intValue());
         }
 
-        assertEquals(expected, logP, 1e-9, "Prevalence-based likelihood should match manual sum for constant prevalence.");
+        assertEquals(expected, logP, 1e-9, "Prevalence-based likelihood should match manual sum for dynamic skygrowth prevalence.");
+    }
+
+    // Build a minimal tree and RateShifts with fractional breakpoints resolved against root height
+    private static Object buildRateShifts(String shiftValues) throws Exception {
+        // Minimal BEAST setup
+        Sequence s1 = new Sequence();
+        Sequence s2 = new Sequence();
+        Sequence s3 = new Sequence();
+        Sequence s4 = new Sequence();
+        s1.initByName("taxon", "a1", "value", "?");
+        s2.initByName("taxon", "b1", "value", "?");
+        s3.initByName("taxon", "a2", "value", "?");
+        s4.initByName("taxon", "b2", "value", "?");
+        Alignment alignment = new Alignment();
+        alignment.initByName("sequence", s1, "sequence", s2, "sequence", s3, "sequence", s4);
+
+        TaxonSet taxa = new TaxonSet();
+        taxa.initByName("alignment", alignment);
+
+        TraitSet traitSet = new TraitSet();
+        traitSet.initByName("value", "a1=Deme1,a2=Deme1,b1=Deme2,b2=Deme2", "traitname", "type", "taxa", taxa);
+
+        // 4-tip ultrametric tree; root height arbitrary (2.0)
+        Tree tree = new TreeParser("((a1:1.0,a2:1.0):1.0,(b1:1.0,b2:1.0):1.0);");
+        tree.initByName("taxonset", taxa, "trait", traitSet);
+
+        Class<?> clsRateShifts = Class.forName("mascot.dynamics.RateShifts");
+        Object rs = clsRateShifts.getDeclaredConstructor().newInstance();
+        clsRateShifts.getMethod("initByName", Object[].class)
+                .invoke(rs, new Object[] { new Object[] { "tree", tree, "value", shiftValues } });
+        return rs;
     }
 }

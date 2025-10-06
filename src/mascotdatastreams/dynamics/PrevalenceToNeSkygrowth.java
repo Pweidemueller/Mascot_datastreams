@@ -3,7 +3,6 @@ package mascotdatastreams.dynamics;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
-import mascot.dynamics.RateShifts;
 import mascot.parameterdynamics.NeDynamics;
 
 /**
@@ -20,12 +19,9 @@ import mascot.parameterdynamics.NeDynamics;
 @Description("Prevalence-to-Ne mapping with Skygrowth-style log-prevalence and RateShifts; implements NeDynamics.")
 public class PrevalenceToNeSkygrowth extends NeDynamics {
 
-    public final Input<RealParameter> logPrevalenceInput = new Input<>(
-            "logPrevalence", "log-prevalence values at breakpoints", Input.Validate.REQUIRED);
-
-    public final Input<RateShifts> rateShiftsInput = new Input<>(
-            "rateShifts",
-            "time breakpoints provided via RateShifts; values are specified as fractions of the tree root height (0..1) and resolved to absolute times (ascending, years before most recent sample)",
+    public final Input<PrevalenceSkygrowth> prevalenceInput = new Input<>(
+            "prevalence",
+            "PrevalenceSkygrowth providing log-prevalence interpolation and interval slopes",
             Input.Validate.REQUIRED);
 
     public final Input<RealParameter> uninfectiousRateInput = new Input<>(
@@ -35,13 +31,9 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
     public final Input<RealParameter> coalescentScaleInput = new Input<>(
             "coalescentScale", "coalescent scaling constant c in Ne = I / (c * transmission_rate)", Input.Validate.OPTIONAL);
 
-    private RealParameter logPrevalence;
-    private RateShifts rateShifts;
+    private PrevalenceSkygrowth prevalence;
     private RealParameter uninfectiousRate;
     private RealParameter coalescentScale; // optional; if null -> use 2.0
-
-    private double[] growth;        // forward-time slopes of log I per interval
-    private double[] growth_stored;
 
     boolean isValid = true;
 
@@ -54,42 +46,18 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
 
     @Override
     public void initAndValidate() {
-        logPrevalence = logPrevalenceInput.get();
-        rateShifts = rateShiftsInput.get();
+        prevalence = prevalenceInput.get();
         uninfectiousRate = uninfectiousRateInput.get();
         coalescentScale = coalescentScaleInput.get();
-
-        // Ensure dimension matches number of intervals + 1
-        logPrevalence.setDimension(rateShifts.getDimension() + 1);
-        growth = new double[rateShifts.getDimension()];
-        recalcGrowth();
         isTime = true;
     }
 
     @Override
     public double getNeTime(double t) {
         isValid = true;
-        int interval = getIntervalNr(t);
-
-        // Compute log I(t)
-        double logI_t;
-        // Forward-time slope in the interval
-        double g_fwd;
-        if (interval >= rateShifts.getDimension()) {
-            logI_t = logPrevalence.getArrayValue(logPrevalence.getDimension() - 1);
-            g_fwd = growth[rateShifts.getDimension()-1];
-        } else {
-            double timediff = t;
-            if (interval > 0) timediff -= rateShifts.getValue(interval - 1);
-            logI_t = logPrevalence.getArrayValue(interval) - growth[interval] * timediff;
-            // if t is right on a break point we should use the future (smaller) interval
-            // if t is within an interval we should use the current interval
-            // for when t is the most recent sample (t=0, interval=0) we need to use the smallest (=0) interval
-            if (timediff == 0.0 && interval > 0) {
-                interval--;
-            }
-            g_fwd = growth[interval];
-        }
+        // Compute log I(t) and forward-time slope using the provided prevalence dynamics
+        double logI_t = prevalence.getPrevalenceTime(t);
+        double g_fwd = prevalence.getForwardSlopeAt(t);
         double I_t = Math.exp(logI_t);
         // Infeasible I(t): clamp to small positive
         if (I_t < I_MIN) { isValid = false; I_t = I_MIN; }
@@ -127,51 +95,11 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
         return Ne;
     }
 
-    private int getIntervalNr(double t) {
-        for (int i = 0; i < rateShifts.getDimension(); i++)
-            if (t < rateShifts.getValue(i))
-                return i;
-        return rateShifts.getDimension();
-    }
-
-    private void recalcGrowth() {
-        // Growth is calculated forwards in time (t is expressed backwards in time)
-        growth = new double[rateShifts.getDimension()];
-        double curr_time = 0.0;
-        for (int i = 1; i < logPrevalence.getDimension(); i++) {
-            double dt = rateShifts.getValue(i - 1) - curr_time;
-            growth[i - 1] = (logPrevalence.getArrayValue(i - 1) - logPrevalence.getArrayValue(i)) / dt;
-            curr_time = rateShifts.getValue(i - 1);
-        }
-    }
-
-    @Override
-    public boolean requiresRecalculation() {
-        recalcGrowth();
-        return super.requiresRecalculation();
-    }
-
-    @Override
-    public void store() {
-        growth_stored = new double[growth.length];
-        System.arraycopy(growth, 0, growth_stored, 0, growth.length);
-        super.store();
-    }
-
-    @Override
-    public void restore() {
-        System.arraycopy(growth_stored, 0, growth, 0, growth_stored.length);
-        super.restore();
-    }
-
-    @Override
-    public void recalculate() {
-        recalcGrowth();
-    }
+    // Interval bookkeeping is delegated to the prevalence dynamics.
 
     @Override
     public boolean isDirty() {
-        if (logPrevalence.isDirty(0)) return true;
+        if (prevalence != null && prevalence.isDirty()) return true;
         if (uninfectiousRate != null && uninfectiousRate.isDirty(0)) return true;
         if (coalescentScale != null && coalescentScale.isDirty(0)) return true;
         return false;

@@ -7,82 +7,111 @@ import beast.base.inference.Distribution;
 import beast.base.inference.State;
 import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
-import mascot.parameterdynamics.NeDynamicsList;
-import mascotdatastreams.dynamics.PrevalenceDynamicsList;
+import mascotdatastreams.dynamics.PrevalenceSkygrowth;
 
 import java.util.List;
 import java.util.Random;
+import java.util.ArrayList;
 
-@Description("Calculates likelihood of observing case counts given prevalence values using a specified distribution")
+@Description("Calculates likelihood of observing case counts for a single deme given its prevalence trajectory using a specified distribution")
 public class CaseCountLikelihood extends Distribution {
-    // Deprecated legacy input to provide a clear migration error if still used
-    public final Input<NeDynamicsList> deprecatedNeInput = new Input<>(
-            "NeDynamics", "Deprecated: supply prevalence dynamics instead of NeDynamics.", Validate.OPTIONAL);
-
-    // New prevalence input
-    public final Input<PrevalenceDynamicsList> prevalenceInput = new Input<>(
-            "prevalence", "Input list of log-prevalence dynamics per deme", Validate.REQUIRED);
+    // Single-deme prevalence input (explicitly PrevalenceSkygrowth)
+    public final Input<PrevalenceSkygrowth> prevalenceSingleInput = new Input<>(
+            "prevalence", "PrevalenceSkygrowth object for the selected deme", Validate.REQUIRED);
 
     final public Input<CaseCountData> caseCountInput = new Input<>("caseCounts", "Case count data", Validate.REQUIRED);
     final public Input<ParametricDistribution> distInput = new Input<>("distribution", "Distribution used to calculate likelihood", Validate.REQUIRED);
     // Optional placeholder if needed elsewhere; not used directly in this likelihood
     public final Input<RealParameter> uninfectiousRateInput = new Input<>(
             "uninfectiousRate", "Fixed uninfectious rate (per time unit), optional.", Validate.OPTIONAL);
+    // Deme selection and filtering behavior
+    public final Input<Integer> demeIndexInput = new Input<>(
+            "demeIndex", "0-based deme index to match against CaseCountData traitIndices", Validate.REQUIRED);
+    public final Input<Boolean> strictTraitFilteringInput = new Input<>(
+            "strictTraitFiltering", "If true, warns when no observations match the specified deme; observations for other demes are ignored regardless.", Validate.OPTIONAL);
     
     protected CaseCountData caseCountData;
     protected ParametricDistribution dist;
-    protected PrevalenceDynamicsList prevalence;
+    protected PrevalenceSkygrowth prevalence;
+    protected int demeIndex;
+    protected int[] filteredObservationIndices;
+    protected boolean strictTraitFiltering = true;
     
     @Override
     public void initAndValidate() {
         caseCountData = caseCountInput.get();
         dist = distInput.get();
-        if (deprecatedNeInput.get() != null) {
-            throw new IllegalArgumentException("CaseCountLikelihood: The 'NeDynamics' input is deprecated. Please provide 'prevalence' (log-prevalence dynamics) instead.");
+        prevalence = prevalenceSingleInput.get();
+        Integer di = demeIndexInput.get();
+        if (di == null) {
+            throw new IllegalArgumentException("CaseCountLikelihood: 'demeIndex' must be provided and 0-based.");
         }
-        prevalence = prevalenceInput.get();
+        demeIndex = di.intValue();
+        Boolean stf = strictTraitFilteringInput.get();
+        if (stf != null) {
+            strictTraitFiltering = stf.booleanValue();
+        }
+
+        // Build filtered observation index list for this deme
+        int n = caseCountData.getObservationCount();
+        ArrayList<Integer> idxList = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (caseCountData.getTrait(i) == demeIndex) {
+                idxList.add(i);
+            }
+        }
+        if (idxList.isEmpty() && strictTraitFiltering) {
+            System.err.println("Warning: CaseCountLikelihood found no observations for demeIndex=" + demeIndex + ". Likelihood will be neutral (0).");
+        }
+        filteredObservationIndices = new int[idxList.size()];
+        for (int k = 0; k < idxList.size(); k++) filteredObservationIndices[k] = idxList.get(k);
+
         calculateLogP();
     }
     
     @Override
     public double calculateLogP() {
         logP = 0.0;
-        
-        // Calculate likelihood for each observation
-        for (int i = 0; i < caseCountData.getObservationCount(); i++) {
-            double t = caseCountData.getTime(i);
-            int trait = caseCountData.getTrait(i);
-            double caseCount = caseCountData.getCaseCount(i);
-            
-            // Get log-prevalence for this trait at this time and convert to prevalence I
-            double logI = prevalence.get(trait).getPrevalenceTime(t);
+        // Neutral likelihood if there are no observations for this deme
+        if (filteredObservationIndices == null || filteredObservationIndices.length == 0) {
+            return logP;
+        }
+
+        // Calculate likelihood for each observation matching the selected deme
+        for (int idx : filteredObservationIndices) {
+            double t = caseCountData.getTime(idx);
+            double caseCount = caseCountData.getCaseCount(idx);
+
+            // Get log-prevalence at this time for the selected deme and convert to prevalence I
+            double logI = prevalence.getPrevalenceTime(t);
             double meanI = Math.exp(logI);
-            
+
             // Validate parameters
             if (meanI <= 0.0 || caseCount < 0.0) {
                 System.err.println("Warning: Invalid parameters - prevalence I: " + meanI + ", caseCount: " + caseCount);
                 return Double.NEGATIVE_INFINITY;
             }
-            
+
             // Set the mean parameter for the distribution (based on prevalence I)
             if (dist instanceof GammaPoisson) {
                 RealParameter meanParam = new RealParameter(new Double[]{meanI});
                 ((GammaPoisson) dist).meanInput.setValue(meanParam, dist);
-            } else if (dist instanceof NegativeBinomialDistribution) { // backward compatibility if present
-                RealParameter meanParam = new RealParameter(new Double[]{meanI});
-                ((NegativeBinomialDistribution) dist).meanInput.setValue(meanParam, dist);
+            } else {
+                throw new IllegalArgumentException(
+                        "CaseCountLikelihood currently supports only GammaPoisson as 'distribution'. Got: "
+                                + dist.getClass().getName());
             }
-            
+
             // Calculate log likelihood using the specified distribution
             double intervalLogP = dist.calcLogP(new RealParameter(new Double[]{caseCount}));
             if (Double.isNaN(intervalLogP)) {
-                System.err.println("Warning: NaN likelihood for observation " + i + ": caseCount=" + caseCount + ", prevalence I=" + meanI);
+                System.err.println("Warning: NaN likelihood for observation index " + idx + ": caseCount=" + caseCount + ", prevalence I=" + meanI);
                 return Double.NEGATIVE_INFINITY;
             }
-            
+
             logP += intervalLogP;
         }
-        
+
         return logP;
     }
 

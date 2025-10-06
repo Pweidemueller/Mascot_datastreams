@@ -301,38 +301,27 @@
             
       <distribution id="prior" spec="CompoundDistribution">
 
-        
 
-                
-                
-        <distribution id="caseCountLikelihood.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
-          
-                            
-                    
-          <prevalence id="PrevalenceList.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceDynamicsList">
-
-            <prevalence id="Prev.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
-                    <logPrevalence idref="SkylinePrev.Deme1.t:SimDataset"/>
-                    <rateShifts id="PrevRateShifts.Deme1" spec="mascot.dynamics.RateShifts">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
-            </prevalence>
-            
-            
-            <prevalence id="Prev.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
-                    <logPrevalence idref="SkylinePrev.Deme2.t:SimDataset"/>
-                    <rateShifts id="PrevRateShifts.Deme2" spec="mascot.dynamics.RateShifts">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
-            </prevalence>
+        <!-- Case count likelihood for Deme 1 (demeIndex=0) -->
+        <distribution id="caseCountLikelihood.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
+          <prevalence id="PrevSkygrowth.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
+              <logPrevalence idref="SkylinePrev.Deme1.t:SimDataset"/>
+              <rateShifts id="SkygrowthRateShifts.Deme1" spec="mascot.dynamics.RateShifts" tree="@Tree.t:SimDataset">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
           </prevalence>
-            
-          
-                            
-                    
           <caseCounts idref="caseCounts.t:SimDataset"/>
-          
-                            
-                    
-          <distribution id="negBinomDist.t:SimDataset" spec="mascotdatastreams.distribution.NegativeBinomialDistribution" dispersion="@caseCounts.dispersion:SimDataset"/>
-          
-                
+          <demeIndex>0</demeIndex>
+          <distribution id="gammaPoisson.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
+        </distribution>
+
+        <!-- Case count likelihood for Deme 2 (demeIndex=1) -->
+        <distribution id="caseCountLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
+          <prevalence id="PrevSkygrowth.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
+              <logPrevalence idref="SkylinePrev.Deme2.t:SimDataset"/>
+              <rateShifts id="SkygrowthRateShifts.Deme2" spec="mascot.dynamics.RateShifts" tree="@Tree.t:SimDataset">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
+          </prevalence>
+          <caseCounts idref="caseCounts.t:SimDataset"/>
+          <demeIndex>1</demeIndex>
+          <distribution id="gammaPoisson.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
         </distribution>
         
                             
@@ -350,22 +339,9 @@
                                                     
                             
               <neDynamics id="NeDynamics.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth">
-                
-                                                            
-                                
-                    <logPrevalence idref="SkylinePrev.Deme1.t:SimDataset"/>
-                    
-                                                                
-                                    
-                    <rateShifts idref="PrevRateShifts.Deme1"/>
-                    
-                                                                
-                                    
-                    <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
-                    
-                                                                
-                                    
-                    <coalescentScale spec="parameter.RealParameter">2.0</coalescentScale>
+                <prevalence idref="PrevSkygrowth.Deme1.t:SimDataset"/>
+                <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
+                <coalescentScale spec="parameter.RealParameter">2.0</coalescentScale>
                 
                                                         
                             
@@ -374,22 +350,9 @@
                                                     
                             
               <neDynamics id="NeDynamics.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth">
-                
-                                                            
-                                
-                    <logPrevalence idref="SkylinePrev.Deme2.t:SimDataset"/>
-                    
-                                                                
-                                    
-                    <rateShifts idref="PrevRateShifts.Deme2"/>
-                    
-                                                                
-                                    
-                    <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
-                    
-                                                                
-                                    
-                    <coalescentScale spec="parameter.RealParameter">2.0</coalescentScale>
+                <prevalence idref="PrevSkygrowth.Deme2.t:SimDataset"/>
+                <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
+                <coalescentScale spec="parameter.RealParameter">2.0</coalescentScale>
                 
                                                         
                             
@@ -464,6 +427,7 @@
             
                         
             <parameter id="RealParameter.73" spec="parameter.RealParameter" estimate="false" name="mean">0.0</parameter>
+            <!-- <parameter id="RealParameter.730" spec="parameter.RealParameter" estimate="false" name="sigma">1.0</parameter> -->
             
                         
             <parameter idref="SkylineNeSigma.t:SimDataset" name="sigma"/>
@@ -489,7 +453,8 @@
             
                         
             <parameter id="RealParameter.70" spec="parameter.RealParameter" estimate="false" name="mean">0.0</parameter>
-            
+            <!-- <parameter id="RealParameter.700" spec="parameter.RealParameter" estimate="false" name="sigma">1.0</parameter> -->
+
                         
             <parameter idref="SkylineNeSigma.t:SimDataset" name="sigma"/>
             
@@ -655,6 +620,24 @@
           
                                 
                 
+        </prior>
+
+        <prior id="SkylineNeSigmaPrior.t:SimDataset" name="distribution" x="@SkylineNeSigma.t:SimDataset">
+          
+                                                
+                                
+              <Exponential id="Exponential.4" name="distr">
+                  
+                                                  
+                              
+                  <parameter id="RealParameter.SkylineNeSigmaPriorMean" spec="parameter.RealParameter" estimate="false" name="mean">0.1</parameter>
+                  
+                                              
+                          
+              </Exponential>
+              
+                                            
+                            
         </prior>
         
                         
@@ -1088,7 +1071,9 @@
       
 
             
-      <log idref="caseCountLikelihood.t:SimDataset"/>
+      <log idref="caseCountLikelihood.Deme1.t:SimDataset"/>
+      
+      <log idref="caseCountLikelihood.Deme2.t:SimDataset"/>
       
                     
             

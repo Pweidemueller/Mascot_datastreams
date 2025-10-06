@@ -34,10 +34,17 @@ public class PrevalenceToNeSkygrowthTest {
         // gamma (uninfectious rate) = 1.0, coalescentScale uses default c=2.0
         RealParameter gamma = new RealParameter(new Double[] { 1.0 });
 
+        // Build prevalence dynamics and wire into PrevalenceToNeSkygrowth
+        PrevalenceSkygrowth prev = new PrevalenceSkygrowth();
+        prev.initByName(
+                "logPrevalence", new RealParameter(logI),
+                "rateShifts", rateShifts
+        );
+        prev.initAndValidate();
+
         PrevalenceToNeSkygrowth dyn = new PrevalenceToNeSkygrowth();
         dyn.initByName(
-                "logPrevalence", new RealParameter(logI),
-                "rateShifts", rateShifts,
+                "prevalence", prev,
                 "uninfectiousRate", gamma
         );
         dyn.initAndValidate();
@@ -91,10 +98,16 @@ public class PrevalenceToNeSkygrowthTest {
         RealParameter gamma = new RealParameter(new Double[] { 1.0 });
         RealParameter c = new RealParameter(new Double[] { 4.0 }); // double the denominator vs default
 
+        PrevalenceSkygrowth prev = new PrevalenceSkygrowth();
+        prev.initByName(
+                "logPrevalence", new RealParameter(logI),
+                "rateShifts", rateShifts
+        );
+        prev.initAndValidate();
+
         PrevalenceToNeSkygrowth dyn = new PrevalenceToNeSkygrowth();
         dyn.initByName(
-                "logPrevalence", new RealParameter(logI),
-                "rateShifts", rateShifts,
+                "prevalence", prev,
                 "uninfectiousRate", gamma,
                 "coalescentScale", c
         );

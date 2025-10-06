@@ -8,7 +8,7 @@ import mascot.dynamics.RateShifts;
 /**
  * Piecewise-exponential interpolation of log-prevalence over time, mirroring Mascot's Skygrowth for Ne.
  * The control points are in log-space and defined at rate-shift breakpoints. Within each interval,
- * log-prevalence changes linearly with slope equal to the backward-time growth rate.
+ * log-prevalence changes linearly with slope equal to the forward-time growth rate.
  */
 @Description("Prevalence function with log-scale values at time breakpoints, interpolated piecewise exponentially.")
 public class PrevalenceSkygrowth extends PrevalenceDynamics {
@@ -24,7 +24,7 @@ public class PrevalenceSkygrowth extends PrevalenceDynamics {
     RateShifts rateShifts;
 
     boolean known = false;
-    double[] growth;          // per-interval backward-time growth rate of log I
+    double[] growth;          // per-interval forward-time growth rate of log I
     double[] growth_stored;
 
     @Override
@@ -47,6 +47,27 @@ public class PrevalenceSkygrowth extends PrevalenceDynamics {
         if (interval > 0)
             timediff -= rateShifts.getValue(interval - 1);
         return logPrevalence.getArrayValue(interval) - growth[interval] * timediff;
+    }
+
+    /**
+     * Return the per-interval forward-time slope used by downstream mappings at time t.
+     * This mirrors the semantics previously used in PrevalenceToNeSkygrowth, i.e., the
+     * value equals the interval slope parameter used in the log-prevalence interpolation.
+     */
+    public double getForwardSlopeAt(double t) {
+        int interval = getIntervalNr(t);
+        if (interval >= rateShifts.getDimension()) {
+            // After last shift: use last known interval slope
+            return growth[rateShifts.getDimension() - 1];
+        }
+        double timediff = t;
+        if (interval > 0)
+            timediff -= rateShifts.getValue(interval - 1);
+        // At exact breakpoints, use the previous interval like prior implementation
+        if (timediff == 0.0 && interval > 0) {
+            interval--;
+        }
+        return growth[interval];
     }
 
     private int getIntervalNr(double t) {
