@@ -24,6 +24,9 @@ public class CaseCountLikelihood extends Distribution {
     // Optional placeholder if needed elsewhere; not used directly in this likelihood
     public final Input<RealParameter> uninfectiousRateInput = new Input<>(
             "uninfectiousRate", "Fixed uninfectious rate (per time unit), optional.", Validate.OPTIONAL);
+    // Optional scaling of the mean (akin to a sampling rate in a given deme); defaults to 1.0 (no scaling)
+    public final Input<RealParameter> scalingInput = new Input<>(
+            "scaling", "Scaling factor applied to the prevalence-derived mean; must be > 0.", Validate.OPTIONAL);
     // Deme selection and filtering behavior
     public final Input<Integer> demeIndexInput = new Input<>(
             "demeIndex", "0-based deme index to match against CaseCountData traitIndices", Validate.REQUIRED);
@@ -50,6 +53,15 @@ public class CaseCountLikelihood extends Distribution {
         Boolean stf = strictTraitFilteringInput.get();
         if (stf != null) {
             strictTraitFiltering = stf.booleanValue();
+        }
+
+        // Validate optional scaling parameter if present
+        RealParameter scaleParam = scalingInput.get();
+        if (scaleParam != null) {
+            double s = scaleParam.getArrayValue();
+            if (!(s > 0.0)) {
+                throw new IllegalArgumentException("CaseCountLikelihood: 'scaling' must be > 0, got " + s);
+            }
         }
 
         // Build filtered observation index list for this deme
@@ -86,15 +98,27 @@ public class CaseCountLikelihood extends Distribution {
             double logI = prevalence.getPrevalenceTime(t);
             double meanI = Math.exp(logI);
 
+            // Apply optional scaling factor (default 1.0)
+            double scaling = 1.0;
+            RealParameter scaleParam = scalingInput.get();
+            if (scaleParam != null) {
+                scaling = scaleParam.getArrayValue();
+                if (!(scaling > 0.0)) {
+                    System.err.println("Warning: Invalid 'scaling' <= 0 encountered: " + scaling);
+                    return Double.NEGATIVE_INFINITY;
+                }
+            }
+            double scaledMean = meanI * scaling;
+
             // Validate parameters
-            if (meanI <= 0.0 || caseCount < 0.0) {
-                System.err.println("Warning: Invalid parameters - prevalence I: " + meanI + ", caseCount: " + caseCount);
+            if (scaledMean <= 0.0 || caseCount < 0.0) {
+                System.err.println("Warning: Invalid parameters - scaled mean: " + scaledMean + ", caseCount: " + caseCount);
                 return Double.NEGATIVE_INFINITY;
             }
 
             // Set the mean parameter for the distribution (based on prevalence I)
             if (dist instanceof GammaPoisson) {
-                RealParameter meanParam = new RealParameter(new Double[]{meanI});
+                RealParameter meanParam = new RealParameter(new Double[]{scaledMean});
                 ((GammaPoisson) dist).meanInput.setValue(meanParam, dist);
             } else {
                 throw new IllegalArgumentException(
@@ -105,7 +129,7 @@ public class CaseCountLikelihood extends Distribution {
             // Calculate log likelihood using the specified distribution
             double intervalLogP = dist.calcLogP(new RealParameter(new Double[]{caseCount}));
             if (Double.isNaN(intervalLogP)) {
-                System.err.println("Warning: NaN likelihood for observation index " + idx + ": caseCount=" + caseCount + ", prevalence I=" + meanI);
+                System.err.println("Warning: NaN likelihood for observation index " + idx + ": caseCount=" + caseCount + ", scaled mean=" + scaledMean);
                 return Double.NEGATIVE_INFINITY;
             }
 

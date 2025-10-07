@@ -92,6 +92,88 @@ public class CaseCountLikelihoodPrevalenceTest {
         assertEquals(expected, logP, 1e-9, "Prevalence-based likelihood should match manual sum for dynamic skygrowth prevalence.");
     }
 
+    @Test
+    public void testSkygrowthPrevalenceTwoDemesWithScaling() throws Exception {
+        // Observations: 2 demes x 5 time points
+        Double[] times = new Double[] {0.0, 0.1, 0.11, 0.24, 0.3,
+                                       0.0, 0.15, 0.16, 0.25, 0.37};
+        Double[] traits = new Double[] {0.0, 0.0, 0.0, 0.0, 0.0,
+                                        1.0, 1.0, 1.0, 1.0, 1.0};
+        Double[] counts = new Double[] {5.0, 7.0, 6.0, 8.0, 10.0,
+                                        3.0, 4.0, 5.0, 6.0, 8.0};
+
+        CaseCountData caseData = new CaseCountData();
+        caseData.initByName(
+                "caseCounts", new RealParameter(counts),
+                "observationTimes", new RealParameter(times),
+                "traitIndices", new RealParameter(traits)
+        );
+
+        // Prevalence: dynamic skygrowth with fractional shifts at 0.5 and 1.0 (root height = 2.0 in helper)
+        Object rateShifts = buildRateShifts("0.5 1.0");
+        // 3 control points per deme (dimension = shifts + 1)
+        Double[] logI_deme0 = new Double[] { Math.log(5.0), Math.log(10.0), Math.log(3.0) };
+        Double[] logI_deme1 = new Double[] { Math.log(3.0), Math.log(4.0), Math.log(2.0) };
+        PrevalenceSkygrowth prev1 = new PrevalenceSkygrowth();
+        PrevalenceSkygrowth prev2 = new PrevalenceSkygrowth();
+        prev1.initByName(
+                "logPrevalence", new RealParameter(logI_deme0),
+                "rateShifts", rateShifts
+        );
+        prev2.initByName(
+                "logPrevalence", new RealParameter(logI_deme1),
+                "rateShifts", rateShifts
+        );
+        prev1.initAndValidate();
+        prev2.initAndValidate();
+
+        // Distribution with dispersion alpha; mean will be overwritten per obs by the likelihood
+        RealParameter initMean = new RealParameter(new Double[]{1.0});
+        RealParameter alpha = new RealParameter(new Double[]{0.5});
+        GammaPoisson gp = new GammaPoisson(initMean, alpha);
+        gp.initAndValidate();
+
+        // scaling parameter
+        RealParameter scaling = new RealParameter(new Double[]{0.1});
+
+        // Likelihood per deme (single-deme mode) with scaling
+        CaseCountLikelihood llikDeme0 = new CaseCountLikelihood();
+        llikDeme0.initByName(
+                "prevalence", prev1,
+                "caseCounts", caseData,
+                "demeIndex", 0,
+                "distribution", gp,
+                "scaling", scaling
+        );
+        llikDeme0.initAndValidate();
+        double logP0 = llikDeme0.calculateLogP();
+
+        CaseCountLikelihood llikDeme1 = new CaseCountLikelihood();
+        llikDeme1.initByName(
+                "prevalence", prev2,
+                "caseCounts", caseData,
+                "demeIndex", 1,
+                "distribution", gp,
+                "scaling", scaling
+        );
+        llikDeme1.initAndValidate();
+        double logP1 = llikDeme1.calculateLogP();
+        double logP = logP0 + logP1;
+
+        // Expected: sum of log PMF with mean = exp(logI(t)) * 0.1 per observation using the appropriate deme's prevalence
+        double expected = 0.0;
+        for (int i = 0; i < counts.length; i++) {
+            double t = times[i];
+            int deme = traits[i].intValue();
+            PrevalenceSkygrowth prev = (deme == 0) ? prev1 : prev2;
+            double meanI = Math.exp(prev.getPrevalenceTime(t)) * 0.1;
+            gp.meanInput.setValue(new RealParameter(new Double[]{meanI}), gp);
+            expected += gp.logPmf(counts[i].intValue());
+        }
+
+        assertEquals(expected, logP, 1e-9, "Prevalence-based likelihood with scaling should match manual sum for dynamic skygrowth prevalence.");
+    }
+
     // Build a minimal tree and RateShifts with fractional breakpoints resolved against root height
     private static Object buildRateShifts(String shiftValues) throws Exception {
         // Minimal BEAST setup
