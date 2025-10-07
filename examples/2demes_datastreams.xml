@@ -266,6 +266,11 @@
             
       <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">5</parameter>
 
+      <!-- Per-deme scaling parameters for case count likelihood means -->
+      <parameter id="caseCounts.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">0.1</parameter>
+
+      <parameter id="caseCounts.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">0.1</parameter>
+
       <parameter id="uninfectiousRate.t:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">73.0</parameter>
 
       
@@ -310,6 +315,7 @@
           </prevalence>
           <caseCounts idref="caseCounts.t:SimDataset"/>
           <demeIndex>0</demeIndex>
+          <scaling idref="caseCounts.scaling.Deme1:SimDataset"/>
           <distribution id="gammaPoisson.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
         </distribution>
 
@@ -321,6 +327,7 @@
           </prevalence>
           <caseCounts idref="caseCounts.t:SimDataset"/>
           <demeIndex>1</demeIndex>
+          <scaling idref="caseCounts.scaling.Deme2:SimDataset"/>
           <distribution id="gammaPoisson.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
         </distribution>
         
@@ -536,6 +543,22 @@
           
                                 
                 
+        </prior>
+
+        <prior id="CaseCountsScaling.Deme1.Prior:SimDataset" name="distribution" x="@caseCounts.scaling.Deme1:SimDataset">
+          <LogNormal id="CaseCountsScaling.Deme1.LogNormal" name="distr">
+            <!-- MeanLog = log(0.1) ~ -2.302585, SDLog = 1.0 -->
+            <parameter id="CaseCountsScaling.Deme1.MeanLog" spec="parameter.RealParameter" estimate="false" name="M">-2.30258509299</parameter>
+            <parameter id="CaseCountsScaling.Deme1.SDLog" spec="parameter.RealParameter" estimate="false" name="S">1.0</parameter>
+          </LogNormal>
+        </prior>
+
+        <prior id="CaseCountsScaling.Deme2.Prior:SimDataset" name="distribution" x="@caseCounts.scaling.Deme2:SimDataset">
+          <LogNormal id="CaseCountsScaling.Deme2.LogNormal" name="distr">
+            <!-- MeanLog = log(0.1) ~ -2.302585, SDLog = 1.0 -->
+            <parameter id="CaseCountsScaling.Deme2.MeanLog" spec="parameter.RealParameter" estimate="false" name="M">-2.30258509299</parameter>
+            <parameter id="CaseCountsScaling.Deme2.SDLog" spec="parameter.RealParameter" estimate="false" name="S">1.0</parameter>
+          </LogNormal>
         </prior>
         
                             
@@ -1020,6 +1043,28 @@
       
         
     </operator>
+
+    <operator id="caseCountsScalingDeme1Scaler.s:SimDataset" spec="AdaptableOperatorSampler" weight="0.05">
+      <parameter idref="caseCounts.scaling.Deme1:SimDataset"/>
+      <operator idref="AVMNOperator.SimDataset"/>
+      <operator id="caseCountsScalingDeme1ScalerX.s:SimDataset"
+                spec="kernel.BactrianScaleOperator"
+                parameter="@caseCounts.scaling.Deme1:SimDataset"
+                scaleFactor="0.5"
+                upper="10.0"
+                weight="0.1"/>
+    </operator>
+
+    <operator id="caseCountsScalingDeme2Scaler.s:SimDataset" spec="AdaptableOperatorSampler" weight="0.05">
+      <parameter idref="caseCounts.scaling.Deme2:SimDataset"/>
+      <operator idref="AVMNOperator.SimDataset"/>
+      <operator id="caseCountsScalingDeme2ScalerX.s:SimDataset"
+                spec="kernel.BactrianScaleOperator"
+                parameter="@caseCounts.scaling.Deme2:SimDataset"
+                scaleFactor="0.5"
+                upper="10.0"
+                weight="0.1"/>
+    </operator>
     
             
         
@@ -1052,6 +1097,13 @@
 
             
       <parameter idref="caseCounts.dispersion:SimDataset" name="log"/>
+      
+                    
+            
+      <parameter idref="caseCounts.scaling.Deme1:SimDataset" name="log"/>
+      
+      
+      <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="log"/>
       
                     
             
