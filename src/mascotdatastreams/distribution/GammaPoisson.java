@@ -113,7 +113,8 @@ public class GammaPoisson extends ParametricDistribution {
  * Inner integer distribution implementation.
  */
 class GammaPoissonDistributionImpl extends AbstractIntegerDistribution {
-    private final double r;        // shape
+    private static final long serialVersionUID = 1L;
+	private final double r;        // shape
     private final double p;        // success probability
     private final double mean;     // derived mean
     private final double logGammaR;

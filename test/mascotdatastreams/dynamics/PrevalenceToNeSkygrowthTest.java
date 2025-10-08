@@ -3,7 +3,6 @@ package mascotdatastreams.dynamics;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIf;
 
 import beast.base.inference.parameter.RealParameter;
 import beast.base.evolution.alignment.Alignment;
@@ -12,6 +11,7 @@ import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.tree.TraitSet;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeParser;
+import mascot.parameterdynamics.Skygrowth;
 
 /**
  * Tests for PrevalenceToNeSkygrowth.getNeTime().
@@ -22,7 +22,6 @@ import beast.base.evolution.tree.TreeParser;
 public class PrevalenceToNeSkygrowthTest {
 
     @Test
-    @EnabledIf("mascotClassesPresent")
     public void testNeAcrossIntervals_defaultC() throws Exception {
         // Rate shifts specified as fractions of root height: 0.5 and 1.0.
         // With the test tree's root height = 2.0, these map to absolute times 1.0 and 2.0.
@@ -34,10 +33,10 @@ public class PrevalenceToNeSkygrowthTest {
         // gamma (uninfectious rate) = 1.0, coalescentScale uses default c=2.0
         RealParameter gamma = new RealParameter(new Double[] { 1.0 });
 
-        // Build prevalence dynamics and wire into PrevalenceToNeSkygrowth
-        PrevalenceSkygrowth prev = new PrevalenceSkygrowth();
+        // Build prevalence dynamics (Mascot Skygrowth) and wire into PrevalenceToNeSkygrowth
+        Skygrowth prev = new Skygrowth();
         prev.initByName(
-                "logPrevalence", new RealParameter(logI),
+                "logNe", new RealParameter(logI),
                 "rateShifts", rateShifts
         );
         prev.initAndValidate();
@@ -58,6 +57,7 @@ public class PrevalenceToNeSkygrowthTest {
         //   Ne = I / (2 * transmission)
         double t1 = 0.5;
         double ne1 = dyn.getNeTime(t1);
+
         double growth1 = (Math.log(10.0)-Math.log(20.0))/1.0;
         double I1 = 10.0 / Math.exp(growth1*t1); // ~14.14213562
         double transmission1 = growth1 + gamma.getArrayValue(); // ~0.30685281944
@@ -87,10 +87,21 @@ public class PrevalenceToNeSkygrowthTest {
         double transmission3 = growth3 + gamma.getArrayValue();
         double expected3 = I3 / (2.0 * transmission3);
         assertEquals(expected3, ne3, 1e-9, "Ne(t) after last shift incorrect");
+        
+        // For t=0.0 (at the most recent sample):
+        //   logI(t) = ln(10) (first control point)
+        //   growth[0] = ln(10) - ln(20) over dt=1.0 => ln(0.5) ~ -0.69314718056
+        //   transmission = -0.6931 + 1.0; I=10; Ne = 10 / (2 * transmission)
+        double t4 = 0.0;
+        double ne4 = dyn.getNeTime(t4);
+        double growth4 = (Math.log(10.0)-Math.log(20.0))/1.0;
+        double I4 = 10.0 ; 
+        double transmission4 = growth4 + gamma.getArrayValue();
+        double expected4 = I4 / (2.0 * transmission4);
+        assertEquals(expected4, ne4, 1e-9, "Ne(t) at t=0.0 incorrect");
     }
 
     @Test
-    @EnabledIf("mascotClassesPresent")
     public void testNeWithCustomCoalescentScale() throws Exception {
         // Fractions of root height (2.0): 0.5->1.0, 1.0->2.0
         Object rateShifts = buildRateShifts("0.5 1.0");
@@ -98,9 +109,9 @@ public class PrevalenceToNeSkygrowthTest {
         RealParameter gamma = new RealParameter(new Double[] { 1.0 });
         RealParameter c = new RealParameter(new Double[] { 4.0 }); // double the denominator vs default
 
-        PrevalenceSkygrowth prev = new PrevalenceSkygrowth();
+        Skygrowth prev = new Skygrowth();
         prev.initByName(
-                "logPrevalence", new RealParameter(logI),
+                "logNe", new RealParameter(logI),
                 "rateShifts", rateShifts
         );
         prev.initAndValidate();
@@ -126,16 +137,6 @@ public class PrevalenceToNeSkygrowthTest {
         double transmission = growth + gamma.getArrayValue();
         double expected_c4 = I / (c.getArrayValue() * transmission);
         assertEquals(expected_c4, ne_c4, 1e-9, "Ne(t) with custom c incorrect");
-    }
-
-    // Helper used only if native classes are present on the classpath
-    static boolean mascotClassesPresent() {
-        try {
-            Class.forName("mascot.dynamics.RateShifts");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
     }
 
     // Build a minimal tree (root height = 2.0) and RateShifts instance initialized with fractional breakpoints

@@ -4,6 +4,8 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
 import mascot.parameterdynamics.NeDynamics;
+import mascot.parameterdynamics.Skygrowth;
+import java.lang.reflect.Field;
 
 /**
  * Maps log-prevalence dynamics to an Ne(t) process compatible with MASCOT callers.
@@ -19,9 +21,9 @@ import mascot.parameterdynamics.NeDynamics;
 @Description("Prevalence-to-Ne mapping with Skygrowth-style log-prevalence and RateShifts; implements NeDynamics.")
 public class PrevalenceToNeSkygrowth extends NeDynamics {
 
-    public final Input<PrevalenceSkygrowth> prevalenceInput = new Input<>(
+    public final Input<Skygrowth> prevalenceInput = new Input<>(
             "prevalence",
-            "PrevalenceSkygrowth providing log-prevalence interpolation and interval slopes",
+            "Mascot Skygrowth providing values that are treated as prevalence in log space (semantics: getNeTime returns exp(log I(t)))",
             Input.Validate.REQUIRED);
 
     public final Input<RealParameter> uninfectiousRateInput = new Input<>(
@@ -31,7 +33,7 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
     public final Input<RealParameter> coalescentScaleInput = new Input<>(
             "coalescentScale", "coalescent scaling constant c in Ne = I / (c * transmission_rate)", Input.Validate.OPTIONAL);
 
-    private PrevalenceSkygrowth prevalence;
+    private Skygrowth prevalence;
     private RealParameter uninfectiousRate;
     private RealParameter coalescentScale; // optional; if null -> use 2.0
 
@@ -44,6 +46,9 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
     private static final double NE_MIN = 1e-6;
     private static final double NE_MAX = 1e12;
 
+    // Step for finite-difference slope of log-prevalence (years before present)
+    private static final double DT = 1e-5;
+
     @Override
     public void initAndValidate() {
         prevalence = prevalenceInput.get();
@@ -55,22 +60,19 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
     @Override
     public double getNeTime(double t) {
         isValid = true;
-        // Compute log I(t) and forward-time slope using the provided prevalence dynamics
-        double logI_t = prevalence.getPrevalenceTime(t);
-        double g_fwd = prevalence.getForwardSlopeAt(t);
-        double I_t = Math.exp(logI_t);
-        // Infeasible I(t): clamp to small positive
+        // Compute forward-time slope of log I(t) from Skygrowth via central difference
+        double slope = getForwardSlopeAt(t);
+        double I_t = prevalence.getNeTime(t);
+        // Clamp I(t) to feasible numeric range
         if (I_t < I_MIN) { isValid = false; I_t = I_MIN; }
         if (I_t > I_MAX) { isValid = false; I_t = I_MAX; }
-
-        // Forward-time transmission_rate = g_fwd + gamma
         double gamma = uninfectiousRate.getArrayValue();
         if (!(gamma >= 0.0)) {
             // Invalid gamma: clamp to nonnegative
             isValid = false;
             gamma = 0.0;
         }
-        double transmission_rate = g_fwd + gamma;
+        double transmission_rate = slope + gamma;
         if (!(transmission_rate > 0.0)) {
             // Negative/zero transmission rate: clamp to EPS
             isValid = false;
@@ -95,8 +97,61 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
         return Ne;
     }
 
-    // Interval bookkeeping is delegated to the prevalence dynamics.
+    private double getForwardSlopeAt(double t) {
+        // Prefer exact behavior via reflection when possible: use last interval slope if t beyond last rate shift
+        final double probe = Math.max(DT, 1e-6);
+        Double tmax = getLastRateShiftTimeReflective();
+        Double lastSlope = getLastGrowthReflective();
+        if (tmax == null || lastSlope == null) {
+            throw new IllegalStateException("Unable to access Skygrowth internals (rateShifts/growth) via reflection; cannot determine last-interval slope for t >= tmax");
+        }
+        // If t is at or after the last breakpoint, use the last interval slope
+        if (t >= tmax) {
+            return lastSlope;
+        }
 
+        // Otherwise, use a standard central difference around t (within breakpoints)
+        double t_minus = Math.max(0.0, t - probe);
+        double t_plus = t + probe;
+        double logIm = Math.log(prevalence.getNeTime(t_minus));
+        double logIp = Math.log(prevalence.getNeTime(t_plus));
+        double denom = (t_plus - t_minus);
+        if (!(denom > 0.0)) return 0.0;
+        double slope = (logIm - logIp) / denom;
+        if (Double.isNaN(slope) || Double.isInfinite(slope)) return 0.0;
+        return slope;
+    }
+
+    // Reflection helpers to access Skygrowth internals when available
+    private Double getLastRateShiftTimeReflective() {
+        try {
+            Field f = prevalence.getClass().getDeclaredField("rateShifts");
+            f.setAccessible(true);
+            Object rs = f.get(prevalence);
+            if (rs instanceof mascot.dynamics.RateShifts) {
+                mascot.dynamics.RateShifts r = (mascot.dynamics.RateShifts) rs;
+                int dim = r.getDimension();
+                if (dim > 0) {
+                    return r.getValue(dim - 1);
+                }
+            }
+        } catch (Throwable ignore) { }
+        return null;
+    }
+
+    private Double getLastGrowthReflective() {
+        try {
+            Field f = prevalence.getClass().getDeclaredField("growth");
+            f.setAccessible(true);
+            Object g = f.get(prevalence);
+            if (g instanceof double[]) {
+                double[] arr = (double[]) g;
+                if (arr.length > 0) return arr[arr.length - 1];
+            }
+        } catch (Throwable ignore) { }
+        return null;
+    }
+    
     @Override
     public boolean isDirty() {
         if (prevalence != null && prevalence.isDirty()) return true;
@@ -105,3 +160,4 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
         return false;
     }
 }
+

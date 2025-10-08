@@ -1,59 +1,47 @@
 package mascotdatastreams.distribution;
 
-import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.inference.Distribution;
 import beast.base.inference.State;
 import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
-import mascotdatastreams.dynamics.PrevalenceSkygrowth;
+import mascot.parameterdynamics.Skygrowth;
 
 import java.util.List;
 import java.util.Random;
-import java.util.ArrayList;
 
-@Description("Calculates likelihood of observing case counts for a single deme given its prevalence trajectory using a specified distribution")
 public class CaseCountLikelihood extends Distribution {
-    // Single-deme prevalence input (explicitly PrevalenceSkygrowth)
-    public final Input<PrevalenceSkygrowth> prevalenceSingleInput = new Input<>(
-            "prevalence", "PrevalenceSkygrowth object for the selected deme", Validate.REQUIRED);
+    // Single-deme prevalence input provided via Mascot's Skygrowth.
+    // Note: Skygrowth#getNeTime(t) is interpreted here as I(t), i.e., prevalence at time t in forward time.
+    public final Input<Skygrowth> prevalenceSingleInput = new Input<>(
+            "prevalence", "Mascot Skygrowth providing prevalence values I(t) via getNeTime(t)", Validate.REQUIRED);
 
-    final public Input<CaseCountData> caseCountInput = new Input<>("caseCounts", "Case count data", Validate.REQUIRED);
-    final public Input<ParametricDistribution> distInput = new Input<>("distribution", "Distribution used to calculate likelihood", Validate.REQUIRED);
+    // Observations passed directly as parameters
+    public final Input<RealParameter> caseCountsInput = new Input<>(
+            "caseCounts", "Observed case counts (dimension = number of observations)", Validate.REQUIRED);
+    public final Input<RealParameter> caseTimesInput = new Input<>(
+            "caseTimes", "Observation times corresponding 1:1 to caseCounts", Validate.REQUIRED);
+    final public Input<ParametricDistribution> distInput = new Input<>("distribution", "Distribution used to calculate likelihood. Currently only GammaPoisson is supported.", Validate.REQUIRED);
     // Optional placeholder if needed elsewhere; not used directly in this likelihood
     public final Input<RealParameter> uninfectiousRateInput = new Input<>(
             "uninfectiousRate", "Fixed uninfectious rate (per time unit), optional.", Validate.OPTIONAL);
-    // Optional scaling of the mean (akin to a sampling rate in a given deme); defaults to 1.0 (no scaling)
+    // Optional scaling of the mean (akin to a sampling/surveillance rate in a given deme); defaults to 1.0 (no scaling).
     public final Input<RealParameter> scalingInput = new Input<>(
             "scaling", "Scaling factor applied to the prevalence-derived mean; must be > 0.", Validate.OPTIONAL);
-    // Deme selection and filtering behavior
-    public final Input<Integer> demeIndexInput = new Input<>(
-            "demeIndex", "0-based deme index to match against CaseCountData traitIndices", Validate.REQUIRED);
-    public final Input<Boolean> strictTraitFilteringInput = new Input<>(
-            "strictTraitFiltering", "If true, warns when no observations match the specified deme; observations for other demes are ignored regardless.", Validate.OPTIONAL);
     
-    protected CaseCountData caseCountData;
+    protected RealParameter caseCounts;
+    protected RealParameter caseTimes;
     protected ParametricDistribution dist;
-    protected PrevalenceSkygrowth prevalence;
-    protected int demeIndex;
-    protected int[] filteredObservationIndices;
-    protected boolean strictTraitFiltering = true;
+    protected Skygrowth prevalence;
+    protected boolean validated = false;
     
     @Override
     public void initAndValidate() {
-        caseCountData = caseCountInput.get();
+        caseCounts = caseCountsInput.get();
+        caseTimes = caseTimesInput.get();
         dist = distInput.get();
         prevalence = prevalenceSingleInput.get();
-        Integer di = demeIndexInput.get();
-        if (di == null) {
-            throw new IllegalArgumentException("CaseCountLikelihood: 'demeIndex' must be provided and 0-based.");
-        }
-        demeIndex = di.intValue();
-        Boolean stf = strictTraitFilteringInput.get();
-        if (stf != null) {
-            strictTraitFiltering = stf.booleanValue();
-        }
 
         // Validate optional scaling parameter if present
         RealParameter scaleParam = scalingInput.get();
@@ -64,39 +52,37 @@ public class CaseCountLikelihood extends Distribution {
             }
         }
 
-        // Build filtered observation index list for this deme
-        int n = caseCountData.getObservationCount();
-        ArrayList<Integer> idxList = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            if (caseCountData.getTrait(i) == demeIndex) {
-                idxList.add(i);
-            }
+        // Validate observation vectors
+        if (caseCounts == null || caseTimes == null) {
+            throw new IllegalArgumentException("CaseCountLikelihood: 'caseCounts' and 'caseTimes' must be provided");
         }
-        if (idxList.isEmpty() && strictTraitFiltering) {
-            System.err.println("Warning: CaseCountLikelihood found no observations for demeIndex=" + demeIndex + ". Likelihood will be neutral (0).");
+        if (caseCounts.getDimension() != caseTimes.getDimension()) {
+            throw new IllegalArgumentException("CaseCountLikelihood: 'caseCounts' and 'caseTimes' must have the same dimension");
         }
-        filteredObservationIndices = new int[idxList.size()];
-        for (int k = 0; k < idxList.size(); k++) filteredObservationIndices[k] = idxList.get(k);
+        if (caseCounts.getDimension() == 0) {
+            System.err.println("Warning: CaseCountLikelihood received zero observations. Likelihood will be neutral (0).");
+        }
 
         calculateLogP();
+        validated = true;
     }
     
     @Override
     public double calculateLogP() {
         logP = 0.0;
-        // Neutral likelihood if there are no observations for this deme
-        if (filteredObservationIndices == null || filteredObservationIndices.length == 0) {
+        // Neutral likelihood if there are no observations
+        if (caseCounts == null || caseCounts.getDimension() == 0) {
             return logP;
         }
 
-        // Calculate likelihood for each observation matching the selected deme
-        for (int idx : filteredObservationIndices) {
-            double t = caseCountData.getTime(idx);
-            double caseCount = caseCountData.getCaseCount(idx);
+        int n = caseCounts.getDimension();
+        for (int i = 0; i < n; i++) {
+            double t = caseTimes.getArrayValue(i);
+            double caseCount = caseCounts.getArrayValue(i);
 
-            // Get log-prevalence at this time for the selected deme and convert to prevalence I
-            double logI = prevalence.getPrevalenceTime(t);
-            double meanI = Math.exp(logI);
+            // Get prevalence at this time via Skygrowth and take log for clarity
+            // getNeTime provides I(t) under our prevalence semantics
+            double meanI = prevalence.getNeTime(t);
 
             // Apply optional scaling factor (default 1.0)
             double scaling = 1.0;
@@ -129,13 +115,12 @@ public class CaseCountLikelihood extends Distribution {
             // Calculate log likelihood using the specified distribution
             double intervalLogP = dist.calcLogP(new RealParameter(new Double[]{caseCount}));
             if (Double.isNaN(intervalLogP)) {
-                System.err.println("Warning: NaN likelihood for observation index " + idx + ": caseCount=" + caseCount + ", scaled mean=" + scaledMean);
+                System.err.println("Warning: NaN likelihood for observation index " + i + ": caseCount=" + caseCount + ", scaled mean=" + scaledMean);
                 return Double.NEGATIVE_INFINITY;
             }
 
             logP += intervalLogP;
         }
-
         return logP;
     }
 

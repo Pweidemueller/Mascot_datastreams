@@ -5,20 +5,20 @@
 -->
 <beast version="2.7" namespace="beast.base:beast.evolution:beast.inference:beast.core:mascotdatastreams.dynamics:mascot.parameterdynamics:mascot.dynamics:mascot.util">
 
-    <!-- Define prevalence dynamics per deme using skygrowth -->
-    <PrevalenceSkygrowth id="PrevDeme1" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
-        <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.6094 1.9459 2.1972"/>
+    <!-- Define prevalence dynamics per deme using MASCOT's Skygrowth (values interpreted as log-prevalence) -->
+    <Skygrowth id="PrevDeme1" spec="mascot.parameterdynamics.Skygrowth">
+        <logNe spec="beast.base.inference.parameter.RealParameter" value="1.6094 1.9459 2.1972"/>
         <rateShifts id="rs1" spec="mascot.dynamics.RateShifts" value="0.5 1.0"/>
-    </PrevalenceSkygrowth>
+    </Skygrowth>
 
-    <PrevalenceSkygrowth id="PrevDeme2" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
-        <logPrevalence spec="beast.base.inference.parameter.RealParameter" value="1.0986 1.3863 1.6094"/>
+    <Skygrowth id="PrevDeme2" spec="mascot.parameterdynamics.Skygrowth">
+        <logNe spec="beast.base.inference.parameter.RealParameter" value="1.0986 1.3863 1.6094"/>
         <rateShifts id="rs2" spec="mascot.dynamics.RateShifts" value="0.5 1.0"/>
-    </PrevalenceSkygrowth>
+    </Skygrowth>
 
     <!-- 
         Convert prevalence to Ne per deme using PrevalenceToNeSkygrowth.
-        Each references the corresponding PrevalenceSkygrowth via idref.
+        Each references the corresponding Skygrowth (log-prevalence) via idref.
     -->
     <PrevalenceToNeSkygrowth id="NeFromPrevDeme1" spec="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth">
         <prevalence idref="PrevDeme1"/>

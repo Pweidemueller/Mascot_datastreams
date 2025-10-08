@@ -5,50 +5,42 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import beast.base.inference.parameter.RealParameter;
-import mascotdatastreams.dynamics.PrevalenceSkygrowth;
 import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.alignment.Sequence;
 import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.tree.TraitSet;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeParser;
+import mascot.parameterdynamics.Skygrowth;
 
 public class CaseCountLikelihoodPrevalenceTest {
 
     @Test
     public void testSkygrowthPrevalenceTwoDemes() throws Exception {
-        // Observations: 2 demes x 5 time points
-        Double[] times = new Double[] {0.0, 0.1, 0.11, 0.24, 0.3,
-                                       0.0, 0.15, 0.16, 0.25, 0.37};
-        Double[] traits = new Double[] {0.0, 0.0, 0.0, 0.0, 0.0,
-                                        1.0, 1.0, 1.0, 1.0, 1.0};
-        Double[] counts = new Double[] {5.0, 7.0, 6.0, 8.0, 10.0,
-                                        3.0, 4.0, 5.0, 6.0, 8.0};
+        // Observations per deme: 5 time points each
+        Double[] times0 = new Double[] {0.0, 0.1, 0.11, 0.24, 0.3};
+        Double[] counts0 = new Double[] {5.0, 7.0, 6.0, 8.0, 10.0};
+        Double[] times1 = new Double[] {0.0, 0.15, 0.16, 0.25, 0.37};
+        Double[] counts1 = new Double[] {3.0, 4.0, 5.0, 6.0, 8.0};
 
-        CaseCountData caseData = new CaseCountData();
-        caseData.initByName(
-                "caseCounts", new RealParameter(counts),
-                "observationTimes", new RealParameter(times),
-                "traitIndices", new RealParameter(traits)
-        );
-
-        // Prevalence: dynamic skygrowth with fractional shifts at 0.5 and 1.0 (root height = 2.0 in helper)
+        // Prevalence: Mascot Skygrowth with fractional shifts at 0.5 and 1.0 (root height = 2.0 in helper)
         Object rateShifts = buildRateShifts("0.5 1.0");
-        // 3 control points per deme (dimension = shifts + 1)
+        // 3 control points per deme (dimension = shifts + 1), in log-space
         Double[] logI_deme0 = new Double[] { Math.log(5.0), Math.log(10.0), Math.log(3.0) };
         Double[] logI_deme1 = new Double[] { Math.log(3.0), Math.log(4.0), Math.log(2.0) };
-        PrevalenceSkygrowth prev1 = new PrevalenceSkygrowth();
-        PrevalenceSkygrowth prev2 = new PrevalenceSkygrowth();
-        prev1.initByName(
-                "logPrevalence", new RealParameter(logI_deme0),
+
+        Skygrowth skygrowth0 = new Skygrowth();
+        skygrowth0.initByName(
+                "logNe", new RealParameter(logI_deme0),
                 "rateShifts", rateShifts
         );
-        prev2.initByName(
-                "logPrevalence", new RealParameter(logI_deme1),
+        skygrowth0.initAndValidate();
+        Skygrowth skygrowth1 = new Skygrowth();
+        skygrowth1.initByName(
+                "logNe", new RealParameter(logI_deme1),
                 "rateShifts", rateShifts
         );
-        prev1.initAndValidate();
-        prev2.initAndValidate();
+        skygrowth1.initAndValidate();
 
         // Distribution with dispersion alpha; mean will be overwritten per obs by the likelihood
         RealParameter initMean = new RealParameter(new Double[]{1.0});
@@ -59,9 +51,9 @@ public class CaseCountLikelihoodPrevalenceTest {
         // Likelihood per deme (single-deme mode)
         CaseCountLikelihood llikDeme0 = new CaseCountLikelihood();
         llikDeme0.initByName(
-                "prevalence", prev1,
-                "caseCounts", caseData,
-                "demeIndex", 0,
+                "prevalence", skygrowth0,
+                "caseCounts", new RealParameter(counts0),
+                "caseTimes", new RealParameter(times0),
                 "distribution", gp
         );
         llikDeme0.initAndValidate();
@@ -69,65 +61,56 @@ public class CaseCountLikelihoodPrevalenceTest {
 
         CaseCountLikelihood llikDeme1 = new CaseCountLikelihood();
         llikDeme1.initByName(
-                "prevalence", prev2,
-                "caseCounts", caseData,
-                "demeIndex", 1,
+                "prevalence", skygrowth1,
+                "caseCounts", new RealParameter(counts1),
+                "caseTimes", new RealParameter(times1),
                 "distribution", gp
         );
         llikDeme1.initAndValidate();
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        // Expected: sum of log PMF with mean = exp(logI(t)) per observation using the appropriate deme's prevalence
+        // Expected: sum of log PMF with mean = I(t) per observation using the appropriate deme's prevalence
         double expected = 0.0;
-        for (int i = 0; i < counts.length; i++) {
-            double t = times[i];
-            int deme = traits[i].intValue();
-            PrevalenceSkygrowth prev = (deme == 0) ? prev1 : prev2;
-            double meanI = Math.exp(prev.getPrevalenceTime(t));
+        for (int i = 0; i < counts0.length; i++) {
+            double meanI = skygrowth0.getNeTime(times0[i]);
             gp.meanInput.setValue(new RealParameter(new Double[]{meanI}), gp);
-            expected += gp.logPmf(counts[i].intValue());
+            expected += gp.logPmf(counts0[i].intValue());
+        }
+        for (int i = 0; i < counts1.length; i++) {
+            double meanI = skygrowth1.getNeTime(times1[i]);
+            gp.meanInput.setValue(new RealParameter(new Double[]{meanI}), gp);
+            expected += gp.logPmf(counts1[i].intValue());
         }
 
-        assertEquals(expected, logP, 1e-9, "Prevalence-based likelihood should match manual sum for dynamic skygrowth prevalence.");
+        assertEquals(expected, logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
     }
 
     @Test
     public void testSkygrowthPrevalenceTwoDemesWithScaling() throws Exception {
-        // Observations: 2 demes x 5 time points
-        Double[] times = new Double[] {0.0, 0.1, 0.11, 0.24, 0.3,
-                                       0.0, 0.15, 0.16, 0.25, 0.37};
-        Double[] traits = new Double[] {0.0, 0.0, 0.0, 0.0, 0.0,
-                                        1.0, 1.0, 1.0, 1.0, 1.0};
-        Double[] counts = new Double[] {5.0, 7.0, 6.0, 8.0, 10.0,
-                                        3.0, 4.0, 5.0, 6.0, 8.0};
+        // Observations per deme: 5 time points each
+        Double[] times0 = new Double[] {0.0, 0.1, 0.11, 0.24, 0.3};
+        Double[] counts0 = new Double[] {5.0, 7.0, 6.0, 8.0, 10.0};
+        Double[] times1 = new Double[] {0.0, 0.15, 0.16, 0.25, 0.37};
+        Double[] counts1 = new Double[] {3.0, 4.0, 5.0, 6.0, 8.0};
 
-        CaseCountData caseData = new CaseCountData();
-        caseData.initByName(
-                "caseCounts", new RealParameter(counts),
-                "observationTimes", new RealParameter(times),
-                "traitIndices", new RealParameter(traits)
-        );
-
-        // Prevalence: dynamic skygrowth with fractional shifts at 0.5 and 1.0 (root height = 2.0 in helper)
         Object rateShifts = buildRateShifts("0.5 1.0");
-        // 3 control points per deme (dimension = shifts + 1)
         Double[] logI_deme0 = new Double[] { Math.log(5.0), Math.log(10.0), Math.log(3.0) };
         Double[] logI_deme1 = new Double[] { Math.log(3.0), Math.log(4.0), Math.log(2.0) };
-        PrevalenceSkygrowth prev1 = new PrevalenceSkygrowth();
-        PrevalenceSkygrowth prev2 = new PrevalenceSkygrowth();
-        prev1.initByName(
-                "logPrevalence", new RealParameter(logI_deme0),
+        
+        Skygrowth skygrowth0 = new Skygrowth();
+        skygrowth0.initByName(
+                "logNe", new RealParameter(logI_deme0),
                 "rateShifts", rateShifts
         );
-        prev2.initByName(
-                "logPrevalence", new RealParameter(logI_deme1),
+        skygrowth0.initAndValidate();
+        Skygrowth skygrowth1 = new Skygrowth();
+        skygrowth1.initByName(
+                "logNe", new RealParameter(logI_deme1),
                 "rateShifts", rateShifts
         );
-        prev1.initAndValidate();
-        prev2.initAndValidate();
+        skygrowth1.initAndValidate();
 
-        // Distribution with dispersion alpha; mean will be overwritten per obs by the likelihood
         RealParameter initMean = new RealParameter(new Double[]{1.0});
         RealParameter alpha = new RealParameter(new Double[]{0.5});
         GammaPoisson gp = new GammaPoisson(initMean, alpha);
@@ -136,12 +119,11 @@ public class CaseCountLikelihoodPrevalenceTest {
         // scaling parameter
         RealParameter scaling = new RealParameter(new Double[]{0.1});
 
-        // Likelihood per deme (single-deme mode) with scaling
         CaseCountLikelihood llikDeme0 = new CaseCountLikelihood();
         llikDeme0.initByName(
-                "prevalence", prev1,
-                "caseCounts", caseData,
-                "demeIndex", 0,
+                "prevalence", skygrowth0,
+                "caseCounts", new RealParameter(counts0),
+                "caseTimes", new RealParameter(times0),
                 "distribution", gp,
                 "scaling", scaling
         );
@@ -150,9 +132,9 @@ public class CaseCountLikelihoodPrevalenceTest {
 
         CaseCountLikelihood llikDeme1 = new CaseCountLikelihood();
         llikDeme1.initByName(
-                "prevalence", prev2,
-                "caseCounts", caseData,
-                "demeIndex", 1,
+                "prevalence", skygrowth1,
+                "caseCounts", new RealParameter(counts1),
+                "caseTimes", new RealParameter(times1),
                 "distribution", gp,
                 "scaling", scaling
         );
@@ -160,18 +142,20 @@ public class CaseCountLikelihoodPrevalenceTest {
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        // Expected: sum of log PMF with mean = exp(logI(t)) * 0.1 per observation using the appropriate deme's prevalence
+        // Expected: sum with mean = I(t) * 0.1 per observation using the appropriate deme's prevalence
         double expected = 0.0;
-        for (int i = 0; i < counts.length; i++) {
-            double t = times[i];
-            int deme = traits[i].intValue();
-            PrevalenceSkygrowth prev = (deme == 0) ? prev1 : prev2;
-            double meanI = Math.exp(prev.getPrevalenceTime(t)) * 0.1;
+        for (int i = 0; i < counts0.length; i++) {
+            double meanI = skygrowth0.getNeTime(times0[i]) * 0.1;
             gp.meanInput.setValue(new RealParameter(new Double[]{meanI}), gp);
-            expected += gp.logPmf(counts[i].intValue());
+            expected += gp.logPmf(counts0[i].intValue());
+        }
+        for (int i = 0; i < counts1.length; i++) {
+            double meanI = skygrowth1.getNeTime(times1[i]) * 0.1;
+            gp.meanInput.setValue(new RealParameter(new Double[]{meanI}), gp);
+            expected += gp.logPmf(counts1[i].intValue());
         }
 
-        assertEquals(expected, logP, 1e-9, "Prevalence-based likelihood with scaling should match manual sum for dynamic skygrowth prevalence.");
+        assertEquals(expected, logP, 1e-9, "Prevalence-based likelihood with scaling should match manual sum for Mascot Skygrowth prevalence.");
     }
 
     // Build a minimal tree and RateShifts with fractional breakpoints resolved against root height

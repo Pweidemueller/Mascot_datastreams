@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<beast beautitemplate="Standard" beautistatus="" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.7:Mascot v3.0.7" version="2.7">
+<beast beautitemplate="Standard" beautistatus="" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:mascotdatastreams.dynamics:mascotdatastreams.distribution:mascot.parameterdynamics:mascot.dynamics:mascot.util" required="BEAST.base v2.7.7:Mascot v3.0.7" version="2.7">
   
         
 
@@ -131,19 +131,6 @@
     
 
   </data>
-  <data id="caseCounts.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountData" name="caseCounts">
-    
-        
-    <caseCounts>0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0 2.0 3.0 4.0 5.0 6.0 9.0 10.0 15.0 18.0 22.0 28.0 37.0 47.0 60.0 78.0 100.0 128.0 161.0 197.0 237.0 286.0 339.0 393.0 439.0 485.0 532.0 563.0 581.0 591.0 598.0 583.0 563.0 542.0 515.0 493.0 457.0 423.0 391.0 360.0 333.0 304.0 279.0 256.0 234.0 213.0 193.0 171.0 156.0 140.0 127.0 113.0 103.0 92.0 82.0 74.0 67.0 60.0 54.0 49.0 45.0 39.0 35.0 29.0 27.0 24.0 22.0 19.0 17.0 16.0 14.0 12.0 11.0 11.0 10.0 9.0 8.0 7.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0 2.0 3.0 5.0 7.0 9.0 14.0 18.0 23.0 32.0 43.0 59.0 82.0 105.0 136.0 175.0 223.0 274.0 327.0 379.0 431.0 487.0 532.0 563.0 581.0 591.0 591.0 584.0 569.0 549.0 521.0 491.0 455.0 425.0 390.0 359.0 330.0 303.0 276.0 250.0 231.0 204.0 186.0 170.0 152.0 137.0 125.0 110.0 101.0 92.0 82.0 72.0 64.0 57.0 50.0 43.0 36.0 33.0 29.0 26.0 24.0 22.0 20.0 16.0 14.0 12.0 11.0 10.0 9.0 7.0 7.0</caseCounts>
-    
-        
-    <observationTimes>0.2469957743866405 0.2442560483592432 0.2415163223318459 0.2387765963044487 0.2360368702770514 0.2332971442496542 0.2305574182222569 0.2278176921948596 0.2250779661674624 0.2223382401400651 0.2195985141126679 0.2168587880852706 0.2141190620578733 0.2113793360304761 0.2086396100030788 0.2058998839756816 0.2031601579482843 0.200420431920887 0.1976807058934898 0.1949409798660925 0.1922012538386953 0.189461527811298 0.1867218017839007 0.1839820757565035 0.1812423497291062 0.178502623701709 0.1757628976743117 0.1730231716469144 0.1702834456195172 0.1675437195921199 0.1648039935647227 0.1620642675373254 0.1593245415099281 0.1565848154825309 0.1538450894551336 0.1511053634277364 0.1483656374003391 0.1456259113729418 0.1428861853455446 0.1401464593181473 0.1374067332907501 0.1346670072633528 0.1319272812359555 0.1291875552085583 0.126447829181161 0.1237081031537638 0.1209683771263665 0.1182286510989692 0.115488925071572 0.1127491990441747 0.1100094730167774 0.1072697469893802 0.1045300209619829 0.1017902949345857 0.0990505689071884 0.0963108428797911 0.0935711168523939 0.0908313908249966 0.0880916647975993 0.0853519387702021 0.0826122127428048 0.0798724867154076 0.0771327606880103 0.074393034660613 0.0716533086332158 0.0689135826058185 0.0661738565784213 0.063434130551024 0.0606944045236267 0.0579546784962295 0.0552149524688322 0.052475226441435 0.0497355004140377 0.0469957743866404 0.0442560483592432 0.0415163223318459 0.0387765963044487 0.0360368702770514 0.0332971442496541 0.0305574182222569 0.0278176921948596 0.0250779661674624 0.0223382401400651 0.0195985141126678 0.0168587880852706 0.0141190620578733 0.0113793360304761 0.0086396100030788 0.0058998839756815 0.0031601579482843 0.000420431920887 0.2469957743866405 0.2442560483592432 0.2415163223318459 0.2387765963044487 0.2360368702770514 0.2332971442496542 0.2305574182222569 0.2278176921948596 0.2250779661674624 0.2223382401400651 0.2195985141126679 0.2168587880852706 0.2141190620578733 0.2113793360304761 0.2086396100030788 0.2058998839756816 0.2031601579482843 0.200420431920887 0.1976807058934898 0.1949409798660925 0.1922012538386953 0.189461527811298 0.1867218017839007 0.1839820757565035 0.1812423497291062 0.178502623701709 0.1757628976743117 0.1730231716469144 0.1702834456195172 0.1675437195921199 0.1648039935647227 0.1620642675373254 0.1593245415099281 0.1565848154825309 0.1538450894551336 0.1511053634277364 0.1483656374003391 0.1456259113729418 0.1428861853455446 0.1401464593181473 0.1374067332907501 0.1346670072633528 0.1319272812359555 0.1291875552085583 0.126447829181161 0.1237081031537638 0.1209683771263665 0.1182286510989692 0.115488925071572 0.1127491990441747 0.1100094730167774 0.1072697469893802 0.1045300209619829 0.1017902949345857 0.0990505689071884 0.0963108428797911 0.0935711168523939 0.0908313908249966 0.0880916647975993 0.0853519387702021 0.0826122127428048 0.0798724867154076 0.0771327606880103 0.074393034660613 0.0716533086332158 0.0689135826058185 0.0661738565784213 0.063434130551024 0.0606944045236267 0.0579546784962295 0.0552149524688322 0.052475226441435 0.0497355004140377 0.0469957743866404 0.0442560483592432 0.0415163223318459 0.0387765963044487 0.0360368702770514 0.0332971442496541 0.0305574182222569 0.0278176921948596 0.0250779661674624 0.0223382401400651 0.0195985141126678 0.0168587880852706 0.0141190620578733 0.0113793360304761 0.0086396100030788 0.0058998839756815 0.0031601579482843 0.000420431920887</observationTimes>
-    
-        
-    <traitIndices>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</traitIndices>
-    
-    
-  </data>
   <map name="Uniform">beast.base.inference.distribution.Uniform</map>
   
 
@@ -256,26 +243,24 @@
       <parameter id="migrationRatesSkyline.t:SimDataset" spec="parameter.RealParameter" dimension="2" lower="0.0" name="stateNode">1.0</parameter>
 
             
-      <parameter id="SkylineNeSigma.t:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">1.0</parameter>
-
+      
       <parameter id="SkylinePrev.Deme1.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="10">0.0</parameter>
 
       <parameter id="SkylinePrev.Deme2.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-10" name="stateNode" upper="10">0.0</parameter>
-      
 
-            
-      <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">5</parameter>
-
-      <!-- Per-deme scaling parameters for case count likelihood means -->
-      <parameter id="caseCounts.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">0.1</parameter>
-
-      <parameter id="caseCounts.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">0.1</parameter>
+      <parameter id="SkylineNeSigma.t:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">1.0</parameter>
 
       <parameter id="uninfectiousRate.t:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">73.0</parameter>
 
-      
-      
-                
+
+      <!-- Per-deme case count observations and times for CaseCountLikelihood -->
+      <parameter id="caseCounts.scaling.Deme1:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.1</parameter>
+      <parameter id="caseCounts.Deme1:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">5 7 6 8 10</parameter>
+      <parameter id="caseTimes.Deme1:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.0 0.1 0.11 0.24 0.3</parameter>
+      <parameter id="caseCounts.scaling.Deme2:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.1</parameter>
+      <parameter id="caseCounts.Deme2:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">3 4 5 6 8</parameter>
+      <parameter id="caseTimes.Deme2:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.0 0.15 0.16 0.25 0.37</parameter>
+      <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" lower="0.0" name="stateNode">5</parameter>
         
     </state>
     
@@ -307,26 +292,26 @@
       <distribution id="prior" spec="CompoundDistribution">
 
 
-        <!-- Case count likelihood for Deme 1 (demeIndex=0) -->
+        <!-- Case count likelihood for Deme 1 -->
         <distribution id="caseCountLikelihood.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
-          <prevalence id="PrevSkygrowth.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
-              <logPrevalence idref="SkylinePrev.Deme1.t:SimDataset"/>
+          <prevalence id="PrevSkygrowth.Deme1.t:SimDataset" spec="mascot.parameterdynamics.Skygrowth">
+              <logNe idref="SkylinePrev.Deme1.t:SimDataset"/>
               <rateShifts id="SkygrowthRateShifts.Deme1" spec="mascot.dynamics.RateShifts" tree="@Tree.t:SimDataset">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
           </prevalence>
-          <caseCounts idref="caseCounts.t:SimDataset"/>
-          <demeIndex>0</demeIndex>
+          <caseCounts idref="caseCounts.Deme1:SimDataset"/>
+          <caseTimes idref="caseTimes.Deme1:SimDataset"/>
           <scaling idref="caseCounts.scaling.Deme1:SimDataset"/>
           <distribution id="gammaPoisson.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
         </distribution>
 
-        <!-- Case count likelihood for Deme 2 (demeIndex=1) -->
+        <!-- Case count likelihood for Deme 2 -->
         <distribution id="caseCountLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
-          <prevalence id="PrevSkygrowth.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceSkygrowth">
-              <logPrevalence idref="SkylinePrev.Deme2.t:SimDataset"/>
+          <prevalence id="PrevSkygrowth.Deme2.t:SimDataset" spec="mascot.parameterdynamics.Skygrowth">
+              <logNe idref="SkylinePrev.Deme2.t:SimDataset"/>
               <rateShifts id="SkygrowthRateShifts.Deme2" spec="mascot.dynamics.RateShifts" tree="@Tree.t:SimDataset">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
           </prevalence>
-          <caseCounts idref="caseCounts.t:SimDataset"/>
-          <demeIndex>1</demeIndex>
+          <caseCounts idref="caseCounts.Deme2:SimDataset"/>
+          <caseTimes idref="caseTimes.Deme2:SimDataset"/>
           <scaling idref="caseCounts.scaling.Deme2:SimDataset"/>
           <distribution id="gammaPoisson.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
         </distribution>
