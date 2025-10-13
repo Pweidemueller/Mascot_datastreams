@@ -25,7 +25,7 @@ import beast.base.inference.parameter.RealParameter;
  *   P(X <= k) = I(p; r, k + 1), regularized incomplete beta
  */
 @Description("Gamma-Poisson (Negative Binomial) distribution parameterised by mean and dispersion (alpha).")
-public class GammaPoisson extends ParametricDistribution {
+public class GammaPoisson extends ParametricDistribution implements CountDistributionWithMean {
     public final Input<Function> meanInput = new Input<>("mean", "Mean (mu) of the distribution.");
     public final Input<Function> dispersionInput = new Input<>("dispersion", "Dispersion (alpha) parameter.");
 
@@ -106,6 +106,33 @@ public class GammaPoisson extends ParametricDistribution {
     public double logPmf(int x) {
         refresh();
         return dist.logProbability(x);
+    }
+
+    @Override
+    public double logPForMean(double observation, double mean) {
+        // Stateless log PMF for a given mean; do not mutate Inputs
+        if (observation < 0) {
+            return Double.NEGATIVE_INFINITY;
+        }
+        // Dispersion (alpha) from input; default to 1.0 if absent, as in refresh()
+        double alpha = dispersionInput.get() == null ? 1.0 : dispersionInput.get().getArrayValue();
+        if (!(mean > 0.0) || !(alpha > 0.0)) {
+            throw new IllegalArgumentException("GammaPoisson.logPForMean: mean and alpha must be > 0. Got mean=" + mean + ", alpha=" + alpha);
+        }
+        int x = (int) Math.round(observation);
+        if (x < 0) {
+            return Double.NEGATIVE_INFINITY;
+        }
+        double r = 1.0 / alpha;
+        double p = r / (r + mean);
+        p = Math.min(1 - 1e-16, Math.max(1e-16, p));
+        // log PMF = ln Γ(r + x) - ln Γ(r) - ln Γ(x+1) + r ln p + x ln(1-p)
+        double logGammaRK = Gamma.logGamma(r + x);
+        double logGammaR = Gamma.logGamma(r);
+        double logGammaK1 = Gamma.logGamma(x + 1.0);
+        double logP = Math.log(p);
+        double log1mP = Math.log(1.0 - p);
+        return logGammaRK - logGammaR - logGammaK1 + r * logP + x * log1mP;
     }
 }
 

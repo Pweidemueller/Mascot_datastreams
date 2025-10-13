@@ -159,10 +159,8 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
     
     @Override
     public boolean isDirty() {
-        if (prevalence != null && prevalence.isDirty()) return true;
         if (uninfectiousRate != null && uninfectiousRate.isDirty(0)) return true;
         if (coalescentScale != null && coalescentScale.isDirty(0)) return true;
         return false;
     }
 }
-

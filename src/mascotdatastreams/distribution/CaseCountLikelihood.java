@@ -102,18 +102,13 @@ public class CaseCountLikelihood extends Distribution {
                 return Double.NEGATIVE_INFINITY;
             }
 
-            // Set the mean parameter for the distribution (based on prevalence I)
-            if (dist instanceof GammaPoisson) {
-                RealParameter meanParam = new RealParameter(new Double[]{scaledMean});
-                ((GammaPoisson) dist).meanInput.setValue(meanParam, dist);
-            } else {
+            // Calculate log likelihood using a stateless interface (no input mutation)
+            if (!(dist instanceof CountDistributionWithMean)) {
                 throw new IllegalArgumentException(
-                        "CaseCountLikelihood currently supports only GammaPoisson as 'distribution'. Got: "
+                        "CaseCountLikelihood requires distributions implementing CountDistributionWithMean. Got: "
                                 + dist.getClass().getName());
             }
-
-            // Calculate log likelihood using the specified distribution
-            double intervalLogP = dist.calcLogP(new RealParameter(new Double[]{caseCount}));
+            double intervalLogP = ((CountDistributionWithMean) dist).logPForMean(caseCount, scaledMean);
             if (Double.isNaN(intervalLogP)) {
                 System.err.println("Warning: NaN likelihood for observation index " + i + ": caseCount=" + caseCount + ", scaled mean=" + scaledMean);
                 return Double.NEGATIVE_INFINITY;
@@ -122,6 +117,40 @@ public class CaseCountLikelihood extends Distribution {
             logP += intervalLogP;
         }
         return logP;
+    }
+
+    @Override
+    public boolean requiresRecalculation() {
+        boolean dirty = false;
+        // Upstream process (Skygrowth) driving prevalence
+        if (prevalence != null && prevalence.isDirty()) dirty = true;
+        // Observations
+        if (caseCounts != null) {
+            int n = caseCounts.getDimension();
+            for (int i = 0; i < n; i++) {
+                if (caseCounts.isDirty(i)) { dirty = true; break; }
+            }
+        }
+        if (caseTimes != null) {
+            int n = caseTimes.getDimension();
+            for (int i = 0; i < n; i++) {
+                if (caseTimes.isDirty(i)) { dirty = true; break; }
+            }
+        }
+        // Optional parameters
+        RealParameter scaleParam = scalingInput.get();
+        if (scaleParam != null && scaleParam.isDirty(0)) dirty = true;
+        RealParameter uninf = uninfectiousRateInput.get();
+        if (uninf != null && uninf.isDirty(0)) dirty = true;
+        // Distribution's dispersion parameter (if GammaPoisson with RealParameter dispersion)
+        if (dist instanceof GammaPoisson) {
+            GammaPoisson gp = (GammaPoisson) dist;
+            if (gp.dispersionInput.get() instanceof RealParameter) {
+                RealParameter disp = (RealParameter) gp.dispersionInput.get();
+                if (disp != null && disp.isDirty(0)) dirty = true;
+            }
+        }
+        return dirty || super.requiresRecalculation();
     }
 
 	@Override
