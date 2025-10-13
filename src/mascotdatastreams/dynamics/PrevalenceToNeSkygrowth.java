@@ -154,12 +154,7 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
 
     @Override
 	public boolean requiresRecalculation() {
-		boolean dirty = false;
-		if (prevalence != null && prevalence.isDirty()) dirty = true;
-		if (uninfectiousRate != null && uninfectiousRate.isDirty(0)) dirty = true;
-		if (coalescentScale != null && coalescentScale.isDirty(0)) dirty = true;
-		if (super.requiresRecalculation()) dirty = true;
-		return dirty;
+		return super.requiresRecalculation();
 	}
     
     @Override
