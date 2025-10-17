@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
  */
 @Description("Prevalence-to-Ne mapping with Skygrowth-style log-prevalence and RateShifts; implements NeDynamics.")
 public class PrevalenceToNeSkygrowth extends NeDynamics {
-
+    // TO DO: this should be a copy of skygrowth 
     public final Input<Skygrowth> prevalenceInput = new Input<>(
             "prevalence",
             "Mascot Skygrowth providing values that are treated as prevalence in log space (semantics: getNeTime returns exp(log I(t)))",
@@ -98,63 +98,43 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
     }
 
     private double getForwardSlopeAt(double t) {
-        // Prefer exact behavior via reflection when possible: use last interval slope if t beyond last rate shift
-        final double probe = Math.max(DT, 1e-6);
-        Double tmax = getLastRateShiftTimeReflective();
-        Double lastSlope = getLastGrowthReflective();
-        if (tmax == null || lastSlope == null) {
-            throw new IllegalStateException("Unable to access Skygrowth internals (rateShifts/growth) via reflection; cannot determine last-interval slope for t >= tmax");
-        }
-        // If t is at or after the last breakpoint, use the last interval slope
-        if (t >= tmax) {
-            return lastSlope;
-        }
-
-        // Otherwise, use a standard central difference around t (within breakpoints)
-        double t_minus = Math.max(0.0, t - probe);
-        double t_plus = t + probe;
-        double logIm = Math.log(prevalence.getNeTime(t_minus));
-        double logIp = Math.log(prevalence.getNeTime(t_plus));
-        double denom = (t_plus - t_minus);
-        if (!(denom > 0.0)) return 0.0;
-        double slope = (logIm - logIp) / denom;
-        if (Double.isNaN(slope) || Double.isInfinite(slope)) return 0.0;
-        return slope;
-    }
-
-    // Reflection helpers to access Skygrowth internals when available
-    private Double getLastRateShiftTimeReflective() {
+        // Prefer exact behavior via reflection when possible: forward-time slope = -growth[interval]
+        // and 0.0 after the last rate shift, matching Skygrowth.getNeTime() semantics.
         try {
-            Field f = prevalence.getClass().getDeclaredField("rateShifts");
-            f.setAccessible(true);
-            Object rs = f.get(prevalence);
-            if (rs instanceof mascot.dynamics.RateShifts) {
+            // access growth[]
+            Field fg = prevalence.getClass().getDeclaredField("growth");
+            fg.setAccessible(true);
+            Object g = fg.get(prevalence);
+            // access rateShifts
+            Field fr = prevalence.getClass().getDeclaredField("rateShifts");
+            fr.setAccessible(true);
+            Object rs = fr.get(prevalence);
+            if (g instanceof double[] && rs instanceof mascot.dynamics.RateShifts) {
+                double[] growthArr = (double[]) g;
                 mascot.dynamics.RateShifts r = (mascot.dynamics.RateShifts) rs;
                 int dim = r.getDimension();
-                if (dim > 0) {
-                    return r.getValue(dim - 1);
+                // After the last breakpoint: Skygrowth returns a constant Ne, so slope = 0
+                if (dim == 0) return 0.0;
+                if (t >= r.getValue(dim - 1)) return 0.0;
+                // Find interval index i such that t < r.getValue(i)
+                for (int i = 0; i < dim; i++) {
+                    if (t < r.getValue(i)) {
+                        // forward-time slope = - backward-time growth
+                        return growthArr[i];
+                    }
                 }
+                // Fallback (should not happen due to earlier return): after last interval
+                return 0.0;
             }
         } catch (Throwable ignore) { }
-        return null;
-    }
+        return 0.0;
 
-    private Double getLastGrowthReflective() {
-        try {
-            Field f = prevalence.getClass().getDeclaredField("growth");
-            f.setAccessible(true);
-            Object g = f.get(prevalence);
-            if (g instanceof double[]) {
-                double[] arr = (double[]) g;
-                if (arr.length > 0) return arr[arr.length - 1];
-            }
-        } catch (Throwable ignore) { }
-        return null;
     }
 
     @Override
 	public boolean requiresRecalculation() {
-		return super.requiresRecalculation();
+		// return super.requiresRecalculation();
+		return true;
 	}
     
     @Override

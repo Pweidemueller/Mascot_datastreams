@@ -121,36 +121,37 @@ public class CaseCountLikelihood extends Distribution {
 
     @Override
     public boolean requiresRecalculation() {
-        boolean dirty = false;
-        // Upstream process (Skygrowth) driving prevalence
-        if (prevalence != null && prevalence.isDirty()) dirty = true;
-        // Observations
-        if (caseCounts != null) {
-            int n = caseCounts.getDimension();
-            for (int i = 0; i < n; i++) {
-                if (caseCounts.isDirty(i)) { dirty = true; break; }
-            }
-        }
-        if (caseTimes != null) {
-            int n = caseTimes.getDimension();
-            for (int i = 0; i < n; i++) {
-                if (caseTimes.isDirty(i)) { dirty = true; break; }
-            }
-        }
-        // Optional parameters
-        RealParameter scaleParam = scalingInput.get();
-        if (scaleParam != null && scaleParam.isDirty(0)) dirty = true;
-        RealParameter uninf = uninfectiousRateInput.get();
-        if (uninf != null && uninf.isDirty(0)) dirty = true;
-        // Distribution's dispersion parameter (if GammaPoisson with RealParameter dispersion)
-        if (dist instanceof GammaPoisson) {
-            GammaPoisson gp = (GammaPoisson) dist;
-            if (gp.dispersionInput.get() instanceof RealParameter) {
-                RealParameter disp = (RealParameter) gp.dispersionInput.get();
-                if (disp != null && disp.isDirty(0)) dirty = true;
-            }
-        }
-        return dirty || super.requiresRecalculation();
+        // boolean dirty = false;
+        // // Upstream process (Skygrowth) driving prevalence
+        // if (prevalence != null && prevalence.isDirty()) dirty = true;
+        // // Observations
+        // if (caseCounts != null) {
+        //     int n = caseCounts.getDimension();
+        //     for (int i = 0; i < n; i++) {
+        //         if (caseCounts.isDirty(i)) { dirty = true; break; }
+        //     }
+        // }
+        // if (caseTimes != null) {
+        //     int n = caseTimes.getDimension();
+        //     for (int i = 0; i < n; i++) {
+        //         if (caseTimes.isDirty(i)) { dirty = true; break; }
+        //     }
+        // }
+        // // Optional parameters
+        // RealParameter scaleParam = scalingInput.get();
+        // if (scaleParam != null && scaleParam.isDirty(0)) dirty = true;
+        // RealParameter uninf = uninfectiousRateInput.get();
+        // if (uninf != null && uninf.isDirty(0)) dirty = true;
+        // // Distribution's dispersion parameter (if GammaPoisson with RealParameter dispersion)
+        // if (dist instanceof GammaPoisson) {
+        //     GammaPoisson gp = (GammaPoisson) dist;
+        //     if (gp.dispersionInput.get() instanceof RealParameter) {
+        //         RealParameter disp = (RealParameter) gp.dispersionInput.get();
+        //         if (disp != null && disp.isDirty(0)) dirty = true;
+        //     }
+        // }
+        // return dirty || super.requiresRecalculation();
+        return true;
     }
 
 	@Override
@@ -170,4 +171,5 @@ public class CaseCountLikelihood extends Distribution {
 		// TODO Auto-generated method stub
 		
 	}
+    
 }

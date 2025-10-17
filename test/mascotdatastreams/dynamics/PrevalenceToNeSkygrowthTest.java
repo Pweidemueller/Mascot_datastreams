@@ -78,11 +78,11 @@ public class PrevalenceToNeSkygrowthTest {
 
         // For t=3.0 (after last shift):
         //   logI(t) = ln(5) (last control point)
-        //   g_fwd uses last interval slope = 1.3863
-        //   transmission = 1.3863 + 1.0; I=5; Ne = 5 / (2 * transmission)
+        //   g_fwd is 0
+        //   transmission = 0 + 1.0; I=5; Ne = 5 / (2 * transmission)
         double t3 = 3.0;
         double ne3 = dyn.getNeTime(t3);
-        double growth3 = (Math.log(20.0)-Math.log(5.0))/1.0;
+        double growth3 = 0.0;
         double I3 = 5.0 ; 
         double transmission3 = growth3 + gamma.getArrayValue();
         double expected3 = I3 / (2.0 * transmission3);

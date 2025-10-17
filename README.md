@@ -6,6 +6,7 @@ Mascot Datastreams is an extension to [BEAST2](http://beast2.org)’s MASCOT pac
 - A prevalence-based case-count likelihood that links counts to I(t) from Mascot `Skygrowth` (`CaseCountLikelihood`).
 - A Gamma–Poisson (Negative Binomial) distribution parameterized by mean and dispersion (`GammaPoisson`).
 - A prevalence-to-Ne mapping for downstream coalescent models (`PrevalenceToNeSkygrowth`).
+- A spline-based prevalence-to-Ne mapping using cubic spline interpolation (`PrevalenceToNeSpline`).
 - Updated example XMLs demonstrating both workflows under `examples/`.
 
 This README summarizes the modeling assumptions, parameterization, and how to use the package from Java and from BEAST XMLs.
@@ -54,11 +55,24 @@ At evaluation time, for each observation the likelihood sets the distribution me
 
 ## Mapping prevalence to Ne(t)
 
-For downstream phylodynamic components that require Ne(t), use `mascotdatastreams.dynamics.PrevalenceToNeSkygrowth`.
+For downstream phylodynamic components that require Ne(t), you have two options:
+
+### PrevalenceToNeSkygrowth (piecewise-exponential)
+
+Use `mascotdatastreams.dynamics.PrevalenceToNeSkygrowth` for piecewise-exponential interpolation:
 
 - **Inputs**: `prevalence` (Skygrowth, interpreted as log-prevalence), `uninfectiousRate` γ, optional `coalescentScale` c (default 2).
 - **Mapping**: With forward-time slope of log I(t) denoted g_fwd, transmission_rate(t) = g_fwd + γ, and
   Ne(t) = I(t) / (c · transmission_rate(t)). Numerical clamps ensure robust behavior after the last rate shift and at extremes.
+
+### PrevalenceToNeSpline (cubic spline)
+
+Use `mascotdatastreams.dynamics.PrevalenceToNeSpline` for smooth cubic spline interpolation:
+
+- **Inputs**: `logInfected` (RealParameter with log-prevalence values), `rateShifts` (RealParameter with time points), `uninfectiousRate` γ, optional `coalescentScale` c (default 2).
+- **Mapping**: Uses cubic spline interpolation between rate shift points, then computes Ne(t) = I(t) / (c · transmission_rate(t)) where transmission_rate(t) = dlogI/dt + γ.
+- **Advantages**: Smooth interpolation, analytical derivatives, direct log-prevalence storage, precomputed grid points for efficient and consistent lookup of both prevalence and derivatives.
+- **Note**: TO DO - The numerical clamping should be revisited as it might interfere with inference/convergence. Ideally, unreasonable Ne values should be rejected by the sampler rather than clamped.
 
 
 ## Provided classes (API)
@@ -74,6 +88,10 @@ For downstream phylodynamic components that require Ne(t), use `mascotdatastream
 - `mascotdatastreams.dynamics.PrevalenceToNeSkygrowth`
   - Inputs: `prevalence` (`mascot.parameterdynamics.Skygrowth`), `uninfectiousRate` γ (RealParameter), optional `coalescentScale` c (RealParameter; default 2).
   - Output: an `NeDynamics` compatible component where `getNeTime(t)` returns Ne(t) derived from I(t).
+
+- `mascotdatastreams.dynamics.PrevalenceToNeSpline`
+  - Inputs: `logInfected` (RealParameter with log-prevalence values), `rateShifts` (RealParameter with time points), `uninfectiousRate` γ (RealParameter), optional `coalescentScale` c (RealParameter; default 2).
+  - Output: an `NeDynamics` compatible component using cubic spline interpolation for smooth prevalence trajectories with precomputed grid points for efficient and consistent lookup of both prevalence and derivatives.
 
 
 ## Usage from Java (authoritative example)
@@ -154,7 +172,7 @@ Important
 ## Building and installing
 
 - This repository contains an Ant `build.xml`. Build and add the resulting JAR to your BEAST 2 installation, alongside the MASCOT plugin. Alternatively, integrate into your development environment so that BEAST sees the package on the classpath.
- d
+
 
 ## License
 TBD
