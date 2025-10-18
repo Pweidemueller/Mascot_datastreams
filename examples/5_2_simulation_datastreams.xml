@@ -588,7 +588,7 @@
               <neDynamics id="NeDynamics.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.SplinePrevalenceToNe">
                 <spline id="splinePrev.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.NotAKnotSpline">
                   <logInfected idref="SkylinePrev.Deme1.t:SimDataset"/>
-                  <rateShifts idref="rateShifts.t:SimDataset"/>
+                  <rateShifts id="SkygrowthRateShifts.Deme1" spec="mascot.dynamics.RateShifts" tree="@Tree.t:SimDataset">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
                   <gridRateShifts idref="rateShifts.t:SimDataset"/>
                   <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
                 </spline>
@@ -602,7 +602,7 @@
               <neDynamics id="NeDynamics.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.SplinePrevalenceToNe">
                 <spline id="splinePrev.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.NotAKnotSpline">
                   <logInfected idref="SkylinePrev.Deme2.t:SimDataset"/>
-                  <rateShifts idref="rateShifts.t:SimDataset"/>
+                  <rateShifts idref="SkygrowthRateShifts.Deme1"/>
                   <gridRateShifts idref="rateShifts.t:SimDataset"/>
                   <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
                 </spline>
