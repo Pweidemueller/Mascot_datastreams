@@ -294,10 +294,7 @@
 
         <!-- Case count likelihood for Deme 1 -->
         <distribution id="caseCountLikelihood.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
-          <prevalence id="PrevSkygrowth.Deme1.t:SimDataset" spec="mascot.parameterdynamics.Skygrowth">
-              <logNe idref="SkylinePrev.Deme1.t:SimDataset"/>
-              <rateShifts id="SkygrowthRateShifts.Deme1" spec="mascot.dynamics.RateShifts" tree="@Tree.t:SimDataset">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
-          </prevalence>
+          <prevalenceSpline idref="splinePrev.Deme1.t:SimDataset"/>
           <caseCounts idref="caseCounts.Deme1:SimDataset"/>
           <caseTimes idref="caseTimes.Deme1:SimDataset"/>
           <scaling idref="caseCounts.scaling.Deme1:SimDataset"/>
@@ -306,10 +303,7 @@
 
         <!-- Case count likelihood for Deme 2 -->
         <distribution id="caseCountLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
-          <prevalence id="PrevSkygrowth.Deme2.t:SimDataset" spec="mascot.parameterdynamics.Skygrowth">
-              <logNe idref="SkylinePrev.Deme2.t:SimDataset"/>
-              <rateShifts id="SkygrowthRateShifts.Deme2" spec="mascot.dynamics.RateShifts" tree="@Tree.t:SimDataset">0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00</rateShifts>
-          </prevalence>
+          <prevalenceSpline idref="splinePrev.Deme2.t:SimDataset"/>
           <caseCounts idref="caseCounts.Deme2:SimDataset"/>
           <caseTimes idref="caseTimes.Deme2:SimDataset"/>
           <scaling idref="caseCounts.scaling.Deme2:SimDataset"/>
@@ -330,27 +324,27 @@
               
                                                     
                             
-              <neDynamics id="NeDynamics.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth">
-                <prevalence idref="PrevSkygrowth.Deme1.t:SimDataset"/>
-                <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
+              <neDynamics id="NeDynamics.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.SplinePrevalenceToNe">
+                <spline id="splinePrev.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.NotAKnotSpline">
+                  <logInfected idref="SkylinePrev.Deme1.t:SimDataset"/>
+                  <rateShifts idref="rateShifts.t:SimDataset"/>
+                  <gridRateShifts idref="rateShifts.t:SimDataset"/>
+                  <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
+                </spline>
                 <coalescentScale spec="parameter.RealParameter">2.0</coalescentScale>
-                
-                                                        
-                            
               </neDynamics>
               
                                                     
                             
-              <neDynamics id="NeDynamics.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth">
-                <prevalence idref="PrevSkygrowth.Deme2.t:SimDataset"/>
-                <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
-                <coalescentScale spec="parameter.RealParameter">2.0</coalescentScale>
-                
-                                                        
-                            
+              <neDynamics id="NeDynamics.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.SplinePrevalenceToNe">
+                <spline id="splinePrev.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.NotAKnotSpline">
+                  <logInfected idref="SkylinePrev.Deme2.t:SimDataset"/>
+                  <rateShifts idref="rateShifts.t:SimDataset"/>
+                  <gridRateShifts idref="rateShifts.t:SimDataset"/>
+                  <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
+                </spline>
+                <coalescentScale spec="parameter.RealParameter">2.0</coalescentScale>                            
               </neDynamics>
-              
-                                                
                         
             </NeDynamics>
             
