@@ -6,16 +6,24 @@ import beast.base.inference.Distribution;
 import beast.base.inference.State;
 import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
-import mascot.parameterdynamics.Skygrowth;
+import mascotdatastreams.dynamics.NotAKnotSpline;
 
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Likelihood for case count observations based on prevalence dynamics from a spline.
+ * 
+ * This class takes a NotAKnotSpline that provides log-prevalence values and converts
+ * them to prevalence I(t) for calculating the likelihood of observed case counts.
+ * The spline interpolation allows for smooth prevalence trajectories between
+ * rate shift points.
+ */
 public class CaseCountLikelihood extends Distribution {
-    // Single-deme prevalence input provided via Mascot's Skygrowth.
-    // Note: Skygrowth#getNeTime(t) is interpreted here as I(t), i.e., prevalence at time t in forward time.
-    public final Input<Skygrowth> prevalenceSingleInput = new Input<>(
-            "prevalence", "Mascot Skygrowth providing prevalence values I(t) via getNeTime(t)", Validate.REQUIRED);
+    // Single-deme prevalence input provided via NotAKnotSpline.
+    // Note: The spline provides log-prevalence values that are converted to prevalence I(t).
+    public final Input<NotAKnotSpline> prevalenceSplineInput = new Input<>(
+            "prevalenceSpline", "NotAKnotSpline providing log-prevalence values for interpolation", Validate.REQUIRED);
 
     // Observations passed directly as parameters
     public final Input<RealParameter> caseCountsInput = new Input<>(
@@ -33,7 +41,7 @@ public class CaseCountLikelihood extends Distribution {
     protected RealParameter caseCounts;
     protected RealParameter caseTimes;
     protected ParametricDistribution dist;
-    protected Skygrowth prevalence;
+    protected NotAKnotSpline prevalenceSpline;
     protected boolean validated = false;
     
     @Override
@@ -41,7 +49,7 @@ public class CaseCountLikelihood extends Distribution {
         caseCounts = caseCountsInput.get();
         caseTimes = caseTimesInput.get();
         dist = distInput.get();
-        prevalence = prevalenceSingleInput.get();
+        prevalenceSpline = prevalenceSplineInput.get();
 
         // Validate optional scaling parameter if present
         RealParameter scaleParam = scalingInput.get();
@@ -80,9 +88,10 @@ public class CaseCountLikelihood extends Distribution {
             double t = caseTimes.getArrayValue(i);
             double caseCount = caseCounts.getArrayValue(i);
 
-            // Get prevalence at this time via Skygrowth and take log for clarity
-            // getNeTime provides I(t) under our prevalence semantics
-            double meanI = prevalence.getNeTime(t);
+            // Get prevalence at this time via spline interpolation
+            // The spline provides log-prevalence values, so we need to exponentiate
+            double logI = prevalenceSpline.getValueAtGridPoint(t);
+            double meanI = Math.exp(logI);
 
             // Apply optional scaling factor (default 1.0)
             double scaling = 1.0;
