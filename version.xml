@@ -8,6 +8,8 @@
     <provider classname="mascotdatastreams.distribution.CaseCountLikelihood"/>
     <provider classname="mascotdatastreams.distribution.GammaPoisson"/>
     <provider classname="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth"/>
+    <provider classname="mascotdatastreams.dynamics.NotAKnotSpline"/>
+    <provider classname="mascotdatastreams.dynamics.SplinePrevalenceToNe"/>
 
   </service>
 </package>

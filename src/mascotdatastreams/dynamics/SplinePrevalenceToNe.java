@@ -25,7 +25,7 @@ import java.util.List;
  * - Uses precomputed grid points for efficient lookup
  */
 @Description("Maps log-prevalence to Ne(t) using spline interpolation between rate shift points")
-public class PrevalenceToNeSpline extends NeDynamics implements Loggable {
+public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     
     // Required inputs
     final public Input<NotAKnotSpline> splineInput = new Input<>("spline",
@@ -36,7 +36,7 @@ public class PrevalenceToNeSpline extends NeDynamics implements Loggable {
     // Optional inputs
     final public Input<RealParameter> coalescentScaleInput = new Input<>("coalescentScale",
             "Coalescent scaling constant c in Ne = I / (c * transmission_rate)", 
-            1.0);
+            Input.Validate.OPTIONAL);
 
             
     
@@ -62,7 +62,6 @@ public class PrevalenceToNeSpline extends NeDynamics implements Loggable {
         }
     }
     
-    @Override
     public List<String> getParameterIds() {
         return null;
     }
@@ -103,11 +102,11 @@ public class PrevalenceToNeSpline extends NeDynamics implements Loggable {
         return true;  // Always recalculate when parameters change
     }
     
+    // TODO do more salient isDirty return
     @Override
     public boolean isDirty() {        
-        if (coalescentScale.isDirty()) return true;
         
-        return false;
+        return true;
     }
     
     @Override
