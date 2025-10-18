@@ -74,9 +74,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
      * @return prevalence at time t
      */
     public double getPrevalenceTime(double t) {
-        double logI = spline.getValueAtGridPoint(t);
-        double I = Math.exp(logI);
-        return I;
+        return spline.getPrevalenceAtGridPoint(t);
     }
     
     @Override

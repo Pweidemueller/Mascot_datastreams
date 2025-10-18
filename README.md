@@ -168,6 +168,35 @@ Important
   - Ensure observation times are on the same scale (years before most recent sample) as your Mascot dynamics.
   - Use standard MASCOT priors/smoothing on log-prevalence (Skygrowth). The case-count likelihood adds information; check sensitivity so it does not dominate unduly.
 
+## Not a Knot Spline
+**OVERVIEW:**
+This class provides cubic spline interpolation with not-a-knot boundary conditions,
+which ensures smooth interpolation between data points. It also precomputes
+values at grid points for efficient lookup.
+
+**CUBIC SPLINE MATHEMATICS:**
+A cubic spline consists of cubic polynomials S_i(t) on each interval [x[i], x[i+1]]:
+S_i(t) = a[i] + b[i]*(t-x[i]) + c[i]*(t-x[i])^2 + d[i]*(t-x[i])^3
+
+**COEFFICIENT INTERPRETATION:**
+- a[i] = y[i]: Function value at knot x[i] (given data)
+- b[i]: Coefficient of linear term (t-x[i])
+- c[i]: Coefficient of quadratic term (t-x[i])^2 
+- d[i]: Coefficient of cubic term (t-x[i])^3
+
+The actual derivatives at knots are computed from these coefficients:
+- S'(x[i]) = b[i] (first derivative at left endpoint of interval i)
+- S''(x[i]) = 2*c[i] (second derivative at left endpoint of interval i)
+- S'''(x[i]) = 6*d[i] (third derivative at left endpoint of interval i)
+
+**NOT-A-KNOT CONDITION:**
+The not-a-knot condition is a boundary condition that eliminates the need
+for additional constraints at the endpoints. It requires:
+- At x[1]: S'''_0(x[1]) = S'''_1(x[1]) (third derivative continuity)
+- At x[n-1]: S'''_{n-2}(x[n-1]) = S'''_{n-1}(x[n-1]) (third derivative continuity)
+
+This creates a tridiagonal system of equations that is solved using
+LU decomposition to determine the second derivatives at all knots.
 
 ## Building and installing
 
