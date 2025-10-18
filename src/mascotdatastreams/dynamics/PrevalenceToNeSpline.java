@@ -4,6 +4,7 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
 import mascot.parameterdynamics.NeDynamics;
+import mascot.dynamics.RateShifts;
 
 /**
  * Maps log-prevalence dynamics to an Ne(t) process using spline interpolation.
@@ -28,7 +29,7 @@ public class PrevalenceToNeSpline extends NeDynamics {
             "Log-prevalence values at rate shift points (dimension = rateShifts + 1)", 
             Input.Validate.REQUIRED);
     
-    final public Input<RealParameter> rateShiftsInput = new Input<>("rateShifts",
+    final public Input<RateShifts> rateShiftsInput = new Input<>("rateShifts",
             "Time points for rate shifts (backward time from present)", 
             Input.Validate.REQUIRED);
     
@@ -49,7 +50,7 @@ public class PrevalenceToNeSpline extends NeDynamics {
     
     // Member variables
     private RealParameter logInfected;
-    private RealParameter rateShifts;
+    private RateShifts rateShifts;
     private RealParameter uninfectiousRate;
     private RealParameter coalescentScale;
     private Integer numGridPoints;
@@ -128,7 +129,7 @@ public class PrevalenceToNeSpline extends NeDynamics {
         values[0] = logInfected.getArrayValue(0);  // Log-prevalence at present
         
         for (int i = 0; i < nShifts; i++) {
-            times[i + 1] = rateShifts.getArrayValue(i);
+            times[i + 1] = rateShifts.getValue(i);
             System.out.println("times[" + (i + 1) + "]: " + times[i + 1]);
             values[i + 1] = logInfected.getArrayValue(i + 1);
             System.out.println("values[" + (i + 1) + "]: " + values[i + 1]);
@@ -152,6 +153,15 @@ public class PrevalenceToNeSpline extends NeDynamics {
             updateSpline();
         }
         double logI = spline.getValueAtGridPoint(t);
+        double I = Math.exp(logI);
+        return I;
+    }
+
+    public double getPrevalenceTimeExact(double t) {
+        if (!splineValid) {
+            updateSpline();
+        }
+        double logI = spline.getValue(t);
         double I = Math.exp(logI);
         return I;
     }
@@ -211,7 +221,6 @@ public class PrevalenceToNeSpline extends NeDynamics {
     public boolean isDirty() {
         // Check if any input parameters are dirty
         if (logInfected.isDirty(0)) return true;
-        if (rateShifts.isDirty(0)) return true;
         if (uninfectiousRate.isDirty(0)) return true;
         if (coalescentScale != null && coalescentScale.isDirty(0)) return true;
         
