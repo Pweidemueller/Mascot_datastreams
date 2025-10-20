@@ -255,6 +255,31 @@ public class NotAKnotSpline extends CalculationNode {
         double timeDiff2 = timeDiff * timeDiff;
         return 3 * splineCoeffs[k][0] * timeDiff2 + 2 * splineCoeffs[k][1] * timeDiff + splineCoeffs[k][2];
     }
+
+    public double getTranssmissionRateAtGridPoint(double t) {
+        if (!ratesKnows) {
+            recalculateRates();
+        }
+        // Find the appropriate grid point
+        if (t <= time[0]) {
+            // Return derivative at first point using spline coefficients
+            // This is the first knot so dt = 0 
+            return transmissionRate[0];
+        }
+        
+        // Binary search for the closest grid point
+        int left = 0, right = time.length - 1;
+        while (left < right) {
+            int mid = (left + right + 1) / 2;
+            if (time[mid] <= t) {
+                left = mid;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        return transmissionRate[left];
+    }
     
     /**
      * Get the number of grid points in the spline.

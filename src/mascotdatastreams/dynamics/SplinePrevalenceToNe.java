@@ -38,7 +38,9 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
             "Coalescent scaling constant c in Ne = I / (c * transmission_rate)", 
             Input.Validate.OPTIONAL);
 
-            
+    // Constants
+    // TODO revisit this, since ideally we don't need to use clipping but the sampler should reject unreasonable transmissionrate values
+    private static final double TSR_MIN = 1e-6;
     
     // Member variables
     private NotAKnotSpline spline;
@@ -82,10 +84,11 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         // Get prevalence using precomputed grid points for efficiency
         double I_t = getPrevalenceTime(t);
         
-        double dlogI_dt = spline.getDerivativeAtGridPoint(t);
-        
         // Compute transmission rate = -dlogI/dt (forward in time)
-        double transmissionRate = -dlogI_dt;
+        double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
+        
+        // Clamp transmission rate to minimum value to prevent division by zero
+        transmissionRate = Math.max(transmissionRate, TSR_MIN);
         
         // Get coalescent scaling constant
         double c = coalescentScale.getArrayValue();
@@ -131,17 +134,14 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     public void log(long l, PrintStream printStream) {
         for (int i = 0; i < spline.getGridPointCount(); i+=2) {
             double t = spline.getGridStart() + i * spline.getGridStep();
-            double I_t = getPrevalenceTime(t);
-            double dlogI_dt = spline.getDerivativeAtGridPoint(t);
-            double transmissionRate = -dlogI_dt;
-            double c = coalescentScale.getArrayValue();
-            double Ne = I_t / (c * transmissionRate);
+            double Ne = getNeTime(t);
             printStream.print(Math.log(Ne) + "\t");
         }
         for (int i = 0; i < spline.getGridPointCount(); i+=20) {
             double t = spline.getGridStart() + i * spline.getGridStep();
-            double dlogI_dt = spline.getDerivativeAtGridPoint(t);
-            double transmissionRate = -dlogI_dt;
+            double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
+            // Clamp transmission rate to minimum value
+            transmissionRate = Math.max(transmissionRate, TSR_MIN);
             printStream.print(transmissionRate + "\t");
         }
     }
