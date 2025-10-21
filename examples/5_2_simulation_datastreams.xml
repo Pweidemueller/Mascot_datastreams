@@ -605,11 +605,20 @@
           
         
         </distribution>
+
+        <distribution id="RegulariseTransmissionRates.Deme1:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
+
+          <spline idref="splinePrev.Deme1.t:SimDataset"/>
+
+        </distribution>
+
+        <distribution id="RegulariseTransmissionRates.Deme2:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
+
+          <spline idref="splinePrev.Deme2.t:SimDataset"/>
+
+        </distribution>
         
-        
-        
-                            
-                
+
         
         <distribution id="Mascot.t:SimDataset" spec="mascot.distribution.Mascot" tree="@Tree.t:SimDataset">
           

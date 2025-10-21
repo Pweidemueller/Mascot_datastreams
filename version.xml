@@ -10,6 +10,7 @@
     <provider classname="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth"/>
     <provider classname="mascotdatastreams.dynamics.NotAKnotSpline"/>
     <provider classname="mascotdatastreams.dynamics.SplinePrevalenceToNe"/>
+    <provider classname="mascotdatastreams.util.TransmissionSmallerThan"/>
 
   </service>
 </package>

@@ -87,8 +87,8 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         // Compute transmission rate = -dlogI/dt (forward in time)
         double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
         
-        // Clamp transmission rate to minimum value to prevent division by zero
-        transmissionRate = Math.max(transmissionRate, TSR_MIN);
+        // // Clamp transmission rate to minimum value to prevent division by zero
+        // transmissionRate = Math.max(transmissionRate, TSR_MIN);
         
         // Get coalescent scaling constant
         double c = coalescentScale.getArrayValue();
