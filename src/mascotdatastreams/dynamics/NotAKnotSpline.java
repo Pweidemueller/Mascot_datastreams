@@ -17,9 +17,9 @@ public class NotAKnotSpline extends CalculationNode {
     final public Input<RealParameter> InfectedInput = new Input<>("logInfected",
             "Prevalence over time in log space", Input.Validate.REQUIRED);
     final public Input<RateShifts> rateShiftsInput = new Input<>("rateShifts",
-            "Knots in log prevalence space for spline interpolation, the first knot at time 0 is not explicitly included", Input.Validate.REQUIRED);
+            "Knots in log prevalence space for spline interpolation, should be given in absolute time units (backward from present)", Input.Validate.REQUIRED);
     final public Input<RateShifts> gridRateShiftsInput = new Input<>("gridRateShifts",
-            "Rate shifts to use as grid points for spline evaluation, all grid points need to be specified including at time 0", Input.Validate.REQUIRED);
+            "Rate shifts to use as grid points for spline evaluation, should be given in absolute time units (backward from present)", Input.Validate.REQUIRED);
     final public Input<RealParameter> uninfectiousRateInput = new Input<>("uninfectiousRate",
             "Rate at which individuals become uninfectious", Input.Validate.REQUIRED);
 
@@ -105,26 +105,22 @@ public class NotAKnotSpline extends CalculationNode {
     
     // Helper method to find which spline segment a given time falls into
     private int findSplineSegment(double t) {
-        for (int i = 0; i < rateShifts.getDimension(); i++) {
+        for (int i = 1; i < rateShifts.getDimension(); i++) {
             if (t < rateShifts.getValue(i)) {
-                return i;
+                return i-1;
             }
         }
         // Use last segment if t is beyond all rate shifts
         // splineCoeffs has rateShifts.getDimension() if rateShifts do NOT include time 0.0, otherwise rateShifts.getDimension() - 1 elements (indices 0 to rateShifts.getDimension()-2)
-        return rateShifts.getDimension() - 1;
+        return rateShifts.getDimension() - 2;
     }
 
     private double findSplineSegmentStartKnotTime(int segmentIndex) {
-        if (segmentIndex == 0) {
-            return 0.0;
-        } else {
-            return rateShifts.getValue(segmentIndex - 1);
-        }
+        return rateShifts.getValue(segmentIndex);
     }
 
     private double findSplineSegmentEndKnotTime(int segmentIndex) {
-        return rateShifts.getValue(segmentIndex);
+        return rateShifts.getValue(segmentIndex+1);
     }
 
     public boolean update() {
@@ -338,11 +334,11 @@ public class NotAKnotSpline extends CalculationNode {
      *  de Boor, Carl. A Practical Guide to Splines. Springer-Verlag, New York: 1978
      */
     public void notAKnotCubicSpline() {
-        int n = rateShifts.getDimension() + 1; // +1 for time 0
+        int n = rateShifts.getDimension();
 
         // Handle edge case: only 2 points - linear interpolation
         if (n == 2) {
-            double h = rateShifts.getValue(0) - 0.0;
+            double h = rateShifts.getValue(1) - rateShifts.getValue(0);
             double delta = (infected.getArrayValue(1) - infected.getArrayValue(0)) / h;
             splineCoeffs = new double[1][4];
             splineCoeffs[0][0] = 0.0;  // d = 0 (no cubic term)
@@ -355,11 +351,7 @@ public class NotAKnotSpline extends CalculationNode {
         // Calculate h values (difference between knots)
         double[] h = new double[n - 1];
         for (int i = 0; i < n - 1; i++) {
-            if (i == 0) {
-                h[i] = rateShifts.getValue(0) - 0.0;
-            } else {
-                h[i] = rateShifts.getValue(i) - rateShifts.getValue(i-1);
-            }
+            h[i] = rateShifts.getValue(i+1) - rateShifts.getValue(i);
         }
 
         // Calculate the difference in y values

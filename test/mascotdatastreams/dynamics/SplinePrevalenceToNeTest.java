@@ -28,8 +28,8 @@ public class SplinePrevalenceToNeTest {
     public void testBasicSplineInterpolation() throws Exception {
         // Rate shifts specified as fractions of root height: 0.5 and 1.0.
         // With the test tree's root height = 2.0, these map to absolute times 1.0 and 2.0.
-        RateShifts rateShifts = buildRateShifts("0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0");
-        RateShifts gridRateShifts = buildRateShifts("0.0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 0.99 1.0 1.05 1.1");
+        RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
+        RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
 
         // log-prevalence at knots
         Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, -1.0, 0.0};
@@ -72,8 +72,8 @@ public class SplinePrevalenceToNeTest {
     public void testIrregularGridSplineInterpolation() throws Exception {
         // Rate shifts specified as fractions of root height: 0.5 and 1.0.
         // With the test tree's root height = 2.0, these map to absolute times 1.0 and 2.0.
-        RateShifts rateShifts = buildRateShifts("0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0");
-        RateShifts gridRateShifts = buildRateShifts("0.0 0.12 0.38 0.84 1.0");
+        RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
+        RateShifts gridRateShifts = buildRateShifts("0.0 0.24 0.76 1.68 2.0");
 
         // log-prevalence at knots
         Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 7.0, 1.5, -2.0, 0.0, 4.0, -1.0, 0.0};
@@ -112,8 +112,8 @@ public class SplinePrevalenceToNeTest {
     public void testNeSplineInterpolation() throws Exception {
         // Rate shifts specified as fractions of root height: 0.5 and 1.0.
         // With the test tree's root height = 2.0, these map to absolute times 1.0 and 2.0.
-        RateShifts rateShifts = buildRateShifts("0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0");
-        RateShifts gridRateShifts = buildRateShifts("0.0 0.12 0.38 0.84 1.0");
+        RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
+        RateShifts gridRateShifts = buildRateShifts("0.0 0.24 0.76 1.68 2.0");
 
         // log-prevalence at knots
         Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 7.0, 1.5, -2.0, 0.0, 4.0, -1.0, 0.0};
@@ -149,34 +149,9 @@ public class SplinePrevalenceToNeTest {
         assertEquals(0.02836701655438929, dyn.getNeTime(2.0), tolerance, "Ne at t=2.0");
     }
     
-    // Build a minimal tree (root height = 2.0) and RateShifts instance initialized with fractional breakpoints
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {
-        // Minimal BEAST setup copied from existing tests to satisfy RateShifts
-        Sequence s1 = new Sequence();
-        Sequence s2 = new Sequence();
-        Sequence s3 = new Sequence();
-        Sequence s4 = new Sequence();
-        s1.initByName("taxon", "a1", "value", "?");
-        s2.initByName("taxon", "b1", "value", "?");
-        s3.initByName("taxon", "a2", "value", "?");
-        s4.initByName("taxon", "b2", "value", "?");
-        Alignment alignment = new Alignment();
-        alignment.initByName("sequence", s1, "sequence", s2, "sequence", s3, "sequence", s4);
-
-        TaxonSet taxa = new TaxonSet();
-        taxa.initByName("alignment", alignment);
-
-        TraitSet traitSet = new TraitSet();
-        traitSet.initByName("value", "a1=Deme1,a2=Deme1,b1=Deme2,b2=Deme2", "traitname", "type", "taxa", taxa);
-
-        // 4-tip ultrametric tree; branch lengths sum to 2.0 from root to tips (root height = 2.0)
-        // Left clade: (a1:1.0,a2:1.0):1.0 -> total to tips = 2.0
-        // Right clade: (b1:1.0,b2:1.0):1.0 -> total to tips = 2.0
-        Tree tree = new TreeParser("((a1:1.0,a2:1.0):1.0,(b1:1.0,b2:1.0):1.0);");
-        tree.initByName("taxonset", taxa, "trait", traitSet);
-
         RateShifts rs = new RateShifts();
-        rs.initByName("tree", tree, "value", shiftValues);
+        rs.initByName("value", shiftValues);
         return rs;
     }
 }
