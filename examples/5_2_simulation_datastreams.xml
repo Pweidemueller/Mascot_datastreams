@@ -1379,6 +1379,15 @@
           
           <parameter idref="caseCounts.dispersion:SimDataset" name="f"/>
 
+
+
+          <parameter idref="caseCounts.scaling.Deme1:SimDataset" name="f"/>
+          
+          <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="f"/>
+
+          
+          <parameter idref="caseCounts.dispersion:SimDataset" name="f"/>
+
                                 
                 
         
@@ -1547,27 +1556,8 @@
     <operator id="SkylinePrev.Deme1.ScalerXX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme1.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
     
 
-    <operator id="SkylinePrev.Deme2.ScalerXX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme2.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
-    
 
-    
-    <operator id="caseCountsScalingDeme2Scaler.s:SimDataset" spec="AdaptableOperatorSampler" weight="0.05">
-      
-      
-      
-      <parameter idref="caseCounts.scaling.Deme2:SimDataset"/>
-      
-      
-      
-      <operator idref="AVMNOperator.SimDataset"/>
-      
-      
-      
-      <operator id="caseCountsScalingDeme2ScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.scaling.Deme2:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.1"/>
-      
-    
-    
-    </operator>
+    <operator id="SkylinePrev.Deme2.ScalerXX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme2.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
     
     
             
