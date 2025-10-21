@@ -320,18 +320,9 @@ public class NotAKnotSpline extends CalculationNode {
         }
         return 0.0;
     }
-    
-    /**
-     * Get the step size between grid points.
-     * Since grid points are now at grid rate shifts, this returns the average step size.
-     * 
-     * @return average step size
-     */
-    public double getGridStep() {
-        if (gridRateShifts.getDimension() > 0) {
-            return getGridEnd() / gridRateShifts.getDimension();
-        }
-        return 0.0;
+
+    public double getGridPointTime(int i) {
+        return gridRateShifts.getValue(i);
     }
     
     /**
