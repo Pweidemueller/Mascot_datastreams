@@ -74,17 +74,16 @@ public class NotAKnotSpline extends CalculationNode {
         
         // Points at grid rate shifts
         for (int i = 1; i < gridRateShifts.getDimension(); i++) {
-            
             time[i] = gridRateShifts.getValue(i);
             // Find which spline segment this grid point falls into
             int segmentIndex = findSplineSegment(gridRateShifts.getValue(i));
-            
+
             // Bounds check for segmentIndex
-            if (segmentIndex >= splineCoeffs.length) {
+            if (segmentIndex >= splineCoeffs.length ) {
                 segmentIndex = splineCoeffs.length - 1;
             }
                         
-            double timeDiff = gridRateShifts.getValue(i) - findSplineSegmentStartKnot(segmentIndex);
+            double timeDiff = gridRateShifts.getValue(i) - findSplineSegmentStartKnotTime(segmentIndex);
             double timeDiff2 = timeDiff * timeDiff;
             double timeDiff3 = timeDiff2 * timeDiff;
             
@@ -116,7 +115,7 @@ public class NotAKnotSpline extends CalculationNode {
         return rateShifts.getDimension() - 1;
     }
 
-    private double findSplineSegmentStartKnot(int segmentIndex) {
+    private double findSplineSegmentStartKnotTime(int segmentIndex) {
         if (segmentIndex == 0) {
             return 0.0;
         } else {
@@ -124,7 +123,7 @@ public class NotAKnotSpline extends CalculationNode {
         }
     }
 
-    private double findSplineSegmentEndKnot(int segmentIndex) {
+    private double findSplineSegmentEndKnotTime(int segmentIndex) {
         return rateShifts.getValue(segmentIndex);
     }
 
@@ -176,11 +175,14 @@ public class NotAKnotSpline extends CalculationNode {
         // Binary search for the closest grid point
         int left = 0, right = time.length - 1;
         while (left < right) {
-            int mid = (left + right + 1) / 2;
+            int mid = (left + right ) / 2;
+            if (time[mid] <= t && time[mid+1] > t) {
+                return Math.log(I[mid]);
+            }
             if (time[mid] <= t) {
-                left = mid;
+                left = mid+1;
             } else {
-                right = mid - 1;
+                right = mid;
             }
         }
         
@@ -202,18 +204,19 @@ public class NotAKnotSpline extends CalculationNode {
         if (t <= time[0]) {
             return I[0];
         }
-        
         // Binary search for the closest grid point
         int left = 0, right = time.length - 1;
         while (left < right) {
-            int mid = (left + right + 1) / 2;
+            int mid = (left + right ) / 2;
+            if (time[mid] <= t && time[mid+1] > t) {
+                return I[mid];
+            }
             if (time[mid] <= t) {
-                left = mid;
+                left = mid+1;
             } else {
-                right = mid - 1;
+                right = mid;
             }
         }
-        
         return I[left];
     }
     
@@ -238,11 +241,15 @@ public class NotAKnotSpline extends CalculationNode {
         // Binary search for the closest grid point
         int left = 0, right = time.length - 1;
         while (left < right) {
-            int mid = (left + right + 1) / 2;
-            if (time[mid] <= t) {
+            int mid = (left + right ) / 2;
+            if (time[mid] <= t && time[mid+1] > t) {
                 left = mid;
+                break;
+            }
+            if (time[mid] <= t) {
+                left = mid+1;
             } else {
-                right = mid - 1;
+                right = mid;
             }
         }
         
@@ -251,7 +258,7 @@ public class NotAKnotSpline extends CalculationNode {
         if (k >= splineCoeffs.length) {
             k = splineCoeffs.length-1;
         }
-        double timeDiff = t - findSplineSegmentStartKnot(k);
+        double timeDiff = t - findSplineSegmentStartKnotTime(k);
         double timeDiff2 = timeDiff * timeDiff;
         return 3 * splineCoeffs[k][0] * timeDiff2 + 2 * splineCoeffs[k][1] * timeDiff + splineCoeffs[k][2];
     }
@@ -270,11 +277,14 @@ public class NotAKnotSpline extends CalculationNode {
         // Binary search for the closest grid point
         int left = 0, right = time.length - 1;
         while (left < right) {
-            int mid = (left + right + 1) / 2;
+            int mid = (left + right ) / 2;
+            if (time[mid] <= t && time[mid+1] > t) {
+                return transmissionRate[mid];
+            }
             if (time[mid] <= t) {
-                left = mid;
+                left = mid+1;
             } else {
-                right = mid - 1;
+                right = mid;
             }
         }
 

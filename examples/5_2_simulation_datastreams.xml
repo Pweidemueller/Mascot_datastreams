@@ -1781,7 +1781,6 @@
     
     </logger>
     
-    
             
         
     
@@ -1816,6 +1815,38 @@
         
     
     </logger>
+
+    <logger id="NeDynamicsLogger.Deme1.t:SimDataset" spec="Logger" fileName="$(filebase).NeDynamics.Deme1.log" logEvery="1000">
+      
+      
+                    
+            
+      
+      <log idref="NeDynamics.Deme1.t:SimDataset"/>
+      
+      
+                
+        
+    
+    </logger>
+
+    <logger id="NeDynamicsLogger.Deme2.t:SimDataset" spec="Logger" fileName="$(filebase).NeDynamics.Deme2.log" logEvery="1000">
+      
+      
+                    
+            
+      
+      <log idref="NeDynamics.Deme2.t:SimDataset"/>
+      
+      
+                
+        
+    
+    </logger>
+    
+
+
+
     
     
             

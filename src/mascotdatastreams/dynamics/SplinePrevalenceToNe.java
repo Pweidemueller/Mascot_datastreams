@@ -123,15 +123,23 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     @Override
     public void init(PrintStream printStream) {
         for (int i = 0; i < spline.getGridPointCount(); i+=2) {
+            printStream.print("logPrevalence_" + i + "\t");
+        }
+        for (int i = 0; i < spline.getGridPointCount(); i+=2) {
             printStream.print("logNe_" + i + "\t");
         }
         for (int i = 0; i < spline.getGridPointCount(); i+=20) {
-            printStream.print("transmissionRate" + i + "\t");
+            printStream.print("transmissionRate_" + i + "\t");
         }
     }
 
     @Override
     public void log(long l, PrintStream printStream) {
+        for (int i = 0; i < spline.getGridPointCount(); i+=2) {
+            double t = spline.getGridStart() + i * spline.getGridStep();
+            double prevalence = getPrevalenceTime(t);
+            printStream.print(Math.log(prevalence) + "\t");
+        }
         for (int i = 0; i < spline.getGridPointCount(); i+=2) {
             double t = spline.getGridStart() + i * spline.getGridStep();
             double Ne = getNeTime(t);
