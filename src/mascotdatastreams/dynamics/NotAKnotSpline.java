@@ -54,7 +54,6 @@ public class NotAKnotSpline extends CalculationNode {
 
     // computes the Ne's at the break points from the growth rates and the transmission rates
     private void recalculateRates() {
-    	System.out.println(infected);
         notAKnotCubicSpline();
         // use grid rate shifts as grid points
         int n = gridRateShifts.getDimension() + 1; // +1 for time 0

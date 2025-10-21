@@ -25,7 +25,7 @@ import java.util.List;
  * - Uses precomputed grid points for efficient lookup
  */
 @Description("Maps log-prevalence to Ne(t) using spline interpolation between rate shift points")
-public class PrevalenceToNeSpline extends NeDynamics implements Loggable {
+public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     
     // Required inputs
     final public Input<NotAKnotSpline> splineInput = new Input<>("spline",
@@ -35,8 +35,7 @@ public class PrevalenceToNeSpline extends NeDynamics implements Loggable {
     
     // Optional inputs
     final public Input<RealParameter> coalescentScaleInput = new Input<>("coalescentScale",
-            "Coalescent scaling constant c in Ne = I / (c * transmission_rate)", 
-            1.0);
+            "Coalescent scaling constant c in Ne = I / (c * transmission_rate)", Input.Validate.REQUIRED);
 
             
     
@@ -62,11 +61,6 @@ public class PrevalenceToNeSpline extends NeDynamics implements Loggable {
         }
     }
     
-    @Override
-    public List<String> getParameterIds() {
-        return null;
-    }
-    
     /**
      * Gets prevalence at time t using precomputed grid points for efficiency.
      * Returns the prevalence value at the closest grid point.
@@ -87,8 +81,9 @@ public class PrevalenceToNeSpline extends NeDynamics implements Loggable {
         
         double dlogI_dt = spline.getDerivativeAtGridPoint(t);
         
-        // Compute transmission rate = -dlogI/dt (forward in time)
-        double transmissionRate = -dlogI_dt;
+        // Compute transmission rate = uninfectiousRate - dlogI/dt (forward in time)
+        // Note: dlogI_dt is the derivative of log-prevalence, transmission rate is uninfectiousRate - dlogI/dt
+        double transmissionRate = spline.getUninfectiousRate().getValue() - dlogI_dt;
         
         // Get coalescent scaling constant
         double c = coalescentScale.getArrayValue();
@@ -104,9 +99,8 @@ public class PrevalenceToNeSpline extends NeDynamics implements Loggable {
     }
     
     @Override
-    public boolean isDirty() {        
-        if (coalescentScale.isDirty()) return true;
-        
+    public boolean isDirty() {                
+    	//TODO: revist in the future
         return false;
     }
     
