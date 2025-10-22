@@ -57,10 +57,10 @@ public class SplinePrevalenceToNeTest {
 
         // Test interpolation at knot points
         double tolerance = 1e-9;
-        assertEquals(1.0, dyn.getPrevalenceTime(0.0), tolerance, "Prevalence at t=0.0");
-        assertEquals(148.4131591025761, dyn.getPrevalenceTime(0.6), tolerance, "Prevalence at t=0.6");
-        assertEquals(0.3678794411714424, dyn.getPrevalenceTime(1.8), tolerance, "Prevalence at t=1.8");
-        assertEquals(1.0, dyn.getPrevalenceTime(2.0), tolerance, "Prevalence at t=2.0");
+        assertEquals(0.0, Math.log(dyn.getPrevalenceTime(0.0)), tolerance, "Prevalence at t=0.0");
+        assertEquals(5.0, Math.log(dyn.getPrevalenceTime(0.6)), tolerance, "Prevalence at t=0.6");
+        assertEquals(-1.0, Math.log(dyn.getPrevalenceTime(1.8)), tolerance, "Prevalence at t=1.8");
+        assertEquals(0.0, Math.log(dyn.getPrevalenceTime(2.0)), tolerance, "Prevalence at t=2.0");
         
         // Test interpolation at intermediate point but on gridshift points
         assertEquals(1.741106210845324, dyn.getPrevalenceTime(0.1), tolerance, "Prevalence at t=0.1");

@@ -92,7 +92,7 @@ public class NotAKnotSpline extends CalculationNode {
                              splineCoeffs[segmentIndex][2]*timeDiff + splineCoeffs[segmentIndex][3]);
             
             // Calculate derivative at this grid point
-            derivative_logprev = 3 * splineCoeffs[segmentIndex][0] * timeDiff2 + 2 * splineCoeffs[segmentIndex][1] * timeDiff + splineCoeffs[segmentIndex][2];
+            derivative_logprev = getDerivative(gridRateShifts.getValue(i), segmentIndex);
             transmissionRate[i] = uninfectiousRate.getValue() - derivative_logprev;
             
             if (transmissionRate[i] < 0) {
@@ -213,50 +213,21 @@ public class NotAKnotSpline extends CalculationNode {
                 right = mid;
             }
         }
+        // System.out.println("mid: " + mid + "time[mid]" + time[mid] + "I[mid]" + I[mid]);
         return I[left];
     }
     
     /**
-     * Get the derivative of log-prevalence at a specific time using precomputed grid points.
+     * Get the derivative of log-prevalence at a specific time.
      * 
      * @param t time (backward from present)
      * @return derivative of log-prevalence at time t
      */
-    public double getDerivativeAtGridPoint(double t) {
-        if (!ratesKnows) {
-            recalculateRates();
-        }
-        
-        // Find the appropriate grid point
-        if (t <= time[0]) {
-            // Return derivative at first point using spline coefficients
-            // This is the first knot so dt = 0 
-            return splineCoeffs[0][2];
-        }
-        
-        // Binary search for the closest grid point
-        int left = 0, right = time.length - 1;
-        while (left < right) {
-            int mid = (left + right ) / 2;
-            if (time[mid] <= t && time[mid+1] > t) {
-                left = mid;
-                break;
-            }
-            if (time[mid] <= t) {
-                left = mid+1;
-            } else {
-                right = mid;
-            }
-        }
-        
-        // Calculate derivative using spline coefficients
-        int k = left;
-        if (k >= splineCoeffs.length) {
-            k = splineCoeffs.length-1;
-        }
-        double timeDiff = t - findSplineSegmentStartKnotTime(k);
+    public double getDerivative(double t, int segmentIndex) {
+
+        double timeDiff = t - findSplineSegmentStartKnotTime(segmentIndex);
         double timeDiff2 = timeDiff * timeDiff;
-        return 3 * splineCoeffs[k][0] * timeDiff2 + 2 * splineCoeffs[k][1] * timeDiff + splineCoeffs[k][2];
+        return 3 * splineCoeffs[segmentIndex][0] * timeDiff2 + 2 * splineCoeffs[segmentIndex][1] * timeDiff + splineCoeffs[segmentIndex][2];
     }
 
     public double getTranssmissionRateAtGridPoint(double t) {

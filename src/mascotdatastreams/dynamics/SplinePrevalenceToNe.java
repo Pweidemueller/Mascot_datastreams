@@ -150,7 +150,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
             double t = spline.getGridPointTime(i);
             double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
             // Clamp transmission rate to minimum value
-            transmissionRate = Math.max(transmissionRate, TSR_MIN);
+            // transmissionRate = Math.max(transmissionRate, TSR_MIN);
             printStream.print(transmissionRate + "\t");
         }
     }
