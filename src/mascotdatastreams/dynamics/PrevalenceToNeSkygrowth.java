@@ -93,7 +93,7 @@ public class PrevalenceToNeSkygrowth extends NeDynamics {
         }
         if (Ne < NE_MIN) { isValid = false; Ne = NE_MIN; }
         if (Ne > NE_MAX) { isValid = false; Ne = NE_MAX; }
-
+        
         return Ne;
     }
 
