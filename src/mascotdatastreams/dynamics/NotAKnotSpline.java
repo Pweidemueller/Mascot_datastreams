@@ -48,7 +48,8 @@ public class NotAKnotSpline extends CalculationNode {
         infected = InfectedInput.get();
         rateShifts = rateShiftsInput.get();
         gridRateShifts = gridRateShiftsInput.get();
-        infected.setDimension(rateShifts.getDimension()+1); // +1 for time 0
+        // infected dimension should match rateShifts dimension (rateShifts already includes time 0)
+        infected.setDimension(rateShifts.getDimension());
         uninfectiousRate = uninfectiousRateInput.get();
         recalculateRates();
     }
@@ -74,15 +75,15 @@ public class NotAKnotSpline extends CalculationNode {
             double logI = splineFunction.value(time[i]);
             I[i] = Math.exp(logI);
 
-            // Evaluate spline derivative (d(log I)/dt)
-            double derivative_logprev = splineFunction.derivative().value(time[i]);
+            // Evaluate spline derivative d(log I)/dτ where τ is backward time
+            double dLogI_dBackwardTime = splineFunction.derivative().value(time[i]);
 
-            // Renewal equation: dI/dt = beta*I - gamma*I
-            // Since dI/dt = I * d(log I)/dt, we have:
-            // I * d(log I)/dt = beta*I - gamma*I
-            // d(log I)/dt = beta - gamma
-            // beta = gamma + d(log I)/dt
-            transmissionRate[i] = uninfectiousRate.getValue() + derivative_logprev;
+            // Epidemiological model in forward time: dI/dt_fwd = (β - γ) * I
+            // This means: d(log I)/dt_fwd = β - γ
+            // In backward time τ: d(log I)/dτ = -d(log I)/dt_fwd = -(β - γ) = γ - β
+            // Rearranging: β = γ - d(log I)/dτ
+            // Therefore: transmission_rate = β = γ - d(log I)/dτ_backward
+            transmissionRate[i] = uninfectiousRate.getValue() - dLogI_dBackwardTime;
         }
 
         ratesKnows = true;
@@ -273,6 +274,9 @@ public class NotAKnotSpline extends CalculationNode {
      * than cubic splines and does not exhibit overshoot.
      */
     private void buildSpline() {
+        // rateShifts already includes time 0 as the first value
+        // infected[i] corresponds to rateShifts[i] for i = 0, 1, ..., rateShifts.getDimension()-1
+
         int n = rateShifts.getDimension();
 
         // Prepare arrays for spline interpolation
