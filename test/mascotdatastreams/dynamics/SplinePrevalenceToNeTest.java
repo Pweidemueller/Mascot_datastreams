@@ -116,6 +116,10 @@ public class SplinePrevalenceToNeTest {
         assertEquals(1309.6214076166518, dyn.getPrevalenceTime(0.76), tolerance, "Prevalence at t=0.76");
         assertEquals(15.106990514646617, dyn.getPrevalenceTime(1.68), tolerance, "Prevalence at t=1.68");
         assertEquals(1.0, dyn.getPrevalenceTime(2.0), tolerance, "Prevalence at t=2.0");
+        
+        // at time outside the grid
+        assertEquals(1.0, dyn.getPrevalenceTime(3.0), tolerance, "Prevalence at t=3.0");
+        assertEquals(1.0, dyn.getPrevalenceTime(10.0), tolerance, "Prevalence at t=10.0");
     }
     
     @Test
@@ -157,6 +161,10 @@ public class SplinePrevalenceToNeTest {
         assertEquals(8.848148341013303, dyn.getNeTime(0.76), tolerance, "Ne at t=0.76");
         assertEquals(0.07441497433106414, dyn.getNeTime(1.68), tolerance, "Ne at t=1.68");
         assertEquals(0.02836701655438929, dyn.getNeTime(2.0), tolerance, "Ne at t=2.0");
+        
+     // at time outside the grid
+        assertEquals(0.02836701655438929, dyn.getNeTime(3.0), tolerance, "Ne at t=3.0");
+        assertEquals(0.02836701655438929, dyn.getNeTime(10.0), tolerance, "Ne at t=10.0");
     }
 //    
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {

@@ -82,6 +82,7 @@ public class GammaPoisson extends ParametricDistribution implements CountDistrib
         double r = 1.0 / alpha;
         double p = r / (r + mean);
         // Defensive clamp to avoid log(0)
+        // TODO revisit this clamp
         p = Math.min(1 - 1e-16, Math.max(1e-16, p));
         dist = new GammaPoissonDistributionImpl(r, p);
     }
@@ -125,6 +126,7 @@ public class GammaPoisson extends ParametricDistribution implements CountDistrib
         }
         double r = 1.0 / alpha;
         double p = r / (r + mean);
+        // TODO revisit this clamp
         p = Math.min(1 - 1e-16, Math.max(1e-16, p));
         // log PMF = ln Γ(r + x) - ln Γ(r) - ln Γ(x+1) + r ln p + x ln(1-p)
         double logGammaRK = Gamma.logGamma(r + x);

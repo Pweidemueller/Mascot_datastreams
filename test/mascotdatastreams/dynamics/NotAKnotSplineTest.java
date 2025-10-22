@@ -50,6 +50,7 @@ public class NotAKnotSplineTest {
         assertEquals(-41.93192827227541, spline.getDerivative(0.89, 4), tolerance, "Derivative at t=0.89");
         assertEquals(-16.350521792157604, spline.getDerivative(1.13, 5), tolerance, "Derivative at t=1.13");
         assertEquals(20.110919090574374, spline.getDerivative(1.98, 9), tolerance, "Derivative at t=1.98");
+        
     }
 
 }

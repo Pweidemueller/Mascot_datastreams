@@ -47,7 +47,7 @@ public class NotAKnotSpline extends CalculationNode {
         infected = InfectedInput.get();
         rateShifts = rateShiftsInput.get();
         gridRateShifts = gridRateShiftsInput.get();
-        infected.setDimension(rateShifts.getDimension()+1); // +1 for time 0
+        infected.setDimension(rateShifts.getDimension());
         uninfectiousRate = uninfectiousRateInput.get();
         recalculateRates();
     }
@@ -209,7 +209,7 @@ public class NotAKnotSpline extends CalculationNode {
         if (t <= time[0]) {
             return I[0];
         }
-        // Binary search for the closest sgment in the grid, returns the left grid point of the segment in which t lies
+        // Binary search for the closest segment in the grid, returns the left grid point of the segment in which t lies
         int left = 0, right = time.length - 1;
         while (left < right) {
             int mid = (left + right ) / 2;
