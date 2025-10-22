@@ -35,9 +35,12 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     
     // Optional inputs
     final public Input<RealParameter> coalescentScaleInput = new Input<>("coalescentScale",
-            "Coalescent scaling constant c in Ne = I / (c * transmission_rate)", Input.Validate.REQUIRED);
+            "Coalescent scaling constant c in Ne = I / (c * transmission_rate)", 
+            Input.Validate.OPTIONAL);
 
-            
+    // Constants
+    // TODO revisit this, since ideally we don't need to use clipping but the sampler should reject unreasonable transmissionrate values
+    private static final double TSR_MIN = 1e-2;
     
     // Member variables
     private NotAKnotSpline spline;
@@ -61,6 +64,10 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         }
     }
     
+    public List<String> getParameterIds() {
+        return null;
+    }
+    
     /**
      * Gets prevalence at time t using precomputed grid points for efficiency.
      * Returns the prevalence value at the closest grid point.
@@ -69,9 +76,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
      * @return prevalence at time t
      */
     public double getPrevalenceTime(double t) {
-        double logI = spline.getValueAtGridPoint(t);
-        double I = Math.exp(logI);
-        return I;
+        return spline.getPrevalenceAtGridPoint(t);
     }
     
     @Override
@@ -79,11 +84,13 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         // Get prevalence using precomputed grid points for efficiency
         double I_t = getPrevalenceTime(t);
         
-        double dlogI_dt = spline.getDerivativeAtGridPoint(t);
+        // Compute transmission rate = -dlogI/dt (forward in time)
+        double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
         
-        // Compute transmission rate = uninfectiousRate - dlogI/dt (forward in time)
-        // Note: dlogI_dt is the derivative of log-prevalence, transmission rate is uninfectiousRate - dlogI/dt
-        double transmissionRate = spline.getUninfectiousRate().getValue() - dlogI_dt;
+//        if (transmissionRate <= 0.0)
+//        	System.err.println("Warning: non-positive transmission rate at time " + t + ": " + transmissionRate);
+        // // Clamp transmission rate to minimum value to prevent division by zero
+         transmissionRate = Math.max(transmissionRate, TSR_MIN);
         
         // Get coalescent scaling constant
         double c = coalescentScale.getArrayValue();
@@ -98,10 +105,11 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         return true;  // Always recalculate when parameters change
     }
     
+    // TODO do more salient isDirty return
     @Override
-    public boolean isDirty() {                
-    	//TODO: revist in the future
-        return false;
+    public boolean isDirty() {        
+        
+        return true;
     }
     
     @Override
@@ -116,29 +124,35 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
 
     @Override
     public void init(PrintStream printStream) {
-        for (int i = 0; i < spline.getGridPointCount(); i+=2) {
-            printStream.print("logNe_" + i + "\t");
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            printStream.print("I" + i + "\t");
         }
-        for (int i = 0; i < spline.getGridPointCount(); i+=20) {
-            printStream.print("transmissionRate" + i + "\t");
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            printStream.print("Ne_" + i + "\t");
+        }
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            printStream.print("transmissionRate_" + i + "\t");
         }
     }
 
     @Override
     public void log(long l, PrintStream printStream) {
-        for (int i = 0; i < spline.getGridPointCount(); i+=2) {
-            double t = spline.getGridStart() + i * spline.getGridStep();
-            double I_t = getPrevalenceTime(t);
-            double dlogI_dt = spline.getDerivativeAtGridPoint(t);
-            double transmissionRate = -dlogI_dt;
-            double c = coalescentScale.getArrayValue();
-            double Ne = I_t / (c * transmissionRate);
-            printStream.print(Math.log(Ne) + "\t");
+ 
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            double t = spline.getGridPointTime(i);
+            double prevalence = getPrevalenceTime(t);
+            printStream.print(prevalence + "\t");
         }
-        for (int i = 0; i < spline.getGridPointCount(); i+=20) {
-            double t = spline.getGridStart() + i * spline.getGridStep();
-            double dlogI_dt = spline.getDerivativeAtGridPoint(t);
-            double transmissionRate = -dlogI_dt;
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            double t = spline.getGridPointTime(i);
+            double Ne = getNeTime(t);
+            printStream.print(Ne + "\t");
+        }
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            double t = spline.getGridPointTime(i);
+            double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
+            // Clamp transmission rate to minimum value
+//            transmissionRate = Math.max(transmissionRate, TSR_MIN);
             printStream.print(transmissionRate + "\t");
         }
     }

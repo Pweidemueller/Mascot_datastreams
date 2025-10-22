@@ -4,9 +4,9 @@ import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.inference.Distribution;
 import beast.base.inference.State;
-import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
 import mascotdatastreams.dynamics.NotAKnotSpline;
+import org.apache.commons.math.special.Gamma;
 
 import java.util.List;
 import java.util.Random;
@@ -30,7 +30,9 @@ public class CaseCountLikelihood extends Distribution {
             "caseCounts", "Observed case counts (dimension = number of observations)", Validate.REQUIRED);
     public final Input<RealParameter> caseTimesInput = new Input<>(
             "caseTimes", "Observation times corresponding 1:1 to caseCounts", Validate.REQUIRED);
-    final public Input<ParametricDistribution> distInput = new Input<>("distribution", "Distribution used to calculate likelihood. Currently only GammaPoisson is supported.", Validate.REQUIRED);
+    // Dispersion parameter for Gamma-Poisson (Negative Binomial) distribution
+    public final Input<RealParameter> dispersionInput = new Input<>(
+            "dispersion", "Dispersion parameter (alpha) for Gamma-Poisson distribution", Validate.REQUIRED);
     // Optional placeholder if needed elsewhere; not used directly in this likelihood
     public final Input<RealParameter> uninfectiousRateInput = new Input<>(
             "uninfectiousRate", "Fixed uninfectious rate (per time unit), optional.", Validate.OPTIONAL);
@@ -40,7 +42,7 @@ public class CaseCountLikelihood extends Distribution {
     
     protected RealParameter caseCounts;
     protected RealParameter caseTimes;
-    protected ParametricDistribution dist;
+    protected RealParameter dispersion;
     protected NotAKnotSpline prevalenceSpline;
     protected boolean validated = false;
     
@@ -48,8 +50,17 @@ public class CaseCountLikelihood extends Distribution {
     public void initAndValidate() {
         caseCounts = caseCountsInput.get();
         caseTimes = caseTimesInput.get();
-        dist = distInput.get();
+        dispersion = dispersionInput.get();
         prevalenceSpline = prevalenceSplineInput.get();
+
+        // Validate dispersion parameter
+        if (dispersion == null) {
+            throw new IllegalArgumentException("CaseCountLikelihood: 'dispersion' parameter is required");
+        }
+        double alpha = dispersion.getArrayValue();
+        if (!(alpha > 0.0)) {
+            throw new IllegalArgumentException("CaseCountLikelihood: 'dispersion' must be > 0, got " + alpha);
+        }
 
         // Validate optional scaling parameter if present
         RealParameter scaleParam = scalingInput.get();
@@ -84,6 +95,7 @@ public class CaseCountLikelihood extends Distribution {
         }
 
         int n = caseCounts.getDimension();
+//        System.out.println("Calculating CaseCountLikelihood for " + n + " observations.");
         for (int i = 0; i < n; i++) {
             double t = caseTimes.getArrayValue(i);
             double caseCount = caseCounts.getArrayValue(i);
@@ -92,6 +104,7 @@ public class CaseCountLikelihood extends Distribution {
             // The spline provides log-prevalence values, so we need to exponentiate
             double logI = prevalenceSpline.getValueAtGridPoint(t);
             double meanI = Math.exp(logI);
+//            System.out.println(meanI + " " + caseCount);
 
             // Apply optional scaling factor (default 1.0)
             double scaling = 1.0;
@@ -105,21 +118,12 @@ public class CaseCountLikelihood extends Distribution {
             }
             double scaledMean = meanI * scaling;
 
-            // Validate parameters
-            if (scaledMean <= 0.0 || caseCount < 0.0) {
-                System.err.println("Warning: Invalid parameters - scaled mean: " + scaledMean + ", caseCount: " + caseCount);
-                return Double.NEGATIVE_INFINITY;
-            }
 
-            // Calculate log likelihood using a stateless interface (no input mutation)
-            if (!(dist instanceof CountDistributionWithMean)) {
-                throw new IllegalArgumentException(
-                        "CaseCountLikelihood requires distributions implementing CountDistributionWithMean. Got: "
-                                + dist.getClass().getName());
-            }
-            double intervalLogP = ((CountDistributionWithMean) dist).logPForMean(caseCount, scaledMean);
+            // Calculate Gamma-Poisson (Negative Binomial) log likelihood directly
+            double alpha = dispersion.getArrayValue();
+            double intervalLogP = calculateGammaPoissonLogP(caseCount, scaledMean, alpha);
             if (Double.isNaN(intervalLogP)) {
-                System.err.println("Warning: NaN likelihood for observation index " + i + ": caseCount=" + caseCount + ", scaled mean=" + scaledMean);
+                System.err.println("Warning: NaN likelihood for observation index " + i + ": caseCount=" + caseCount + ", scaled mean=" + scaledMean + ", alpha=" + alpha);
                 return Double.NEGATIVE_INFINITY;
             }
 
@@ -128,39 +132,69 @@ public class CaseCountLikelihood extends Distribution {
         return logP;
     }
 
+    /**
+     * Calculate the log probability of a Gamma-Poisson (Negative Binomial) distribution.
+     * 
+     * @param observation observed count
+     * @param mean mean of the distribution
+     * @param alpha dispersion parameter
+     * @return log probability
+     */
+    private double calculateGammaPoissonLogP(double observation, double mean, double alpha) {
+        
+        int x = (int) Math.round(observation);
+        double r = 1.0 / alpha;
+        double p = r / (r + mean);
+        
+        // Clamp p to avoid numerical issues
+        p = Math.min(1 - 1e-16, Math.max(1e-16, p));
+        
+        // Log PMF = ln Γ(r + x) - ln Γ(r) - ln Γ(x+1) + r ln p + x ln(1-p)
+        double logGammaRK = Gamma.logGamma(r + x);
+        double logGammaR = Gamma.logGamma(r);
+        double logGammaK1 = Gamma.logGamma(x + 1.0);
+        double logP = Math.log(p);
+        double log1mP = Math.log(1.0 - p);
+        
+        return logGammaRK - logGammaR - logGammaK1 + r * logP + x * log1mP;
+    }
+
     @Override
     public boolean requiresRecalculation() {
-        // boolean dirty = false;
-        // // Upstream process (Skygrowth) driving prevalence
-        // if (prevalence != null && prevalence.isDirty()) dirty = true;
-        // // Observations
-        // if (caseCounts != null) {
-        //     int n = caseCounts.getDimension();
-        //     for (int i = 0; i < n; i++) {
-        //         if (caseCounts.isDirty(i)) { dirty = true; break; }
-        //     }
-        // }
-        // if (caseTimes != null) {
-        //     int n = caseTimes.getDimension();
-        //     for (int i = 0; i < n; i++) {
-        //         if (caseTimes.isDirty(i)) { dirty = true; break; }
-        //     }
-        // }
-        // // Optional parameters
-        // RealParameter scaleParam = scalingInput.get();
-        // if (scaleParam != null && scaleParam.isDirty(0)) dirty = true;
-        // RealParameter uninf = uninfectiousRateInput.get();
-        // if (uninf != null && uninf.isDirty(0)) dirty = true;
-        // // Distribution's dispersion parameter (if GammaPoisson with RealParameter dispersion)
-        // if (dist instanceof GammaPoisson) {
-        //     GammaPoisson gp = (GammaPoisson) dist;
-        //     if (gp.dispersionInput.get() instanceof RealParameter) {
-        //         RealParameter disp = (RealParameter) gp.dispersionInput.get();
-        //         if (disp != null && disp.isDirty(0)) dirty = true;
-        //     }
-        // }
-        // return dirty || super.requiresRecalculation();
-        return true;
+        boolean dirty = false;
+        
+        // Check observations
+        if (caseCounts != null) {
+            int n = caseCounts.getDimension();
+            for (int i = 0; i < n; i++) {
+                if (caseCounts.isDirty(i)) { 
+                    dirty = true; 
+                    break; 
+                }
+            }
+        }
+        if (caseTimes != null) {
+            int n = caseTimes.getDimension();
+            for (int i = 0; i < n; i++) {
+                if (caseTimes.isDirty(i)) { 
+                    dirty = true; 
+                    break; 
+                }
+            }
+        }
+        
+        // Check dispersion parameter
+        if (dispersion != null && dispersion.isDirty(0)) {
+            dirty = true;
+        }
+        
+        // Check optional parameters
+        RealParameter scaleParam = scalingInput.get();
+        if (scaleParam != null && scaleParam.isDirty(0)) {
+            dirty = true;
+        }
+        
+        return dirty || super.requiresRecalculation();
     }
 
 	@Override
