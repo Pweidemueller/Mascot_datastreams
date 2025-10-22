@@ -17,3 +17,5 @@ src/beast/mascot/operators/BitFlipBSSVSOperator.java
 /deps/
 *trees
 *state
+*.log
+*.trees

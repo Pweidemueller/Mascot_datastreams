@@ -143,7 +143,7 @@
       <parameter id="uninfectiousRate.t:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">90.58463835048036</parameter>
       <parameter id="caseCounts.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">1</parameter>
       <parameter id="caseCounts.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">1</parameter>
-      <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">5</parameter>
+      <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" upper="1.0" name="stateNode">0.25</parameter>
     </state>
     <init id="RandomTree.t:SimDataset" spec="RandomTree" estimate="false" initial="@Tree.t:SimDataset" taxa="@SimDataset">
       <populationModel id="ConstantPopulation0.t:SimDataset" spec="ConstantPopulation">
@@ -157,14 +157,14 @@
           <caseCounts idref="caseCounts.Deme1:SimDataset"/>
           <caseTimes idref="caseTimes.Deme1:SimDataset"/>
           <scaling idref="caseCounts.scaling.Deme1:SimDataset"/>
-          <dispersion idref="caseCounts.dispersion:SimDataset"/>
+          <distribution id="gammaPoisson.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
         </distribution>
         <distribution id="caseCountLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
           <prevalenceSpline idref="splinePrev.Deme2.t:SimDataset"/>
           <caseCounts idref="caseCounts.Deme2:SimDataset"/>
           <caseTimes idref="caseTimes.Deme2:SimDataset"/>
           <scaling idref="caseCounts.scaling.Deme2:SimDataset"/>
-          <dispersion idref="caseCounts.dispersion:SimDataset"/>
+          <distribution id="gammaPoisson.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
         </distribution>
         <!-- <distribution id="RegulariseTransmissionRates.Deme1:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
           <spline idref="splinePrev.Deme1.t:SimDataset"/>

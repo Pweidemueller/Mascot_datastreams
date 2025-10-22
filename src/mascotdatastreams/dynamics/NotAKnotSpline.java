@@ -67,7 +67,7 @@ public class NotAKnotSpline extends CalculationNode {
         time[0] = 0.0;
         I[0] = Math.exp(infected.getArrayValue(0));
         double derivative_logprev = splineCoeffs[0][2];
-        transmissionRate[0] = uninfectiousRate.getValue() - derivative_logprev; // derivative at t=0 is splineCoeffs[0][2]
+        transmissionRate[0] = uninfectiousRate.getValue() + derivative_logprev; // derivative at t=0 is splineCoeffs[0][2], add for backward time
 //        if (transmissionRate[0] < 0) {
 //            isValid = false;
 //        }
@@ -93,7 +93,7 @@ public class NotAKnotSpline extends CalculationNode {
             
             // Calculate derivative at this grid point
             derivative_logprev = 3 * splineCoeffs[segmentIndex][0] * timeDiff2 + 2 * splineCoeffs[segmentIndex][1] * timeDiff + splineCoeffs[segmentIndex][2];
-            transmissionRate[i] = uninfectiousRate.getValue() - derivative_logprev;
+            transmissionRate[i] = uninfectiousRate.getValue() + derivative_logprev; // add for backward time coordinates
             
 //            if (transmissionRate[i] < 0) {
 //                isValid = false;
