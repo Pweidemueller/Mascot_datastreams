@@ -66,6 +66,16 @@ public class SplinePrevalenceToNeTest {
         assertEquals(1.741106210845324, dyn.getPrevalenceTime(0.1), tolerance, "Prevalence at t=0.1");
         assertEquals(0.45879046299891335, dyn.getPrevalenceTime(1.1), tolerance, "Prevalence at t=1.1");
         assertEquals(0.25850366508689415, dyn.getPrevalenceTime(1.9), tolerance, "Prevalence at t=1.9");
+//        
+//        // Test interpolation at times not on grid
+        
+        assertEquals(dyn.getPrevalenceTime(0.0), dyn.getPrevalenceTime(0.01), tolerance, "Prevalence at t=0.01");
+        assertEquals(dyn.getPrevalenceTime(0.0), dyn.getPrevalenceTime(0.05), tolerance, "Prevalence at t=0.05");
+        assertEquals(dyn.getPrevalenceTime(0.1), dyn.getPrevalenceTime(0.09), tolerance, "Prevalence at t=0.09");
+        
+        assertEquals(dyn.getPrevalenceTime(1.9), dyn.getPrevalenceTime(1.91), tolerance, "Prevalence at t=1.9");
+        assertEquals(dyn.getPrevalenceTime(1.9), dyn.getPrevalenceTime(1.95), tolerance, "Prevalence at t=1.95");
+        assertEquals(dyn.getPrevalenceTime(2.0), dyn.getPrevalenceTime(1.98), tolerance, "Prevalence at t=1.98");
     }
 
     @Test
@@ -148,7 +158,7 @@ public class SplinePrevalenceToNeTest {
         assertEquals(0.07441497433106414, dyn.getNeTime(1.68), tolerance, "Ne at t=1.68");
         assertEquals(0.02836701655438929, dyn.getNeTime(2.0), tolerance, "Ne at t=2.0");
     }
-    
+//    
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {
         RateShifts rs = new RateShifts();
         rs.initByName("value", shiftValues);
