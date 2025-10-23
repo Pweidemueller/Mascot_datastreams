@@ -37,20 +37,18 @@ public class NotAKnotSplineTest {
 
         double tolerance = 1e-12;
         // at gridRateShift points
-        assertEquals(6.453884388807061, spline.getDerivative(0.0, 0), tolerance, "Derivative at t=0.0");
-        assertEquals(6.453884388807062, spline.getDerivative(0.4, 2), tolerance, "Derivative at t=0.4");
-        assertEquals(-6.0995029455080925, spline.getDerivative(0.8, 4), tolerance, "Derivative at t=0.8");
-        assertEquals(-1.8469256259204478, spline.getDerivative(1.2, 6), tolerance, "Derivative at t=1.2");
-        assertEquals(-4.7574558173784975, spline.getDerivative(1.6, 8), tolerance, "Derivative at t=1.6");
-        assertEquals(25.242544182621508, spline.getDerivative(2.0, 9), tolerance, "Derivative at t=2.0");
+        assertEquals(5.0, spline.getDerivative(0.0), tolerance, "Derivative at t=0.0");
+        assertEquals(5.0, spline.getDerivative(0.24), tolerance, "Derivative at t=0.24");
+        assertEquals(19.413793103448313, spline.getDerivative(0.76), tolerance, "Derivative at t=0.76");
+        assertEquals(-13.749999999999993, spline.getDerivative(1.68), tolerance, "Derivative at t=1.68");
+        assertEquals(12.5, spline.getDerivative(2.0), tolerance, "Derivative at t=2.0");
         
-        // at random times in between knots and grid points
-        assertEquals(4.714675188696615, spline.getDerivative(0.11, 0), tolerance, "Derivative at t=0.11");
-        assertEquals(9.481008376288646, spline.getDerivative(0.46, 2), tolerance, "Derivative at t=0.46");
-        assertEquals(-41.93192827227541, spline.getDerivative(0.89, 4), tolerance, "Derivative at t=0.89");
-        assertEquals(-16.350521792157604, spline.getDerivative(1.13, 5), tolerance, "Derivative at t=1.13");
-        assertEquals(20.110919090574374, spline.getDerivative(1.98, 9), tolerance, "Derivative at t=1.98");
-        
+        // at random times in between knots and grid points, getDerivative() does not use the grid points
+        assertEquals(5.0, spline.getDerivative(0.11), tolerance, "Derivative at t=0.11");
+        assertEquals(13.84482758620689, spline.getDerivative(0.46), tolerance, "Derivative at t=0.46");
+        assertEquals(-47.605263157894754, spline.getDerivative(0.89), tolerance, "Derivative at t=0.89");
+        assertEquals(-21.585937500000032, spline.getDerivative(1.13), tolerance, "Derivative at t=1.13");
+        assertEquals(11.0, spline.getDerivative(1.98), tolerance, "Derivative at t=1.98");
     }
 
 }

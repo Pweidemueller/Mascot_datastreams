@@ -59,16 +59,18 @@ public class SplinePrevalenceToNeTest {
         double tolerance = 1e-9;
         assertEquals(0.0, Math.log(dyn.getPrevalenceTime(0.0)), tolerance, "Prevalence at t=0.0");
         assertEquals(5.0, Math.log(dyn.getPrevalenceTime(0.6)), tolerance, "Prevalence at t=0.6");
+        assertEquals(10.0, Math.log(dyn.getPrevalenceTime(0.8)), tolerance, "Prevalence at t=0.8");
+        assertEquals(2.5, Math.log(dyn.getPrevalenceTime(1.0)), tolerance, "Prevalence at t=1.0");
         assertEquals(-1.0, Math.log(dyn.getPrevalenceTime(1.8)), tolerance, "Prevalence at t=1.8");
         assertEquals(0.0, Math.log(dyn.getPrevalenceTime(2.0)), tolerance, "Prevalence at t=2.0");
         
         // Test interpolation at intermediate point but on gridshift points
-        assertEquals(1.741106210845324, dyn.getPrevalenceTime(0.1), tolerance, "Prevalence at t=0.1");
-        assertEquals(0.45879046299891335, dyn.getPrevalenceTime(1.1), tolerance, "Prevalence at t=1.1");
-        assertEquals(0.25850366508689415, dyn.getPrevalenceTime(1.9), tolerance, "Prevalence at t=1.9");
-//        
-//        // Test interpolation at times not on grid
+        assertEquals(1.0, dyn.getPrevalenceTime(0.0), tolerance, "Prevalence at t=0.0");
+        assertEquals(1.6487212707001282, dyn.getPrevalenceTime(0.1), tolerance, "Prevalence at t=0.1");
+        assertEquals(0.6140588713927467, dyn.getPrevalenceTime(1.1), tolerance, "Prevalence at t=1.1");
+        assertEquals(0.36787944117144233, dyn.getPrevalenceTime(1.8), tolerance, "Prevalence at t=1.8");
         
+        // Test interpolation at times not on grid
         assertEquals(dyn.getPrevalenceTime(0.0), dyn.getPrevalenceTime(0.01), tolerance, "Prevalence at t=0.01");
         assertEquals(dyn.getPrevalenceTime(0.0), dyn.getPrevalenceTime(0.05), tolerance, "Prevalence at t=0.05");
         assertEquals(dyn.getPrevalenceTime(0.1), dyn.getPrevalenceTime(0.09), tolerance, "Prevalence at t=0.09");
@@ -78,15 +80,15 @@ public class SplinePrevalenceToNeTest {
         assertEquals(dyn.getPrevalenceTime(2.0), dyn.getPrevalenceTime(1.98), tolerance, "Prevalence at t=1.98");
     }
 
-    @Test
-    public void testIrregularGridSplineInterpolation() throws Exception {
+   @Test
+   public void testIrregularGridSplineInterpolation() throws Exception {
         // Rate shifts specified as fractions of root height: 0.5 and 1.0.
         // With the test tree's root height = 2.0, these map to absolute times 1.0 and 2.0.
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
         RateShifts gridRateShifts = buildRateShifts("0.0 0.24 0.76 1.68 2.0");
 
         // log-prevalence at knots
-        Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 7.0, 1.5, -2.0, 0.0, 4.0, -1.0, 0.0};
+        Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, -1.0, 0.0};
 
         // gamma (uninfectious rate)
         RealParameter gamma = new RealParameter(new Double[] { 75.0 });
@@ -112,25 +114,25 @@ public class SplinePrevalenceToNeTest {
         // Test interpolation at intermediate point but on gridshift points
         double tolerance = 1e-9;
         assertEquals(1.0, dyn.getPrevalenceTime(0.0), tolerance, "Prevalence at t=0.0");
-        assertEquals(3.040021253350453, dyn.getPrevalenceTime(0.24), tolerance, "Prevalence at t=0.24");
-        assertEquals(1309.6214076166518, dyn.getPrevalenceTime(0.76), tolerance, "Prevalence at t=0.76");
-        assertEquals(15.106990514646617, dyn.getPrevalenceTime(1.68), tolerance, "Prevalence at t=1.68");
+        assertEquals(3.3201169227365472, dyn.getPrevalenceTime(0.24), tolerance, "Prevalence at t=0.24");
+        assertEquals(14542.455069881033, dyn.getPrevalenceTime(0.76), tolerance, "Prevalence at t=0.76");
+        assertEquals(1.4622845894342276, dyn.getPrevalenceTime(1.68), tolerance, "Prevalence at t=1.68");
         assertEquals(1.0, dyn.getPrevalenceTime(2.0), tolerance, "Prevalence at t=2.0");
-        
-        // at time outside the grid
-        assertEquals(1.0, dyn.getPrevalenceTime(3.0), tolerance, "Prevalence at t=3.0");
-        assertEquals(1.0, dyn.getPrevalenceTime(10.0), tolerance, "Prevalence at t=10.0");
-    }
-    
-    @Test
-    public void testNeSplineInterpolation() throws Exception {
+
+       // at time outside the grid
+       assertEquals(1.0, dyn.getPrevalenceTime(3.0), tolerance, "Prevalence at t=3.0");
+       assertEquals(1.0, dyn.getPrevalenceTime(10.0), tolerance, "Prevalence at t=10.0");
+   }
+   
+   @Test
+   public void testNeSplineInterpolation() throws Exception {
         // Rate shifts specified as fractions of root height: 0.5 and 1.0.
         // With the test tree's root height = 2.0, these map to absolute times 1.0 and 2.0.
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
         RateShifts gridRateShifts = buildRateShifts("0.0 0.24 0.76 1.68 2.0");
 
         // log-prevalence at knots
-        Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 7.0, 1.5, -2.0, 0.0, 4.0, -1.0, 0.0};
+        Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, -1.0, 0.0};
 
         // gamma (uninfectious rate)
         RealParameter gamma = new RealParameter(new Double[] { 75.0 });
@@ -156,16 +158,16 @@ public class SplinePrevalenceToNeTest {
         // Test interpolation at intermediate point but on gridshift points
         double tolerance = 1e-9;
 
-        assertEquals(0.007644136727600229, dyn.getNeTime(0.0), tolerance, "Ne at t=0.0");
-        assertEquals(0.021105462990341873, dyn.getNeTime(0.24), tolerance, "Ne at t=0.24");
-        assertEquals(8.848148341013303, dyn.getNeTime(0.76), tolerance, "Ne at t=0.76");
-        assertEquals(0.07441497433106414, dyn.getNeTime(1.68), tolerance, "Ne at t=1.68");
-        assertEquals(0.02836701655438929, dyn.getNeTime(2.0), tolerance, "Ne at t=2.0");
-        
-     // at time outside the grid
-        assertEquals(0.02836701655438929, dyn.getNeTime(3.0), tolerance, "Ne at t=3.0");
-        assertEquals(0.02836701655438929, dyn.getNeTime(10.0), tolerance, "Ne at t=10.0");
-    }
+        assertEquals(0.007142857142857143, dyn.getNeTime(0.0), tolerance, "Ne at t=0.0");
+        assertEquals(0.023715120876689623, dyn.getNeTime(0.24), tolerance, "Ne at t=0.24");
+        assertEquals(130.80992463602675, dyn.getNeTime(0.76), tolerance, "Ne at t=0.76");
+        assertEquals(0.008238223039066071, dyn.getNeTime(1.68), tolerance, "Ne at t=1.68");
+        assertEquals(0.007999999999999997, dyn.getNeTime(2.0), tolerance, "Ne at t=2.0");
+       
+        // at time outside the grid
+        assertEquals(0.007999999999999997, dyn.getNeTime(3.0), tolerance, "Ne at t=3.0");
+        assertEquals(0.007999999999999997, dyn.getNeTime(10.0), tolerance, "Ne at t=10.0");
+   }
 //    
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {
         RateShifts rs = new RateShifts();

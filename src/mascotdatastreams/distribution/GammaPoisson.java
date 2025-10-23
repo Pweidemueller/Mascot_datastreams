@@ -70,6 +70,7 @@ public class GammaPoisson extends ParametricDistribution implements CountDistrib
     }
 
     // Keep internal state up-to-date
+    // TPDO this seems to use  GammaPoissonDistributionImpl but logPForMean does NOT -> inconsistent
     void refresh() {
         double mean = meanInput.get() == null ? 1.0 : meanInput.get().getArrayValue();
         double alpha = dispersionInput.get() == null ? 1.0 : dispersionInput.get().getArrayValue();
