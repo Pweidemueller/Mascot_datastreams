@@ -11,10 +11,6 @@
     <provider classname="mascotdatastreams.dynamics.NotAKnotSpline"/>
     <provider classname="mascotdatastreams.dynamics.SplinePrevalenceToNe"/>
     <provider classname="mascotdatastreams.util.TransmissionSmallerThan"/>
-<<<<<<< HEAD
-=======
-    <provider classname="mascotdatastreams.distribution.StructuredSkylinePrevalence"/>
->>>>>>> nfm
-
+	<provider classname="mascotdatastreams.distribution.StructuredSkylinePrevalence"/>
   </service>
 </package>

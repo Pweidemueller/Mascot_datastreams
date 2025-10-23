@@ -143,7 +143,7 @@
       <parameter id="uninfectiousRate.t:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">90.58463835048036</parameter>
       <parameter id="caseCounts.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">1</parameter>
       <parameter id="caseCounts.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">1</parameter>
-      <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" upper="1.0" name="stateNode">0.25</parameter>
+      <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">0.25</parameter>
     </state>
     <init id="RandomTree.t:SimDataset" spec="RandomTree" estimate="false" initial="@Tree.t:SimDataset" taxa="@SimDataset">
       <populationModel id="ConstantPopulation0.t:SimDataset" spec="ConstantPopulation">
@@ -191,22 +191,16 @@
         
         </distribution>
 
-        <distribution id="RegulariseTransmissionRates.Deme1:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
-
-          <spline idref="splinePrev.Deme1.t:SimDataset"/>
-
-        </distribution>
-
-        <distribution id="RegulariseTransmissionRates.Deme2:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
-
-          <spline idref="splinePrev.Deme2.t:SimDataset"/>
-
-        </distribution>
         <!-- <distribution id="RegulariseTransmissionRates.Deme1:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
+
           <spline idref="splinePrev.Deme1.t:SimDataset"/>
+
         </distribution>
+
         <distribution id="RegulariseTransmissionRates.Deme2:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
+
           <spline idref="splinePrev.Deme2.t:SimDataset"/>
+
         </distribution> -->
         <distribution id="Mascot.t:SimDataset" spec="mascot.distribution.Mascot" tree="@Tree.t:SimDataset">
           <dynamics id="StructuredSkyline.t:SimDataset" spec="mascotdatastreams.distribution.StructuredSkylinePrevalence" dimension="2" forwardsMigration="@migrationRatesSkyline.t:SimDataset" fromBeauti="true" maxRate="1000">
@@ -428,6 +422,7 @@
       <log idref="StructuredSkyline.t:SimDataset"/>
       <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="log"/>
       <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="log"/>
+      <log idref="NeDynamics.Deme1.t:SimDataset"/>
       <log idref="NeDynamics.Deme1.t:SimDataset"/>
     </logger>
     <logger id="screenlog" spec="Logger" logEvery="1000">
