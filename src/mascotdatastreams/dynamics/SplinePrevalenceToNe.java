@@ -127,12 +127,12 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
             printStream.print("I" + i + "\t");
         }
-//        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
-//            printStream.print("Ne_" + i + "\t");
-//        }
-//        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
-//            printStream.print("transmissionRate_" + i + "\t");
-//        }
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            printStream.print("Ne_" + i + "\t");
+        }
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            printStream.print("transmissionRate_" + i + "\t");
+        }
     }
 
     @Override
@@ -143,18 +143,18 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
             double prevalence = getPrevalenceTime(t);
             printStream.print(Math.log(prevalence) + "\t");
         }
-//        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
-//            double t = spline.getGridPointTime(i);
-//            double Ne = getNeTime(t);
-//            printStream.print(Ne + "\t");
-//        }
-//        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
-//            double t = spline.getGridPointTime(i);
-//            double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
-//            // Clamp transmission rate to minimum value
-////            transmissionRate = Math.max(transmissionRate, TSR_MIN);
-//            printStream.print(transmissionRate + "\t");
-//        }
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            double t = spline.getGridPointTime(i);
+            double Ne = getNeTime(t);
+            printStream.print(Ne + "\t");
+        }
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            double t = spline.getGridPointTime(i);
+            double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
+            // Clamp transmission rate to minimum value
+//            transmissionRate = Math.max(transmissionRate, TSR_MIN);
+            printStream.print(transmissionRate + "\t");
+        }
     }
 
     @Override

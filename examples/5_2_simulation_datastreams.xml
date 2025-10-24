@@ -423,7 +423,7 @@
       <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="log"/>
       <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="log"/>
       <log idref="NeDynamics.Deme1.t:SimDataset"/>
-      <log idref="NeDynamics.Deme1.t:SimDataset"/>
+      <log idref="NeDynamics.Deme2.t:SimDataset"/>
     </logger>
     <logger id="screenlog" spec="Logger" logEvery="1000">
       <log idref="posterior"/>
