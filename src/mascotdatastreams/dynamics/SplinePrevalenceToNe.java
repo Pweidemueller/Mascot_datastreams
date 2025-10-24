@@ -146,7 +146,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
             double t = spline.getGridPointTime(i);
             double Ne = getNeTime(t);
-            printStream.print(Ne + "\t");
+            printStream.print(Math.log(Ne) + "\t");
         }
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
             double t = spline.getGridPointTime(i);
