@@ -143,7 +143,7 @@
       <parameter id="uninfectiousRate.t:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">90.58463835048036</parameter>
       <parameter id="caseCounts.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">1</parameter>
       <parameter id="caseCounts.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">1</parameter>
-      <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" upper="0.5" name="stateNode">0.25</parameter>
+      <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">0.25</parameter>
     </state>
     <init id="RandomTree.t:SimDataset" spec="RandomTree" estimate="false" initial="@Tree.t:SimDataset" taxa="@SimDataset">
       <populationModel id="ConstantPopulation0.t:SimDataset" spec="ConstantPopulation">
@@ -163,7 +163,7 @@
           <prevalenceSpline idref="splinePrev.Deme2.t:SimDataset"/>
           <caseCounts idref="caseCounts.Deme2:SimDataset"/>
           <caseTimes idref="caseTimes.Deme2:SimDataset"/>
-          <scaling idref="caseCounts.scaling.Deme1:SimDataset"/>
+          <scaling idref="caseCounts.scaling.Deme2:SimDataset"/>
           <distribution id="gammaPoisson.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
         </distribution>
         <!-- <distribution id="RegulariseTransmissionRates.Deme1:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
@@ -234,7 +234,7 @@
           <x id="caseCounts.dispersionPrior:SimDataset" spec="mascot.util.Final" arg="@caseCounts.dispersion:SimDataset"/>
           <LogNormal id="LogNormalDistributionModel.3" name="distr">
             <parameter id="RealParameter.100" spec="parameter.RealParameter" estimate="false" name="M">0</parameter>
-            <parameter id="RealParameter.101" spec="parameter.RealParameter" estimate="false" name="S">0.5</parameter>
+            <parameter id="RealParameter.101" spec="parameter.RealParameter" estimate="false" name="S">1</parameter>
           </LogNormal>
         </prior>
         <prior id="CaseCountsScaling.Deme1.Prior:SimDataset" name="distribution" x="@caseCounts.scaling.Deme1:SimDataset">
@@ -334,7 +334,7 @@
       <transformations id="AVMNLogTransform.Mascot.SimDataset" spec="operator.kernel.Transform$LogTransform">
         <parameter idref="migrationRatesSkyline.t:SimDataset" name="f"/>
         <parameter idref="caseCounts.scaling.Deme1:SimDataset" name="f"/>
-        <!-- <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="f"/> -->
+        <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="f"/>
         <parameter idref="caseCounts.dispersion:SimDataset" name="f"/>
       </transformations>
       <transformations id="AVMNNoTransform.Mascot.SimDataset" spec="operator.kernel.Transform$NoTransform">
@@ -348,6 +348,7 @@
       <upLogParameter idref="SkylinePrev.Deme1.t:SimDataset"/>
       <downRealParameter idref="caseCounts.scaling.Deme1:SimDataset"/>
     </operator>
+
     <operator id="UpDownPrevScaling.Deme2:SimDataset" spec="mascotdatastreams.operators.UpDownLogScaleOperator" scaleFactor="0.5" weight="1.5" optimise="true">
       <upLogParameter idref="SkylinePrev.Deme2.t:SimDataset"/>
       <downRealParameter idref="caseCounts.scaling.Deme2:SimDataset"/>
@@ -362,6 +363,7 @@
       <transformations id="AVMNSumTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$LogConstrainedSumTransform"/>
       <transformations id="AVMNLogTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$LogTransform">
         <parameter idref="caseCounts.scaling.Deme1:SimDataset" name="f"/>
+        <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="f"/>
       </transformations>
       <transformations id="AVMNNoTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$NoTransform">
         <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="f"/>

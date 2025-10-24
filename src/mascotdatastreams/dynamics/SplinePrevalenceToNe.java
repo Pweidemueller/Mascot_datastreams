@@ -40,7 +40,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
 
     // Constants
     // TODO revisit this, since ideally we don't need to use clipping but the sampler should reject unreasonable transmissionrate values
-    private static final double TSR_MIN = 1e-2;
+    private static final double TSR_MIN = 1;
     
     // Member variables
     private NotAKnotSpline spline;
