@@ -12,6 +12,7 @@
     <provider classname="mascotdatastreams.dynamics.SplinePrevalenceToNe"/>
     <provider classname="mascotdatastreams.util.TransmissionSmallerThan"/>
     <provider classname="mascotdatastreams.distribution.StructuredSkylinePrevalence"/>
+    <provider classname="mascotdatastreams.operators.UpDownLogScaleOperator"/>
 
   </service>
 </package>

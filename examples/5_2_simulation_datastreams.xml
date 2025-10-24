@@ -166,12 +166,12 @@
           <scaling idref="caseCounts.scaling.Deme1:SimDataset"/>
           <distribution id="gammaPoisson.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
         </distribution>
-        <distribution id="RegulariseTransmissionRates.Deme1:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
+        <!-- <distribution id="RegulariseTransmissionRates.Deme1:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
           <spline idref="splinePrev.Deme1.t:SimDataset"/>
         </distribution>
         <distribution id="RegulariseTransmissionRates.Deme2:SimDataset" spec='mascotdatastreams.util.TransmissionSmallerThan'>
           <spline idref="splinePrev.Deme2.t:SimDataset"/>
-        </distribution>
+        </distribution> -->
         <distribution id="Mascot.t:SimDataset" spec="mascot.distribution.Mascot" tree="@Tree.t:SimDataset">
           <dynamics id="StructuredSkyline.t:SimDataset" spec="mascotdatastreams.distribution.StructuredSkylinePrevalence" dimension="2" forwardsMigration="@migrationRatesSkyline.t:SimDataset" fromBeauti="true" maxRate="1000">
             <NeDynamics id="NeDynamicsList.t:SimDataset" spec="mascot.util.InitializedNeDynamicsList">
@@ -342,12 +342,18 @@
         <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="f"/>
       </transformations>
     </operator>
-    <operator id="SkylinePrev.Deme1.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme1.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
-    <operator id="SkylinePrev.Deme2.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme2.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
+    <!-- Joint up-down operator for prevalence and case counts scaling -->
+    <!-- Prevalence (log space) and scaling (real space) move in opposite directions -->
+    <operator id="UpDownPrevScaling.Deme1:SimDataset" spec="mascotdatastreams.operators.UpDownLogScaleOperator" scaleFactor="0.5" weight="1.5" optimise="true">
+      <upLogParameter idref="SkylinePrev.Deme1.t:SimDataset"/>
+      <downRealParameter idref="caseCounts.scaling.Deme1:SimDataset"/>
+    </operator>
+    <operator id="UpDownPrevScaling.Deme2:SimDataset" spec="mascotdatastreams.operators.UpDownLogScaleOperator" scaleFactor="0.5" weight="1.5" optimise="true">
+      <upLogParameter idref="SkylinePrev.Deme2.t:SimDataset"/>
+      <downRealParameter idref="caseCounts.scaling.Deme2:SimDataset"/>
+    </operator>
 
     <operator id="migrationRatesScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@migrationRatesSkyline.t:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.5"/>
-    <operator id="SkylinePrev.Deme1.ScalerXX.t:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.scaling.Deme1:SimDataset" scaleFactor="0.5" weight="0.5"/>
-    <!-- <operator id="SkylinePrev.Deme2.ScalerXX.t:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.scaling.Deme2:SimDataset" scaleFactor="0.5" weight="2.0"/> -->
     <operator id="CaseCountsDispersionScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.dispersion:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.5"/>
 
 
@@ -362,6 +368,9 @@
         <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="f"/>
       </transformations>
     </operator>
+
+    <operator id="ScaleAll" spec="targetedbeast.operators.IntervalScaleOperator" tree="@Tree.t:SimDataset" weight="0.5" scaleFactor="0.9" down="@clockRate.c:SimDataset"/>
+    <operator id="ScaleIntervalsRandomly" spec="targetedbeast.operators.IntervalScaleOperator" tree="@Tree.t:SimDataset" weight="0.5" scaleFactor="0.9" scaleAllNodesIndependently="true"/>
 
 
     <operator id="MascotBICEPSEpochTop.t:SimDataset" spec="EpochFlexOperator" scaleFactor="0.1" tree="@Tree.t:SimDataset" weight="2.0"/>

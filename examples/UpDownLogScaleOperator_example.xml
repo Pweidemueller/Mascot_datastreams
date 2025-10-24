@@ -1,0 +1,110 @@
+<!-- Example usage of UpDownLogScaleOperator -->
+<!-- This operator jointly scales parameters in log space and real space -->
+<!-- Use this to maintain relationships between prevalence (log space) and scaling factors (real space) -->
+
+<!-- EXAMPLE 1: Basic up-down operator for Deme1 -->
+<!-- Prevalence (already in log space) goes UP, case counts scaling (real space) goes DOWN -->
+<operator id="UpDownPrevScaling.Deme1:SimDataset"
+          spec="mascotdatastreams.operators.UpDownLogScaleOperator"
+          scaleFactor="0.5"
+          weight="1.0">
+  <!-- Prevalence parameter is ALREADY IN LOG SPACE (SkylinePrev = log(infected)) -->
+  <upLogParameter idref="SkylinePrev.Deme1.t:SimDataset"/>
+  <!-- Case counts scaling is IN REAL SPACE (positive real number) -->
+  <downRealParameter idref="caseCounts.scaling.Deme1:SimDataset"/>
+</operator>
+
+<!-- EXAMPLE 2: Up-down operator for Deme2 -->
+<operator id="UpDownPrevScaling.Deme2:SimDataset"
+          spec="mascotdatastreams.operators.UpDownLogScaleOperator"
+          scaleFactor="0.5"
+          weight="1.0">
+  <upLogParameter idref="SkylinePrev.Deme2.t:SimDataset"/>
+  <downRealParameter idref="caseCounts.scaling.Deme2:SimDataset"/>
+</operator>
+
+<!-- EXAMPLE 3: Joint operator for both demes at once -->
+<!-- Both demes' prevalence go up together, both scaling factors go down together -->
+<operator id="UpDownPrevScaling.BothDemes:SimDataset"
+          spec="mascotdatastreams.operators.UpDownLogScaleOperator"
+          scaleFactor="0.3"
+          weight="2.0"
+          optimise="true">
+  <!-- Both prevalence parameters (in log space) go up -->
+  <upLogParameter idref="SkylinePrev.Deme1.t:SimDataset"/>
+  <upLogParameter idref="SkylinePrev.Deme2.t:SimDataset"/>
+  <!-- Both scaling parameters (in real space) go down -->
+  <downRealParameter idref="caseCounts.scaling.Deme1:SimDataset"/>
+  <downRealParameter idref="caseCounts.scaling.Deme2:SimDataset"/>
+</operator>
+
+<!-- EXAMPLE 4: Reverse direction - scaling up, prevalence down -->
+<operator id="UpDownScalingPrev.Deme1:SimDataset"
+          spec="mascotdatastreams.operators.UpDownLogScaleOperator"
+          scaleFactor="0.5"
+          weight="1.0">
+  <!-- Scaling goes UP -->
+  <upRealParameter idref="caseCounts.scaling.Deme1:SimDataset"/>
+  <!-- Prevalence goes DOWN -->
+  <downLogParameter idref="SkylinePrev.Deme1.t:SimDataset"/>
+</operator>
+
+<!--
+HOW IT WORKS:
+=============
+
+The operator generates a single random walk step: logScaler ~ Normal(0, scaleFactor²)
+
+For LOG-SPACE parameters (upLogParameter/downLogParameter):
+  - upLogParameter:   newValue = oldValue + logScaler
+  - downLogParameter: newValue = oldValue - logScaler
+
+For REAL-SPACE parameters (upRealParameter/downRealParameter):
+  - upRealParameter:   newValue = oldValue × exp(logScaler)
+  - downRealParameter: newValue = oldValue × exp(-logScaler)
+
+The Hastings ratio is automatically calculated to account for the transformations.
+
+PARAMETER SPACE GUIDE:
+======================
+LOG SPACE (use upLogParameter/downLogParameter):
+  - SkylinePrev.Deme*.t:SimDataset (log prevalence)
+  - Any parameter stored as log(x)
+
+REAL SPACE (use upRealParameter/downRealParameter):
+  - caseCounts.scaling.Deme*:SimDataset (positive scaling factor)
+  - migrationRates (positive rates)
+  - Ne values (positive population sizes)
+
+TUNING:
+=======
+- scaleFactor: Controls step size (typical values: 0.1-1.0)
+  - Smaller = smaller steps, higher acceptance rate
+  - Larger = larger steps, lower acceptance rate
+- weight: Relative frequency (higher = called more often)
+- optimise="true": Auto-tunes scaleFactor for ~23.4% acceptance
+
+REPLACEMENT STRATEGY:
+=====================
+If you currently have separate operators like:
+  <operator id="SkylinePrev.Deme1.ScalerX.t:SimDataset"
+            spec="operator.kernel.BactrianRandomWalkOperator"
+            parameter="@SkylinePrev.Deme1.t:SimDataset"
+            scaleFactor="0.5" weight="1.0"/>
+  <operator id="SkylinePrev.Deme1.ScalerXX.t:SimDataset"
+            spec="kernel.BactrianScaleOperator"
+            parameter="@caseCounts.scaling.Deme1:SimDataset"
+            scaleFactor="0.5" weight="0.5"/>
+
+Replace with ONE joint operator:
+  <operator id="UpDownPrevScaling.Deme1:SimDataset"
+            spec="mascotdatastreams.operators.UpDownLogScaleOperator"
+            scaleFactor="0.5" weight="1.5">
+    <upLogParameter idref="SkylinePrev.Deme1.t:SimDataset"/>
+    <downRealParameter idref="caseCounts.scaling.Deme1:SimDataset"/>
+  </operator>
+
+This maintains the biological relationship: when true prevalence increases,
+the case count scaling factor (detection rate) should decrease to explain
+the same observed case counts.
+-->
