@@ -40,7 +40,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
 
     // Constants
     // TODO revisit this, since ideally we don't need to use clipping but the sampler should reject unreasonable transmissionrate values
-    private static final double TSR_MIN = 1e-2;
+    private static final double TSR_MIN = 1;
     
     // Member variables
     private NotAKnotSpline spline;
@@ -146,7 +146,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
             double t = spline.getGridPointTime(i);
             double Ne = getNeTime(t);
-            printStream.print(Ne + "\t");
+            printStream.print(Math.log(Ne) + "\t");
         }
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
             double t = spline.getGridPointTime(i);

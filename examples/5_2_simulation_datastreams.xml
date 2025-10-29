@@ -274,7 +274,7 @@
           <x id="caseCounts.dispersionPrior:SimDataset" spec="mascot.util.Final" arg="@caseCounts.dispersion:SimDataset"/>
           <LogNormal id="LogNormalDistributionModel.3" name="distr">
             <parameter id="RealParameter.100" spec="parameter.RealParameter" estimate="false" name="M">0</parameter>
-            <parameter id="RealParameter.101" spec="parameter.RealParameter" estimate="false" name="S">0.5</parameter>
+            <parameter id="RealParameter.101" spec="parameter.RealParameter" estimate="false" name="S">1</parameter>
           </LogNormal>
         </prior>
         <prior id="CaseCountsScaling.Deme1.Prior:SimDataset" name="distribution" x="@caseCounts.scaling.Deme1:SimDataset">
@@ -369,7 +369,7 @@
     </operator>
 
 
-    <operator id="AVMNOperator.Mascot.SimDataset" spec="kernel.AdaptableVarianceMultivariateNormalOperator" allowNonsense="true" beta="0.25" burnin="400" initial="800" weight="10.0">
+    <operator id="AVMNOperator.Mascot.SimDataset" spec="kernel.AdaptableVarianceMultivariateNormalOperator" allowNonsense="true" beta="0.1" burnin="400" initial="800" weight="2.0">
       <transformations id="AVMNSumTransform.Mascot.SimDataset" spec="operator.kernel.Transform$LogConstrainedSumTransform"/>
       <transformations id="AVMNLogTransform.Mascot.SimDataset" spec="operator.kernel.Transform$LogTransform">
         <parameter idref="migrationRatesSkyline.t:SimDataset" name="f"/>
@@ -382,13 +382,37 @@
         <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="f"/>
       </transformations>
     </operator>
-    <operator id="SkylinePrev.Deme1.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme1.t:SimDataset" scaleFactor="0.5" weight="2.0"/>
-    <operator id="SkylinePrev.Deme2.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme2.t:SimDataset" scaleFactor="0.5" weight="2.0"/>
+    <!-- Joint up-down operator for prevalence and case counts scaling -->
+    <!-- Prevalence (log space) and scaling (real space) move in opposite directions -->
+    <operator id="UpDownPrevScaling.Deme1:SimDataset" spec="mascotdatastreams.operators.UpDownLogScaleOperator" scaleFactor="0.5" weight="1.5" optimise="true">
+      <upLogParameter idref="SkylinePrev.Deme1.t:SimDataset"/>
+      <downRealParameter idref="caseCounts.scaling.Deme1:SimDataset"/>
+    </operator>
 
-    <operator id="migrationRatesScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@migrationRatesSkyline.t:SimDataset" scaleFactor="0.5" upper="10.0" weight="2.0"/>
-    <operator id="SkylinePrev.Deme1.ScalerXX.t:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.scaling.Deme1:SimDataset" scaleFactor="0.5" weight="2.0"/>
-    <operator id="SkylinePrev.Deme2.ScalerXX.t:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.scaling.Deme2:SimDataset" scaleFactor="0.5" weight="2.0"/>
-    <operator id="CaseCountsDispersionScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.dispersion:SimDataset" scaleFactor="0.5" upper="10.0" weight="2.0"/>
+    <operator id="UpDownPrevScaling.Deme2:SimDataset" spec="mascotdatastreams.operators.UpDownLogScaleOperator" scaleFactor="0.5" weight="1.5" optimise="true">
+      <upLogParameter idref="SkylinePrev.Deme2.t:SimDataset"/>
+      <downRealParameter idref="caseCounts.scaling.Deme2:SimDataset"/>
+    </operator>
+
+    <operator id="migrationRatesScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@migrationRatesSkyline.t:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.5"/>
+    <operator id="CaseCountsDispersionScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.dispersion:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.5"/>
+
+
+
+    <operator id="AVMNOperator.Mascot.SimDataset2" spec="kernel.AdaptableVarianceMultivariateNormalOperator" allowNonsense="true" beta="0.1" burnin="400" initial="800" weight="2.0">
+      <transformations id="AVMNSumTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$LogConstrainedSumTransform"/>
+      <transformations id="AVMNLogTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$LogTransform">
+        <parameter idref="caseCounts.scaling.Deme1:SimDataset" name="f"/>
+        <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="f"/>
+      </transformations>
+      <transformations id="AVMNNoTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$NoTransform">
+        <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="f"/>
+        <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="f"/>
+      </transformations>
+    </operator>
+
+    <operator id="ScaleAll" spec="targetedbeast.operators.IntervalScaleOperator" tree="@Tree.t:SimDataset" weight="0.5" scaleFactor="0.9" down="@clockRate.c:SimDataset"/>
+    <operator id="ScaleIntervalsRandomly" spec="targetedbeast.operators.IntervalScaleOperator" tree="@Tree.t:SimDataset" weight="0.5" scaleFactor="0.9" scaleAllNodesIndependently="true"/>
 
 
     <operator id="MascotBICEPSEpochTop.t:SimDataset" spec="EpochFlexOperator" scaleFactor="0.1" tree="@Tree.t:SimDataset" weight="2.0"/>

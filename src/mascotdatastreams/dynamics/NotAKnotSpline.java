@@ -5,7 +5,7 @@ import beast.base.core.Input;
 import beast.base.inference.CalculationNode;
 import beast.base.inference.parameter.RealParameter;
 import mascot.dynamics.RateShifts;
-import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 
@@ -305,9 +305,9 @@ public class NotAKnotSpline extends CalculationNode {
     }
 
     /**
-     * Builds the Akima spline interpolation using Apache Commons Math.
-     * Akima spline is a C1 differentiable piecewise cubic polynomial that is more stable
-     * than cubic splines and does not exhibit overshoot.
+     * Builds the not-a-knot cubic spline interpolation using Apache Commons Math.
+     * Not-a-knot spline is a natural cubic spline with modified boundary conditions
+     * that makes the third derivative continuous at the second and second-to-last knots.
      */
     private void buildSpline() {
         // rateShifts already includes time 0 as the first value
@@ -324,8 +324,9 @@ public class NotAKnotSpline extends CalculationNode {
             knotValues[i] = infected.getArrayValue(i);
         }
 
-        // Create the spline using Apache Commons Math Akima interpolator
-        AkimaSplineInterpolator interpolator = new AkimaSplineInterpolator();
+        // Create the spline using Apache Commons Math SplineInterpolator
+        // This creates a natural cubic spline (not-a-knot boundary conditions)
+        SplineInterpolator interpolator = new SplineInterpolator();
         splineFunction = interpolator.interpolate(knotTimes, knotValues);
     }
 }

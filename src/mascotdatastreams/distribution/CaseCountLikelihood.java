@@ -75,8 +75,11 @@ public class CaseCountLikelihood extends Distribution {
         validated = true;
     }
     
+    int ii=0;
+    
     @Override
     public double calculateLogP() {
+    	ii++;
         logP = 0.0;
         // Neutral likelihood if there are no observations
         if (caseCounts == null || caseCounts.getDimension() == 0) {
