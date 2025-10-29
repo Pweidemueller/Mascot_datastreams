@@ -71,8 +71,15 @@ public class NotAKnotSpline extends CalculationNode {
         for (int i = 0; i < gridRateShifts.getDimension(); i++) {
             time[i] = gridRateShifts.getValue(i);
 
-            // Evaluate spline value (log prevalence)
-            double logI = splineFunction.value(time[i]);
+            double logI;
+            // TODO: check if we want to throw an error or take value at first or last knot
+            if (time[i] < rateShifts.getValue(0)) {
+                logI = splineFunction.value(rateShifts.getValue(0)); 
+            } else if (time[i] > rateShifts.getValue(rateShifts.getDimension() - 1)) {
+                logI = splineFunction.value(rateShifts.getValue(rateShifts.getDimension() - 1)); // logI at last knot
+            } else {
+                logI = splineFunction.value(time[i]);
+            }
             I[i] = Math.exp(logI);
 
             // Evaluate spline derivative d(log I)/dτ where τ is backward time
@@ -221,8 +228,12 @@ public class NotAKnotSpline extends CalculationNode {
         if (!ratesKnows) {
             recalculateRates();
         }
-
-        return splineFunction.derivative().value(t);
+        // TODO: check if we want to throw an error or return 0.0
+        if (t < time[0] || t > time[time.length - 1]) {
+            return 0.0;
+        } else {
+            return splineFunction.derivative().value(t);
+        }
     }
 
     public double getTranssmissionRateAtGridPoint(double t) {
@@ -305,9 +316,8 @@ public class NotAKnotSpline extends CalculationNode {
     }
 
     /**
-     * Builds the not-a-knot cubic spline interpolation using Apache Commons Math.
-     * Not-a-knot spline is a natural cubic spline with modified boundary conditions
-     * that makes the third derivative continuous at the second and second-to-last knots.
+     * Builds a natural cubic spline interpolation using Apache Commons Math.
+     * Boundary conditions are natural (second derivative is 0 at the first and last knot)
      */
     private void buildSpline() {
         // rateShifts already includes time 0 as the first value
@@ -325,7 +335,7 @@ public class NotAKnotSpline extends CalculationNode {
         }
 
         // Create the spline using Apache Commons Math SplineInterpolator
-        // This creates a natural cubic spline (not-a-knot boundary conditions)
+        // This creates a natural cubic spline (natural boundary conditions)
         SplineInterpolator interpolator = new SplineInterpolator();
         splineFunction = interpolator.interpolate(knotTimes, knotValues);
     }

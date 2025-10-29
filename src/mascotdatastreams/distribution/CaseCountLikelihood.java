@@ -31,9 +31,6 @@ public class CaseCountLikelihood extends Distribution {
     public final Input<RealParameter> caseTimesInput = new Input<>(
             "caseTimes", "Observation times corresponding 1:1 to caseCounts", Validate.REQUIRED);
     final public Input<ParametricDistribution> distInput = new Input<>("distribution", "Distribution used to calculate likelihood. Currently only GammaPoisson is supported.", Validate.REQUIRED);
-    // Optional placeholder if needed elsewhere; not used directly in this likelihood
-    public final Input<RealParameter> uninfectiousRateInput = new Input<>(
-            "uninfectiousRate", "Fixed uninfectious rate (per time unit), optional.", Validate.OPTIONAL);
     // Optional scaling of the mean (akin to a sampling/surveillance rate in a given deme); defaults to 1.0 (no scaling).
     public final Input<RealParameter> scalingInput = new Input<>(
             "scaling", "Scaling factor applied to the prevalence-derived mean; must be > 0.", Validate.OPTIONAL);
@@ -130,39 +127,9 @@ public class CaseCountLikelihood extends Distribution {
         }
         return logP;
     }
-
+    // TODO: think of a more granular decision on when to recalculate
     @Override
     public boolean requiresRecalculation() {
-        // boolean dirty = false;
-        // // Upstream process (Skygrowth) driving prevalence
-        // if (prevalence != null && prevalence.isDirty()) dirty = true;
-        // // Observations
-        // if (caseCounts != null) {
-        //     int n = caseCounts.getDimension();
-        //     for (int i = 0; i < n; i++) {
-        //         if (caseCounts.isDirty(i)) { dirty = true; break; }
-        //     }
-        // }
-        // if (caseTimes != null) {
-        //     int n = caseTimes.getDimension();
-        //     for (int i = 0; i < n; i++) {
-        //         if (caseTimes.isDirty(i)) { dirty = true; break; }
-        //     }
-        // }
-        // // Optional parameters
-        // RealParameter scaleParam = scalingInput.get();
-        // if (scaleParam != null && scaleParam.isDirty(0)) dirty = true;
-        // RealParameter uninf = uninfectiousRateInput.get();
-        // if (uninf != null && uninf.isDirty(0)) dirty = true;
-        // // Distribution's dispersion parameter (if GammaPoisson with RealParameter dispersion)
-        // if (dist instanceof GammaPoisson) {
-        //     GammaPoisson gp = (GammaPoisson) dist;
-        //     if (gp.dispersionInput.get() instanceof RealParameter) {
-        //         RealParameter disp = (RealParameter) gp.dispersionInput.get();
-        //         if (disp != null && disp.isDirty(0)) dirty = true;
-        //     }
-        // }
-        // return dirty || super.requiresRecalculation();
         return true;
     }
 
