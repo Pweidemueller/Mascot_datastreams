@@ -120,10 +120,10 @@ def main():
     args = parse_args()
     # Inputs mirrored from the updated Java test
     # Observation times and counts per deme
-    times0 = [0.0, 0.1, 0.52, 0.98, 1.47, 2.0]
-    counts0 = [5.0, 7.0, 6.0, 8.0, 10.0, 0.0]
-    times1 = [0.0, 0.15, 0.56, 0.98, 1.78, 1.98]
-    counts1 = [3.0, 4.0, 5.0, 6.0, 8.0, 2.0]
+    times0 = [-0.1, 0.0, 0.1, 0.52, 0.98, 1.47, 2.0]
+    counts0 = [2.0, 100, 5480, 1500, 560, 34, 0.0]
+    times1 = [-0.1, 0.0, 0.15, 0.56, 0.98, 1.78, 1.98]
+    counts1 = [1.0, 124, 178, 1000, 1487, 246, 2.0]
 
     # Knot times (RateShifts value string in test)
     if args.rate_shifts is None:
