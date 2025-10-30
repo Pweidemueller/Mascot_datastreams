@@ -26,6 +26,7 @@ import beast.base.inference.parameter.RealParameter;
  */
 @Description("Gamma-Poisson (Negative Binomial) distribution parameterised by mean and dispersion (alpha).")
 public class GammaPoisson extends ParametricDistribution implements CountDistributionWithMean {
+    private static final double PROB_EPS = 1e-16; // shared clamp to avoid log(0)
     public final Input<Function> meanInput = new Input<>("mean", "Mean (mu) of the distribution.");
     public final Input<Function> dispersionInput = new Input<>("dispersion", "Dispersion (alpha) parameter.");
 
@@ -70,7 +71,8 @@ public class GammaPoisson extends ParametricDistribution implements CountDistrib
     }
 
     // Keep internal state up-to-date
-    // TPDO this seems to use  GammaPoissonDistributionImpl but logPForMean does NOT -> inconsistent
+    // TODO: Both instance methods (pmf/logPmf) use GammaPoissonDistributionImpl while
+    //       logPForMean is a stateless calculation using the same parameterization; these are consistent.
     void refresh() {
         double mean = meanInput.get() == null ? 1.0 : meanInput.get().getArrayValue();
         double alpha = dispersionInput.get() == null ? 1.0 : dispersionInput.get().getArrayValue();
@@ -84,7 +86,7 @@ public class GammaPoisson extends ParametricDistribution implements CountDistrib
         double p = r / (r + mean);
         // Defensive clamp to avoid log(0)
         // TODO revisit this clamp
-        p = Math.min(1 - 1e-16, Math.max(1e-16, p));
+        p = Math.min(1 - PROB_EPS, Math.max(PROB_EPS, p));
         dist = new GammaPoissonDistributionImpl(r, p);
     }
 
@@ -96,7 +98,11 @@ public class GammaPoisson extends ParametricDistribution implements CountDistrib
 
     @Override
     public double getMeanWithoutOffset() {
-        return meanInput.get().getArrayValue();
+        Function meanFn = meanInput.get();
+        if (meanFn == null) {
+            return 1.0; // consistent with refresh() default
+        }
+        return meanFn.getArrayValue();
     }
 
     // Public convenience methods requested: PMF and logPMF
@@ -128,14 +134,9 @@ public class GammaPoisson extends ParametricDistribution implements CountDistrib
         double r = 1.0 / alpha;
         double p = r / (r + mean);
         // TODO revisit this clamp
-        p = Math.min(1 - 1e-16, Math.max(1e-16, p));
-        // log PMF = ln Γ(r + x) - ln Γ(r) - ln Γ(x+1) + r ln p + x ln(1-p)
-        double logGammaRK = Gamma.logGamma(r + x);
-        double logGammaR = Gamma.logGamma(r);
-        double logGammaK1 = Gamma.logGamma(x + 1.0);
-        double logP = Math.log(p);
-        double log1mP = Math.log(1.0 - p);
-        return logGammaRK - logGammaR - logGammaK1 + r * logP + x * log1mP;
+        p = Math.min(1 - PROB_EPS, Math.max(PROB_EPS, p));
+        // Delegate to the inner distribution to ensure a single implementation of the PMF
+        return new GammaPoissonDistributionImpl(r, p).logProbability(x);
     }
 }
 

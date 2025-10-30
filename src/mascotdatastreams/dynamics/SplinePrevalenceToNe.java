@@ -13,14 +13,14 @@ import java.util.List;
 /**
  * Maps log-prevalence dynamics to an Ne(t) process using spline interpolation.
  * 
- * This class takes a NotAKnotSpline for log-prevalence interpolation and maps
+ * This class takes a Spline for log-prevalence interpolation and maps
  * the prevalence to coalescent effective population size Ne(t) using the transmission rate
  * formula: Ne(t) = I(t) / (c * transmission_rate(t)), where transmission_rate(t) 
  * is the derivative of log-prevalence plus the uninfectious rate.
  * 
  * Key differences from Skygrowth:
  * - Uses spline interpolation instead of piecewise-exponential
- * - Takes a pre-computed NotAKnotSpline as input rather than individual parameters
+ * - Takes a pre-computed Spline as input rather than individual parameters
  * - Provides analytical derivatives via spline
  * - Uses precomputed grid points for efficient lookup
  */
@@ -28,8 +28,8 @@ import java.util.List;
 public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     
     // Required inputs
-    final public Input<NotAKnotSpline> splineInput = new Input<>("spline",
-            "Not-a-knot spline for log-prevalence interpolation", 
+    final public Input<Spline> splineInput = new Input<>("spline",
+            "Spline for log-prevalence interpolation", 
             Input.Validate.REQUIRED);
     
     
@@ -43,7 +43,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     private static final double TSR_MIN = 1;
     
     // Member variables
-    private NotAKnotSpline spline;
+    private Spline spline;
     private RealParameter coalescentScale;
     
     boolean NesKnown = false;

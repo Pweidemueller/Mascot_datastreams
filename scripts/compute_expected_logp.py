@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Compute expected log-likelihood (logP) for case counts using the same logic as
-CaseCountLikelihood + NotAKnotSpline in the Java codebase, but independently in Python.
+CaseCountLikelihood + Spline in the Java codebase, but independently in Python.
 
 Key points replicated:
 - Not-a-knot cubic spline on log-prevalence at knot times (RateShifts times)
@@ -23,7 +23,7 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Compute expected log-likelihood (logP) for case counts using the same logic as CaseCountLikelihood + NotAKnotSpline in the Java codebase, but independently in Python."
+        description="Compute expected log-likelihood (logP) for case counts using the same logic as CaseCountLikelihood + Spline in the Java codebase, but independently in Python."
     )
     parser.add_argument(
         "--rate_shifts",
@@ -70,7 +70,7 @@ def build_natural_cubic_spline(knots_times: List[float], knots_values: List[floa
 def nearest_grid_value(
     grid_times: List[float], grid_values: List[float], t: float
 ) -> float:
-    """Mimic NotAKnotSpline.getPrevalenceAtGridPoint: choose nearest grid point (left on tie)."""
+    """Mimic Spline.getPrevalenceAtGridPoint: choose nearest grid point (left on tie)."""
     if t <= grid_times[0]:
         return grid_values[0]
     if t >= grid_times[-1]:

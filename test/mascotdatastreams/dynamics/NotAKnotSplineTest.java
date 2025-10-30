@@ -25,8 +25,8 @@ public class NotAKnotSplineTest {
         // gamma (uninfectious rate)
         RealParameter gamma = new RealParameter(new Double[] { 75.0 });
 
-        // Create the NotAKnotSpline first
-        NotAKnotSpline spline = new NotAKnotSpline();
+        // Create the Spline first
+        Spline spline = new Spline();
         spline.initByName(
                 "logInfected", new RealParameter(logI),
                 "rateShifts", rateShifts,

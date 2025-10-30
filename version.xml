@@ -7,11 +7,12 @@
   <service type="beast.base.core.BEASTInterface">
     <provider classname="mascotdatastreams.distribution.CaseCountLikelihood"/>
     <provider classname="mascotdatastreams.distribution.GammaPoisson"/>
-    <provider classname="mascotdatastreams.dynamics.PrevalenceToNeSkygrowth"/>
-    <provider classname="mascotdatastreams.dynamics.NotAKnotSpline"/>
+    <provider classname="mascotdatastreams.distribution.SeroprevalenceLikelihood"/>
+    <provider classname="mascotdatastreams.distribution.Binomial"/>
+    <provider classname="mascotdatastreams.distribution.StructuredSkylinePrevalence"/>
+    <provider classname="mascotdatastreams.dynamics.Spline"/>
     <provider classname="mascotdatastreams.dynamics.SplinePrevalenceToNe"/>
     <provider classname="mascotdatastreams.util.TransmissionSmallerThan"/>
-    <provider classname="mascotdatastreams.distribution.StructuredSkylinePrevalence"/>
     <provider classname="mascotdatastreams.operators.UpDownLogScaleOperator"/>
 
   </service>

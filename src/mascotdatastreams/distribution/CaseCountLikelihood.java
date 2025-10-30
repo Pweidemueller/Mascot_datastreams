@@ -6,7 +6,7 @@ import beast.base.inference.Distribution;
 import beast.base.inference.State;
 import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
-import mascotdatastreams.dynamics.NotAKnotSpline;
+import mascotdatastreams.dynamics.Spline;
 
 import java.util.List;
 import java.util.Random;
@@ -14,16 +14,16 @@ import java.util.Random;
 /**
  * Likelihood for case count observations based on prevalence dynamics from a spline.
  * 
- * This class takes a NotAKnotSpline that provides log-prevalence values and converts
+ * This class takes a Spline that provides log-prevalence values and converts
  * them to prevalence I(t) for calculating the likelihood of observed case counts.
  * The spline interpolation allows for smooth prevalence trajectories between
  * rate shift points.
  */
 public class CaseCountLikelihood extends Distribution {
-    // Single-deme prevalence input provided via NotAKnotSpline.
+    // Single-deme prevalence input provided via Spline.
     // Note: The spline provides log-prevalence values that are converted to prevalence I(t).
-    public final Input<NotAKnotSpline> prevalenceSplineInput = new Input<>(
-            "prevalenceSpline", "NotAKnotSpline providing log-prevalence values for interpolation", Validate.REQUIRED);
+    public final Input<Spline> prevalenceSplineInput = new Input<>(
+            "prevalenceSpline", "Spline providing log-prevalence values for interpolation", Validate.REQUIRED);
 
     // Observations passed directly as parameters
     public final Input<RealParameter> caseCountsInput = new Input<>(
@@ -38,7 +38,7 @@ public class CaseCountLikelihood extends Distribution {
     protected RealParameter caseCounts;
     protected RealParameter caseTimes;
     protected ParametricDistribution dist;
-    protected NotAKnotSpline prevalenceSpline;
+    protected Spline prevalenceSpline;
     protected boolean validated = false;
     
     @Override

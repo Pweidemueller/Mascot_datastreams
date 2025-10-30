@@ -12,7 +12,7 @@ import beast.base.evolution.alignment.TaxonSet;
 import beast.base.evolution.tree.TraitSet;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeParser;
-import mascotdatastreams.dynamics.NotAKnotSpline;
+import mascotdatastreams.dynamics.Spline;
 
 public class CaseCountLikelihoodTest {
 
@@ -31,7 +31,7 @@ public class CaseCountLikelihoodTest {
 
         RealParameter uninf = new RealParameter(new Double[] {75.0});
 
-        NotAKnotSpline spline0 = new NotAKnotSpline();
+        Spline spline0 = new Spline();
         spline0.initByName(
                 "logInfected", new RealParameter(logI_deme0),
                 "rateShifts", rateShifts,
@@ -40,7 +40,7 @@ public class CaseCountLikelihoodTest {
         );
         spline0.initAndValidate();
 
-        NotAKnotSpline spline1 = new NotAKnotSpline();
+        Spline spline1 = new Spline();
         spline1.initByName(
                 "logInfected", new RealParameter(logI_deme1),
                 "rateShifts", rateShifts,
@@ -99,7 +99,7 @@ public class CaseCountLikelihoodTest {
         // uninfectious rate is required by the spline but does not affect the mean directly here
         RealParameter uninf = new RealParameter(new Double[] {75.0});
 
-        NotAKnotSpline spline0 = new NotAKnotSpline();
+        Spline spline0 = new Spline();
         spline0.initByName(
                 "logInfected", new RealParameter(logI_deme0),
                 "rateShifts", rateShifts,
@@ -108,7 +108,7 @@ public class CaseCountLikelihoodTest {
         );
         spline0.initAndValidate();
 
-        NotAKnotSpline spline1 = new NotAKnotSpline();
+        Spline spline1 = new Spline();
         spline1.initByName(
                 "logInfected", new RealParameter(logI_deme1),
                 "rateShifts", rateShifts,
@@ -169,7 +169,7 @@ public class CaseCountLikelihoodTest {
         // uninfectious rate is required by the spline but does not affect the mean directly here
         RealParameter uninf = new RealParameter(new Double[] {75.0});
 
-        NotAKnotSpline spline0 = new NotAKnotSpline();
+        Spline spline0 = new Spline();
         spline0.initByName(
                 "logInfected", new RealParameter(logI_deme0),
                 "rateShifts", rateShifts,
@@ -178,7 +178,7 @@ public class CaseCountLikelihoodTest {
         );
         spline0.initAndValidate();
 
-        NotAKnotSpline spline1 = new NotAKnotSpline();
+        Spline spline1 = new Spline();
         spline1.initByName(
                 "logInfected", new RealParameter(logI_deme1),
                 "rateShifts", rateShifts,

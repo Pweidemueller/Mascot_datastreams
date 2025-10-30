@@ -325,7 +325,7 @@
                                                     
                             
               <neDynamics id="NeDynamics.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.SplinePrevalenceToNe">
-                <spline id="splinePrev.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.NotAKnotSpline">
+                <spline id="splinePrev.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.Spline">
                   <logInfected idref="SkylinePrev.Deme1.t:SimDataset"/>
                   <rateShifts idref="rateShifts.t:SimDataset"/>
                   <gridRateShifts idref="rateShifts.t:SimDataset"/>
@@ -337,7 +337,7 @@
                                                     
                             
               <neDynamics id="NeDynamics.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.SplinePrevalenceToNe">
-                <spline id="splinePrev.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.NotAKnotSpline">
+                <spline id="splinePrev.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.Spline">
                   <logInfected idref="SkylinePrev.Deme2.t:SimDataset"/>
                   <rateShifts idref="rateShifts.t:SimDataset"/>
                   <gridRateShifts idref="rateShifts.t:SimDataset"/>

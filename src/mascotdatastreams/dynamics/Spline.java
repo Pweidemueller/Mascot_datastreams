@@ -13,7 +13,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
  * @author Nicola F. Mueller & Paula Weidemueller
  */
 @Description("Population function with values at certain time points that are interpolated in between. Parameter has to be in log space")
-public class NotAKnotSpline extends CalculationNode {
+public class Spline extends CalculationNode {
 
     final public Input<RealParameter> InfectedInput = new Input<>("logInfected",
             "Prevalence over time in log space", Input.Validate.REQUIRED);
@@ -287,6 +287,9 @@ public class NotAKnotSpline extends CalculationNode {
      * @return start time
      */
     public double getGridStart() {
+        if (gridRateShifts != null && gridRateShifts.getDimension() > 0) {
+            return gridRateShifts.getValue(0);
+        }
         return 0.0;
     }
 
@@ -297,13 +300,63 @@ public class NotAKnotSpline extends CalculationNode {
      */
     public double getGridEnd() {
         if (gridRateShifts != null && gridRateShifts.getDimension() > 0) {
-            return gridRateShifts.getValue(gridRateShifts.getDimension() - 1);
+            return gridRateShifts.getValue(gridRateShifts.getDimension() - 1); // last grid point
         }
         return 0.0;
     }
 
     public double getGridPointTime(int i) {
         return gridRateShifts.getValue(i);
+    }
+
+    /**
+     * Returns the largest index i such that grid time[i] <= t.
+     * Clamps to [0, getGridPointCount()-1].
+     */
+    public int getLeftGridIndex(double t) {
+        int n = getGridPointCount();
+        if (n == 0) return 0;
+        double first = getGridPointTime(0);
+        double last = getGridPointTime(n - 1);
+        if (t <= first) return 0;
+        if (t >= last) return n - 1;
+        int left = 0;
+        int right = n - 1;
+        while (left + 1 < right) {
+            int mid = (left + right) / 2;
+            double tm = getGridPointTime(mid);
+            if (tm <= t) {
+                left = mid;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
+    }
+
+    /**
+     * Returns the smallest index i such that grid time[i] >= t.
+     * Clamps to [0, getGridPointCount()-1].
+     */
+    public int getRightGridIndex(double t) {
+        int n = getGridPointCount();
+        if (n == 0) return 0;
+        double first = getGridPointTime(0);
+        double last = getGridPointTime(n - 1);
+        if (t <= first) return 0;
+        if (t >= last) return n - 1;
+        int left = 0;
+        int right = n - 1;
+        while (left + 1 < right) {
+            int mid = (left + right) / 2;
+            double tm = getGridPointTime(mid);
+            if (tm >= t) {
+                right = mid;
+            } else {
+                left = mid;
+            }
+        }
+        return right;
     }
 
     /**

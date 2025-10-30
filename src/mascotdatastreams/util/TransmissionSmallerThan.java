@@ -10,12 +10,12 @@ import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.inference.*;
 import beast.base.inference.parameter.RealParameter;
-import mascotdatastreams.dynamics.NotAKnotSpline;
+import mascotdatastreams.dynamics.Spline;
 
 
 @Description("returns 0 if all transmission rates are positive and negative infinity if any transmission rate is <= 0")
 public class TransmissionSmallerThan extends Distribution {
-    final public Input<NotAKnotSpline> splineInput = new Input<>("spline", "NotAKnotSpline object to check transmission rates", Validate.REQUIRED);
+    final public Input<Spline> splineInput = new Input<>("spline", "Spline object to check transmission rates", Validate.REQUIRED);
 
 
     @Override
@@ -25,7 +25,7 @@ public class TransmissionSmallerThan extends Distribution {
 
     @Override
     public double calculateLogP() {
-        NotAKnotSpline spline = splineInput.get();
+        Spline spline = splineInput.get();
         
         // Update the spline to ensure transmission rates are calculated
         if (!spline.update()) {
