@@ -45,8 +45,8 @@ public class SeroprevalenceLikelihood extends Distribution {
             "scaling", "Scaling factor applied to the prevalence-derived mean in LOG space.", Validate.OPTIONAL);
     
     // Start time for cumulative calculation (default: earliest time in spline)
-    public final Input<RealParameter> startTimeInput = new Input<>(
-            "startTime", "Start time for cumulative case calculation (default: earliest spline time)", Validate.OPTIONAL);
+    public final Input<RealParameter> EarliestTimeInput = new Input<>(
+            "EarliestTime", "Start time for cumulative case calculation (default: earliest spline time)", Validate.OPTIONAL);
     
     protected RealParameter SeroPeopleTested;
     protected RealParameter SeroPeopleSeropositive;
@@ -94,15 +94,17 @@ public class SeroprevalenceLikelihood extends Distribution {
     }
     
     /**
-     * Computes the integral of prevalence from startTime to endTime.
+     * Computes the integral of prevalence from EarliestTime to endTime.
      * This represents the cumulative cases over the time period.
      * 
-     * @param startTime start time for integration
+     * @param EarliestTime start time for integration
      * @param endTime end time for integration
      * @return cumulative cases (integral of prevalence)
      */
-    private double getCumulativeCases(double startTime, double endTime) {
-        if (startTime >= endTime) {
+    private double getCumulativeCases(double EarliestTime, double endTime) {
+        // Times are relative to the most recent sample: backward time, so if EarliestTime is before endTime, return 0
+        // The integral needs to be calculated from the first infection (around tree root) to the observation time  
+        if (EarliestTime <= endTime) {
             return 0.0;
         }
         
@@ -115,26 +117,26 @@ public class SeroprevalenceLikelihood extends Distribution {
         double gridMin = prevalenceSpline.getGridStart();
         double gridMax = prevalenceSpline.getGridEnd();
 
-        // Clamp to grid range
-        double from = Math.max(startTime, gridMin);
-        double to = Math.min(endTime, gridMax);
-        if (from >= to) {
+        // Clamp to grid range in backward time 
+        double from = Math.min(EarliestTime, gridMax);
+        double to = Math.max(endTime, gridMin);
+        if (from <= to) {
             return 0.0;
         }
 
-        // Find boundary indices
-        int leftIdx = prevalenceSpline.getLeftGridIndex(from);
-        int rightIdx = prevalenceSpline.getRightGridIndex(to);
+        // Find boundary indices in backward time
+        int maxIdx = prevalenceSpline.getRightGridIndex(from);
+        int minIdx = prevalenceSpline.getLeftGridIndex(to);
         // Integrate using trapezoids over gridpoint segments
         double sum = 0.0;
 
-        for (int i = leftIdx; i < rightIdx; i++) {
+        for (int i = maxIdx; i > minIdx; i--) {
             double t1 = prevalenceSpline.getGridPointTime(i);
-            double t2 = prevalenceSpline.getGridPointTime(i + 1);
-            double I1 = prevalenceSpline.getValueAtGridPoint(t1);
-            double I2 = prevalenceSpline.getValueAtGridPoint(t2);
+            double t2 = prevalenceSpline.getGridPointTime(i - 1);
+            double I1 = prevalenceSpline.getPrevalenceAtGridPoint(t1);
+            double I2 = prevalenceSpline.getPrevalenceAtGridPoint(t2);
 
-            sum += (t2 - t1) * (I1 + I2) * 0.5;
+            sum += (t1 - t2) * (I1 + I2) * 0.5;
         }
 
         return sum;
@@ -147,11 +149,12 @@ public class SeroprevalenceLikelihood extends Distribution {
         if (SeroPeopleTested == null || SeroPeopleTested.getDimension() == 0) {
             return logP;
         }
-
-        double startTime = prevalenceSpline.getGridStart(); // Default to earliest grid time     
-        RealParameter startTimeParam = startTimeInput.get();
-        if (startTimeParam != null) {
-            startTime = startTimeParam.getArrayValue();
+        // Default to last grid time since everything is represented relative to most recent sample
+        // we want to calculate cumulative cases from the first infection (around tree root) to the observation time  
+        double EarliestTime = prevalenceSpline.getGridEnd(); 
+        RealParameter EarliestTimeParam = EarliestTimeInput.get();
+        if (EarliestTimeParam != null) {
+            EarliestTime = EarliestTimeParam.getArrayValue();
         }
 
         int numObservations = SeroPeopleTested.getDimension();
@@ -160,11 +163,8 @@ public class SeroprevalenceLikelihood extends Distribution {
             int n = (int) Math.round(SeroPeopleTested.getArrayValue(i));
             int x = (int) Math.round(SeroPeopleSeropositive.getArrayValue(i));
 
-            // Determine start time for cumulative calculation
-
-
             // Get cumulative cases from start time to observation time
-            double cumulativeCases = getCumulativeCases(startTime, t);
+            double cumulativeCases = getCumulativeCases(EarliestTime, t);
 
             // Apply optional scaling factor (default 1.0)
             double scaling = 1.0;
@@ -193,6 +193,16 @@ public class SeroprevalenceLikelihood extends Distribution {
                 System.err.println("Warning: NaN likelihood for observation index " + i + ": n=" + n + ", x=" + x + ", p=" + p);
                 return Double.NEGATIVE_INFINITY;
             }
+            // if (t < 0.001) {
+            //     System.out.println(">>>Start time: " + EarliestTime);
+            //     System.out.println("t: " + t);
+            //     System.out.println("scaling: " + scaling);
+            //     System.out.println("cumulativeCases: " + cumulativeCases);
+            //     System.out.println("x: " + x);
+            //     System.out.println("n: " + n);
+            //     System.out.println("p: " + p);
+            //     System.out.println("intervalLogP: " + intervalLogP);
+            // }
 
             logP += intervalLogP;
         }
