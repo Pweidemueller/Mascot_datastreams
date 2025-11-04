@@ -36,6 +36,8 @@ public class SeroprevalenceLikelihood extends Distribution {
             "seroPeopleSeropositive", "Observed number of people seropositive (dimension = number of observations)", Validate.REQUIRED);
     public final Input<RealParameter> SeroTimesInput = new Input<>(
             "seroTimes", "Observation times corresponding 1:1 to seroPeopleSeropositive", Validate.REQUIRED);
+    public final Input<RealParameter> populationSizeInput = new Input<>(
+            "populationSize", "Population size", Validate.REQUIRED);
     
     final public Input<ParametricDistribution> distInput = new Input<>(
             "distribution", "Distribution used to calculate likelihood. Expected Binomial.", Validate.REQUIRED);
@@ -51,6 +53,7 @@ public class SeroprevalenceLikelihood extends Distribution {
     protected RealParameter SeroPeopleTested;
     protected RealParameter SeroPeopleSeropositive;
     protected RealParameter SeroTimes;
+    protected RealParameter populationSize;
     protected RealParameter logScaling;
     protected ParametricDistribution dist;
     protected Spline prevalenceSpline;
@@ -62,6 +65,7 @@ public class SeroprevalenceLikelihood extends Distribution {
         SeroPeopleTested = SeroPeopleTestedInput.get();
         SeroPeopleSeropositive = SeroPeopleSeropositiveInput.get();
         SeroTimes = SeroTimesInput.get();
+        populationSize = populationSizeInput.get();
         dist = distInput.get();
         prevalenceSpline = prevalenceSplineInput.get();
 
@@ -176,7 +180,7 @@ public class SeroprevalenceLikelihood extends Distribution {
                 }
             }
             // Convert cumulative cases (expected count in whole population) to probability via scaling
-            double p = cumulativeCases * scaling;
+            double p = scaling * cumulativeCases / populationSize.getArrayValue();
             // Clamp to (0,1) for numerical stability and validity
             final double PROB_EPS = 1e-16;
             p = Math.min(1.0 - PROB_EPS, Math.max(PROB_EPS, p));
