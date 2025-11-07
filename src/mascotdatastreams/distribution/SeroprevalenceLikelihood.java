@@ -43,18 +43,18 @@ public class SeroprevalenceLikelihood extends Distribution {
             "distribution", "Distribution used to calculate likelihood. Expected Binomial.", Validate.REQUIRED);
     
     // Optional log-space scaling factor
-    public final Input<RealParameter> logScalingInput = new Input<>(
-            "scaling", "Scaling factor applied to the prevalence-derived mean in LOG space.", Validate.OPTIONAL);
+    public final Input<RealParameter> ScalingInput = new Input<>(
+            "scaling", "Scaling factor applied to the seroprevalence proportion.", Validate.OPTIONAL);
     
-    // Start time for cumulative calculation (default: earliest time in spline)
+    // Start time for cumulative calculation (default: time farthest away from most recent sample)
     public final Input<RealParameter> EarliestTimeInput = new Input<>(
-            "EarliestTime", "Start time for cumulative case calculation (default: earliest spline time)", Validate.OPTIONAL);
+            "EarliestTime", "Start time for cumulative case calculation (default: latest spline time)", Validate.OPTIONAL);
     
     protected RealParameter SeroPeopleTested;
     protected RealParameter SeroPeopleSeropositive;
     protected RealParameter SeroTimes;
     protected RealParameter populationSize;
-    protected RealParameter logScaling;
+    protected RealParameter Scaling;
     protected ParametricDistribution dist;
     protected Spline prevalenceSpline;
 
@@ -71,15 +71,6 @@ public class SeroprevalenceLikelihood extends Distribution {
 
         if (!(dist instanceof Binomial)) {
             throw new IllegalArgumentException("SeroprevalenceLikelihood: 'distribution' must be Binomial");
-        }
-
-        // Validate optional scaling parameter if present
-        logScaling = logScalingInput.get();
-        if (logScaling != null) {
-            double s = Math.exp(logScaling.getArrayValue());
-            if (!(s > 0.0)) {
-                throw new IllegalArgumentException("SeroprevalenceLikelihood: 'logScaling' must be > 0, got " + s);
-            }
         }
 
         // Validate observation vectors
@@ -145,6 +136,81 @@ public class SeroprevalenceLikelihood extends Distribution {
 
         return sum;
     }
+
+    /**
+     * Computes the integral of incidence from EarliestTime to endTime.
+     * This represents the cumulative cases over the time period.
+     * 
+     * @param EarliestTime start time for integration
+     * @param endTime end time for integration
+     * @return cumulative incidence (integral of incidence)
+     */
+    public double getCumulativeIncidence(double EarliestTime, double endTime) {
+        // Times are relative to the most recent sample: backward time, so if EarliestTime is before endTime, return 0
+        // The integral needs to be calculated from the first infection (around tree root) to the observation time  
+        if (EarliestTime <= endTime) {
+            return 0.0;
+        }
+        
+        // Grid info
+        int n = prevalenceSpline.getGridPointCount();
+        if (n <= 1) {
+            return 0.0;
+        }
+
+        double gridMin = prevalenceSpline.getGridStart();
+        double gridMax = prevalenceSpline.getGridEnd();
+
+        // Clamp to grid range in backward time 
+        double from = Math.min(EarliestTime, gridMax);
+        double to = Math.max(endTime, gridMin);
+        if (from <= to) {
+            return 0.0;
+        }
+
+        // Find boundary indices in backward time
+        int maxIdx = prevalenceSpline.getRightGridIndex(from);
+        int minIdx = prevalenceSpline.getLeftGridIndex(to);
+        // Integrate using trapezoids over gridpoint segments
+        double sum = 0.0;
+
+        for (int i = maxIdx; i > minIdx; i--) {
+            double t1 = prevalenceSpline.getGridPointTime(i);
+            double t2 = prevalenceSpline.getGridPointTime(i - 1);
+
+            double b1 = prevalenceSpline.getTranssmissionRateAtGridPoint(t1);
+            double b2 = prevalenceSpline.getTranssmissionRateAtGridPoint(t2);
+
+            double I1 = prevalenceSpline.getPrevalenceAtGridPoint(t1);
+            double I2 = prevalenceSpline.getPrevalenceAtGridPoint(t2);
+
+            double incidence1 = b1 * I1;
+            double incidence2 = b2 * I2;
+
+            sum += (t1 - t2) * (incidence1 + incidence2) * 0.5;
+        }
+
+        return sum;
+    }
+
+    /**
+     * Computes the proportion of seropositive people using the current inferred scaling parameter.
+     * This method automatically uses the scaling parameter from Scaling if available,
+     * otherwise defaults to 1.0.
+     * 
+     * @param EarliestTime start time for cumulative incidence calculation
+     * @param t end time for cumulative incidence calculation
+     * @return proportion of seropositive people
+     */
+    public double propSeropositive(double EarliestTime, double t) {
+        // Apply optional scaling factor (default 1.0)
+        double scaling = 1.0;
+        if (Scaling != null) {
+            scaling = Scaling.getArrayValue();
+        }
+        double cumulativeIncidence = getCumulativeIncidence(EarliestTime, t);
+        return scaling * cumulativeIncidence / populationSize.getArrayValue();
+    }
     
     @Override
     public double calculateLogP() {
@@ -166,22 +232,22 @@ public class SeroprevalenceLikelihood extends Distribution {
             double t = SeroTimes.getArrayValue(i);
             int n = (int) Math.round(SeroPeopleTested.getArrayValue(i));
             int x = (int) Math.round(SeroPeopleSeropositive.getArrayValue(i));
-
-            // Get cumulative cases from start time to observation time
-            double cumulativeCases = getCumulativeCases(EarliestTime, t);
-
-            // Apply optional scaling factor (default 1.0)
-            double scaling = 1.0;
-            if (logScaling != null) {
-                scaling = Math.exp(logScaling.getArrayValue());
-                if (!(scaling > 0.0)) {
-                    System.err.println("Warning: Invalid 'scaling' <= 0 encountered: " + scaling);
-                    return Double.NEGATIVE_INFINITY;
-                }
-            }
+            // double scaling = 1.0;
+            // if (Scaling != null) {
+            //     scaling = Scaling.getArrayValue();
+            // }
+            // double cumulativeIncidence = getCumulativeIncidence(EarliestTime, t);
+            // double p = scaling * cumulativeIncidence / populationSize.getArrayValue();
+            double p = propSeropositive(EarliestTime, t);
             // Convert cumulative cases (expected count in whole population) to probability via scaling
-            double p = scaling * cumulativeCases / populationSize.getArrayValue();
+            // propSeropositive automatically uses the current inferred scaling parameter
+            // double p = propSeropositive(EarliestTime, t);
+            if (Double.isNaN(p)) {
+                System.err.println("Warning: Invalid 'p' value: " + p);
+                return Double.NEGATIVE_INFINITY;
+            }
             // Clamp to (0,1) for numerical stability and validity
+            // TODO: revisit clamping 
             final double PROB_EPS = 1e-16;
             p = Math.min(1.0 - PROB_EPS, Math.max(PROB_EPS, p));
 
@@ -211,6 +277,24 @@ public class SeroprevalenceLikelihood extends Distribution {
             logP += intervalLogP;
         }
         return logP;
+    }
+
+    // Logging methods removed - use CumulativeIncidenceLogger instead
+    
+    /**
+     * Getter for prevalence spline (for use by loggers).
+     * @return the prevalence spline
+     */
+    public Spline getPrevalenceSpline() {
+        return prevalenceSpline;
+    }
+    
+    /**
+     * Getter for earliest time input (for use by loggers).
+     * @return the earliest time parameter input
+     */
+    public RealParameter getEarliestTimeInput() {
+        return EarliestTimeInput.get();
     }
 
     @Override

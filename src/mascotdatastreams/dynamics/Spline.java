@@ -24,6 +24,9 @@ public class Spline extends CalculationNode {
     final public Input<RealParameter> uninfectiousRateInput = new Input<>("uninfectiousRate",
             "Rate at which individuals become uninfectious", Input.Validate.REQUIRED);
 
+    // TODO revisit this, since ideally we don't need to use clipping but the sampler should reject unreasonable transmissionrate values
+    private static final double TSR_MIN = 0.5;
+
     RealParameter infected;
     RateShifts rateShifts;
     RateShifts gridRateShifts;
@@ -91,6 +94,8 @@ public class Spline extends CalculationNode {
             // Rearranging: β = γ - d(log I)/dτ
             // Therefore: transmission_rate = β = γ - d(log I)/dτ_backward
             transmissionRate[i] = uninfectiousRate.getValue() - dLogI_dBackwardTime;
+            // TODO: revisit clamp transmission rate to minimum value to prevent division by zero
+            transmissionRate[i] = Math.max(transmissionRate[i], TSR_MIN);
         }
 
         ratesKnows = true;
@@ -242,7 +247,7 @@ public class Spline extends CalculationNode {
         }
         // Find the appropriate grid point
         if (t <= time[0]) {
-            // Return derivative at first point using spline coefficients
+            // Return transmission rate at first point using spline coefficients
             // This is the first knot so dt = 0 
             return transmissionRate[0];
         }

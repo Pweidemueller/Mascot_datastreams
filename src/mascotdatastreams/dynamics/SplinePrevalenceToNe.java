@@ -37,10 +37,6 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     final public Input<RealParameter> coalescentScaleInput = new Input<>("coalescentScale",
             "Coalescent scaling constant c in Ne = I / (c * transmission_rate)", 
             Input.Validate.OPTIONAL);
-
-    // Constants
-    // TODO revisit this, since ideally we don't need to use clipping but the sampler should reject unreasonable transmissionrate values
-    private static final double TSR_MIN = 1;
     
     // Member variables
     private Spline spline;
@@ -89,8 +85,6 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         
 //        if (transmissionRate <= 0.0)
 //        	System.err.println("Warning: non-positive transmission rate at time " + t + ": " + transmissionRate);
-        // // Clamp transmission rate to minimum value to prevent division by zero
-         transmissionRate = Math.max(transmissionRate, TSR_MIN);
         
         // Get coalescent scaling constant
         double c = coalescentScale.getArrayValue();
@@ -125,7 +119,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     @Override
     public void init(PrintStream printStream) {
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
-            printStream.print("I" + i + "\t");
+            printStream.print("I_" + i + "\t");
         }
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
             printStream.print("Ne_" + i + "\t");
