@@ -25,7 +25,7 @@ public class Spline extends CalculationNode {
             "Rate at which individuals become uninfectious", Input.Validate.REQUIRED);
 
     // TODO revisit this, since ideally we don't need to use clipping but the sampler should reject unreasonable transmissionrate values
-    private static final double TSR_MIN = 0.5;
+    // private static final double TSR_MIN = 0.5;
 
     RealParameter infected;
     RateShifts rateShifts;
@@ -95,7 +95,7 @@ public class Spline extends CalculationNode {
             // Therefore: transmission_rate = β = γ - d(log I)/dτ_backward
             transmissionRate[i] = uninfectiousRate.getValue() - dLogI_dBackwardTime;
             // TODO: revisit clamp transmission rate to minimum value to prevent division by zero
-            transmissionRate[i] = Math.max(transmissionRate[i], TSR_MIN);
+            // transmissionRate[i] = Math.max(transmissionRate[i], TSR_MIN);
         }
 
         ratesKnows = true;
