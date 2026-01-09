@@ -25,7 +25,7 @@ import beast.base.inference.parameter.RealParameter;
  *   P(X <= k) = I(p; r, k + 1), regularized incomplete beta
  */
 @Description("Gamma-Poisson (Negative Binomial) distribution parameterised by mean and dispersion (alpha).")
-public class GammaPoisson extends ParametricDistribution implements CountDistributionWithMean {
+public class GammaPoisson extends ParametricDistribution implements DistributionWithMean {
     private static final double PROB_EPS = 1e-16; // shared clamp to avoid log(0)
     public final Input<Function> meanInput = new Input<>("mean", "Mean (mu) of the distribution.");
     public final Input<Function> dispersionInput = new Input<>("dispersion", "Dispersion (alpha) parameter.");
@@ -105,7 +105,6 @@ public class GammaPoisson extends ParametricDistribution implements CountDistrib
         return meanFn.getArrayValue();
     }
 
-    // Public convenience methods requested: PMF and logPMF
     public double pmf(int x) {
         refresh();
         return dist.probability(x);

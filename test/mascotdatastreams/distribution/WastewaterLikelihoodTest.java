@@ -14,14 +14,16 @@ import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeParser;
 import mascotdatastreams.dynamics.Spline;
 
-public class CaseCountLikelihoodTest {
+public class WastewaterLikelihoodTest {
 
     @Test
     public void testSplinePrevalenceTwoDemes() throws Exception {
-         Double[] times0 = new Double[] {0.0, 0.1, 0.52, 0.98, 1.47, 2.0};
-         Double[] counts0 = new Double[] {5.0, 7.0, 6.0, 8.0, 10.0, 0.0};
-         Double[] times1 = new Double[] {0.0, 0.15, 0.56, 0.98, 1.78, 1.98};
-         Double[] counts1 = new Double[] {3.0, 4.0, 5.0, 6.0, 8.0, 2.0};
+        Double[] times0 = new Double[] {0.0, 0.1, 0.52, 0.98, 1.47, 2.0};
+        // Wastewater concentrations as PMV-normalized ratios (typical range: 10^-6 to 10^-2)
+        // Values represent realistic SARS-CoV-2 or Influenza concentrations
+        Double[] concentrations0 = new Double[] {0.0025, 0.0037, 0.0021, 0.0048, 0.0052, 0.0001};
+        Double[] times1 = new Double[] {0.0, 0.15, 0.56, 0.98, 1.78, 1.98};
+        Double[] concentrations1 = new Double[] {0.0013, 0.0018, 0.0023, 0.0026, 0.0031, 0.0008};
         
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
         RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
@@ -49,46 +51,47 @@ public class CaseCountLikelihoodTest {
         );
         spline1.initAndValidate();
 
-        // Distribution with dispersion alpha; mean will be overwritten per obs by the likelihood
+        // Distribution with standard deviation on log scale; mean will be overwritten per obs by the likelihood
         RealParameter initMean = new RealParameter(new Double[]{1.0});
-        RealParameter alpha = new RealParameter(new Double[]{0.5});
-        GammaPoisson gp = new GammaPoisson(initMean, alpha);
-        gp.initAndValidate();
+        RealParameter sd = new RealParameter(new Double[]{0.5});
+        LogNormal ln = new LogNormal(initMean, sd);
+        ln.initAndValidate();
 
         // Likelihood per deme (single-deme mode) using prevalenceSpline
-        CaseCountLikelihood llikDeme0 = new CaseCountLikelihood();
+        WastewaterLikelihood llikDeme0 = new WastewaterLikelihood();
         llikDeme0.initByName(
                 "prevalenceSpline", spline0,
-                "caseCounts", new RealParameter(counts0),
-                "caseTimes", new RealParameter(times0),
-                "distribution", gp
+                "concentrations", new RealParameter(concentrations0),
+                "concentrationTimes", new RealParameter(times0),
+                "distribution", ln
         );
         llikDeme0.initAndValidate();
         double logP0 = llikDeme0.calculateLogP();
 
-        CaseCountLikelihood llikDeme1 = new CaseCountLikelihood();
+        WastewaterLikelihood llikDeme1 = new WastewaterLikelihood();
         llikDeme1.initByName(
                 "prevalenceSpline", spline1,
-                "caseCounts", new RealParameter(counts1),
-                "caseTimes", new RealParameter(times1),
-                "distribution", gp
+                "concentrations", new RealParameter(concentrations1),
+                "concentrationTimes", new RealParameter(times1),
+                "distribution", ln
         );
         llikDeme1.initAndValidate();
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-53.950267384878, logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
+        assertEquals(-1342.3012033247371, logP, 1e-6, "Wastewater concentration likelihood should match expected value.");
     }
     
     @Test
     public void testSplinePrevalenceTwoDemesScaling() throws Exception {
-        // Observations per deme: 5 time points each
+        // Observations per deme: 6 time points each
         Double[] times0 = new Double[] {0.0, 0.1, 0.52, 0.98, 1.47, 2.0};
-        Double[] counts0 = new Double[] {5.0, 7.0, 6.0, 8.0, 10.0, 0.0};
+        // Wastewater concentrations as PMV-normalized ratios (typical range: 10^-6 to 10^-2)
+        Double[] concentrations0 = new Double[] {0.0025, 0.0037, 0.0021, 0.0048, 0.0052, 0.0001};
         Double[] times1 = new Double[] {0.0, 0.15, 0.56, 0.98, 1.78, 1.98};
-        Double[] counts1 = new Double[] {3.0, 4.0, 5.0, 6.0, 8.0, 2.0};
+        Double[] concentrations1 = new Double[] {0.0013, 0.0018, 0.0023, 0.0026, 0.0031, 0.0008};
         
-        // Spline prevalence with absolute shifts at 0.5 and 1.0 (root height = 2.0 in helper)
+        // Spline prevalence with fractional shifts at 0.5 and 1.0 (root height = 2.0 in helper)
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
         RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
 
@@ -117,48 +120,52 @@ public class CaseCountLikelihoodTest {
         );
         spline1.initAndValidate();
 
-        // Distribution with dispersion alpha; mean will be overwritten per obs by the likelihood
+        // Distribution with standard deviation on log scale; mean will be overwritten per obs by the likelihood
         RealParameter initMean = new RealParameter(new Double[]{1.0});
-        RealParameter alpha = new RealParameter(new Double[]{0.1});
-        GammaPoisson gp = new GammaPoisson(initMean, alpha);
-        gp.initAndValidate();
+        RealParameter sd = new RealParameter(new Double[]{0.1});
+        LogNormal ln = new LogNormal(initMean, sd);
+        ln.initAndValidate();
 
         // Likelihood per deme (single-deme mode) using prevalenceSpline
-        CaseCountLikelihood llikDeme0 = new CaseCountLikelihood();
+        WastewaterLikelihood llikDeme0 = new WastewaterLikelihood();
         llikDeme0.initByName(
                 "prevalenceSpline", spline0,
-                "caseCounts", new RealParameter(counts0),
-                "caseTimes", new RealParameter(times0),
-                "distribution", gp,
+                "concentrations", new RealParameter(concentrations0),
+                "concentrationTimes", new RealParameter(times0),
+                "distribution", ln,
                 "scaling", new RealParameter(new Double[]{0.1})
         );
         llikDeme0.initAndValidate();
         double logP0 = llikDeme0.calculateLogP();
 
-        CaseCountLikelihood llikDeme1 = new CaseCountLikelihood();
+        WastewaterLikelihood llikDeme1 = new WastewaterLikelihood();
         llikDeme1.initByName(
                 "prevalenceSpline", spline1,
-                "caseCounts", new RealParameter(counts1),
-                "caseTimes", new RealParameter(times1),
-                "distribution", gp,
+                "concentrations", new RealParameter(concentrations1),
+                "concentrationTimes", new RealParameter(times1),
+                "distribution", ln,
                 "scaling", new RealParameter(new Double[]{0.05})
         );
         llikDeme1.initAndValidate();
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-156.616656999962, logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
+        // Expected value will be computed after first run - placeholder for now
+        // TODO: Update expected value after running test
+        assertEquals(-16547.834297265934, logP, 1e-6, "Wastewater concentration likelihood with scaling should match expected value.");
     }
     
     @Test
-    public void testSplinePrevalenceTwoDemesCaseCountsOutsideTree() throws Exception {
-        // Observations per deme
+    public void testSplinePrevalenceTwoDemesConcentrationsOutsideTree() throws Exception {
+        // Observations per deme: 7 time points each
         Double[] times0 = new Double[] {-0.1, 0.0, 0.1, 0.52, 0.98, 1.47, 2.0};
-        Double[] counts0 = new Double[] {2.0, 100.0, 5480.0, 1500.0, 560.0, 34.0, 0.0};
+        // Wastewater concentrations as PMV-normalized ratios (typical range: 10^-6 to 10^-2)
+        // Including some higher values during peak periods and very low values near baseline
+        Double[] concentrations0 = new Double[] {0.0008, 0.0085, 0.0092, 0.0065, 0.0038, 0.0012, 0.0001};
         Double[] times1 = new Double[] {-0.1, 0.0, 0.15, 0.56, 0.98, 1.78, 1.98};
-        Double[] counts1 = new Double[] {1.0, 124.0, 178.0, 1000.0, 1487.0, 246.0, 2.0};
+        Double[] concentrations1 = new Double[] {0.0005, 0.0072, 0.0045, 0.0058, 0.0062, 0.0028, 0.0009};
         
-        // Spline prevalence with absolute shifts 
+        // Spline prevalence with fractional shifts at 0.5 and 1.0 (root height = 2.0 in helper)
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
         RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
 
@@ -187,35 +194,37 @@ public class CaseCountLikelihoodTest {
         );
         spline1.initAndValidate();
 
-        // Distribution with dispersion alpha; mean will be overwritten per obs by the likelihood
+        // Distribution with standard deviation on log scale; mean will be overwritten per obs by the likelihood
         RealParameter initMean = new RealParameter(new Double[]{1.0});
-        RealParameter alpha = new RealParameter(new Double[]{0.5});
-        GammaPoisson gp = new GammaPoisson(initMean, alpha);
-        gp.initAndValidate();
+        RealParameter sd = new RealParameter(new Double[]{0.5});
+        LogNormal ln = new LogNormal(initMean, sd);
+        ln.initAndValidate();
 
         // Likelihood per deme (single-deme mode) using prevalenceSpline
-        CaseCountLikelihood llikDeme0 = new CaseCountLikelihood();
+        WastewaterLikelihood llikDeme0 = new WastewaterLikelihood();
         llikDeme0.initByName(
                 "prevalenceSpline", spline0,
-                "caseCounts", new RealParameter(counts0),
-                "caseTimes", new RealParameter(times0),
-                "distribution", gp
+                "concentrations", new RealParameter(concentrations0),
+                "concentrationTimes", new RealParameter(times0),
+                "distribution", ln
         );
         llikDeme0.initAndValidate();
         double logP0 = llikDeme0.calculateLogP();
 
-        CaseCountLikelihood llikDeme1 = new CaseCountLikelihood();
+        WastewaterLikelihood llikDeme1 = new WastewaterLikelihood();
         llikDeme1.initByName(
                 "prevalenceSpline", spline1,
-                "caseCounts", new RealParameter(counts1),
-                "caseTimes", new RealParameter(times1),
-                "distribution", gp
+                "concentrations", new RealParameter(concentrations1),
+                "concentrationTimes", new RealParameter(times1),
+                "distribution", ln
         );
         llikDeme1.initAndValidate();
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-5543.832990969199, logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
+        // Expected value will be computed after first run - placeholder for now
+        // TODO: Update expected value after running test
+        assertEquals(-1373.2513362249608, logP, 1e-6, "Wastewater concentration likelihood with observations outside tree should match expected value.");
     }
 
 

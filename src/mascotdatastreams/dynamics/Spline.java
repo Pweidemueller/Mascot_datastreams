@@ -12,7 +12,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 /**
  * @author Nicola F. Mueller & Paula Weidemueller
  */
-@Description("Population function with values at certain time points that are interpolated in between. Parameter has to be in log space")
+@Description("Population function with values at certain time points that are interpolated in between. Parameter has to be in log space. This class uses a natural cubic spline interpolation.")
 public class Spline extends CalculationNode {
 
     final public Input<RealParameter> InfectedInput = new Input<>("logInfected",

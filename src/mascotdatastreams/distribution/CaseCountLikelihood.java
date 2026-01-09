@@ -112,12 +112,12 @@ public class CaseCountLikelihood extends Distribution {
             }
 
             // Calculate log likelihood using a stateless interface (no input mutation)
-            if (!(dist instanceof CountDistributionWithMean)) {
+            if (!(dist instanceof DistributionWithMean)) {
                 throw new IllegalArgumentException(
-                        "CaseCountLikelihood requires distributions implementing CountDistributionWithMean. Got: "
+                        "CaseCountLikelihood requires distributions implementing DistributionWithMean. Got: "
                                 + dist.getClass().getName());
             }
-            double intervalLogP = ((CountDistributionWithMean) dist).logPForMean(caseCount, scaledMean);
+            double intervalLogP = ((DistributionWithMean) dist).logPForMean(caseCount, scaledMean);
             if (Double.isNaN(intervalLogP)) {
                 System.err.println("Warning: NaN likelihood for observation index " + i + ": caseCount=" + caseCount + ", scaled mean=" + scaledMean);
                 return Double.NEGATIVE_INFINITY;
