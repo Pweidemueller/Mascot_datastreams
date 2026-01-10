@@ -38,31 +38,34 @@ public class WastewaterLikelihood extends Distribution {
             "concentrations", "Observed wastewater concentrations (dimension = number of observations)", Validate.REQUIRED);
     public final Input<RealParameter> concentrationTimesInput = new Input<>(
             "concentrationTimes", "Observation times corresponding 1:1 to concentrations", Validate.REQUIRED);
+    public final Input<RealParameter> populationSizeInput = new Input<>(
+            "populationSize", "Population size", Validate.REQUIRED);
     final public Input<ParametricDistribution> distInput = new Input<>(
             "distribution", "Distribution used to calculate likelihood. Currently only LogNormal is supported.", Validate.REQUIRED);
     // Optional scaling of the mean (akin to a sampling/surveillance rate in a given deme); defaults to 1.0 (no scaling).
     // 
     // PRIOR RECOMMENDATIONS:
-    // Since PMV-normalized wastewater concentrations typically span orders of magnitude (10^-7 to 10^-4),
-    // the scaling parameter should use a prior that accommodates this wide range:
+    // PPMoV-normalized wastewater concentrations (copies/g pathogen per copies/g PPMoV) typically
+    // range from ~0.05 to ~1000. Number of infected per population size in the deme can range from 0-1. The scaling factor α converts prevalence to expected normalized concentration:
+    //   E[concentration] = α · I(t)/N
     //
-    // 1. Log-uniform prior (preferred): Uniform on log(scaling) over the expected range.
-    //    If scaling needs to span roughly 10^-6 to 10^-1, use log(scaling) ∈ [-13.8, -2.3].
+    // Typical scaling values can range from ~10 to ~10,000, with values of 100-1000 being typical.
+    // For example: if I(t)/N = 0.01 and concentration = 1, then α = 100.
     //
-    // 2. LogNormal with wide variance (alternative): LogNormal with mean on log scale = -8 to -6
-    //    (centered around 10^-4 to 10^-3) and SD = 2.0 to 3.0. Example:
+    // Recommended prior: LogNormal with mean on log scale = 4.6 to 6.9 (centered around 100-1000)
+    // and SD = 1.0 to 1.5. Example:
     //    <LogNormal name="distr">
-    //      <parameter name="M">-8.0</parameter>  <!-- mean on log scale -->
-    //      <parameter name="S">2.5</parameter>  <!-- SD on log scale -->
+    //      <parameter name="M">5.0</parameter>  <!-- mean on log scale, exp(5.0) ≈ 148 -->
+    //      <parameter name="S">1.2</parameter>  <!-- SD on log scale -->
     //    </LogNormal>
-    //    This centers around exp(-8) ≈ 3.35×10^-4 with SD=2.5, allowing exploration
-    //    from ~10^-10 to ~10^-2.
+    // This centers around exp(5.0) ≈ 148 with SD=1.2, allowing exploration from ~10 to ~10,000.
     //
     public final Input<RealParameter> scalingInput = new Input<>(
             "scaling", "Scaling factor applied to the prevalence-derived mean; must be > 0.", Validate.OPTIONAL);
     
     protected RealParameter concentrations;
     protected RealParameter concentrationTimes;
+    protected RealParameter populationSize;
     protected ParametricDistribution dist;
     protected Spline prevalenceSpline;
     protected boolean validated = false;
@@ -71,6 +74,7 @@ public class WastewaterLikelihood extends Distribution {
     public void initAndValidate() {
         concentrations = concentrationsInput.get();
         concentrationTimes = concentrationTimesInput.get();
+        populationSize = populationSizeInput.get();
         dist = distInput.get();
         prevalenceSpline = prevalenceSplineInput.get();
 
@@ -120,7 +124,8 @@ public class WastewaterLikelihood extends Distribution {
             // Get prevalence at this time via spline interpolation
             // The spline provides log-prevalence values, so we need to exponentiate
             double logI = prevalenceSpline.getValueAtGridPoint(t);
-            double meanI = Math.exp(logI);
+            double I = Math.exp(logI);
+            double I_N = I / populationSize.getArrayValue();
 
             // Apply optional scaling factor (default 1.0)
             double scaling = 1.0;
@@ -132,7 +137,7 @@ public class WastewaterLikelihood extends Distribution {
                     return Double.NEGATIVE_INFINITY;
                 }
             }
-            double scaledMean = meanI * scaling;
+            double scaledMean = I_N * scaling;
 
             // Validate parameters
             if (scaledMean <= 0.0 || concentration <= 0.0) {

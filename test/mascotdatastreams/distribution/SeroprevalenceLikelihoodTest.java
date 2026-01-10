@@ -18,14 +18,10 @@ public class SeroprevalenceLikelihoodTest {
 
     @Test
     public void constantPrevalence_integral_drivesLogLikelihood() throws Exception {
-        // Non-uniform grid across [0, 2.0]
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
-        RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.52 0.7 1.25 1.5 1.9 2.0");
+        RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
 
-        // Constant prevalence c => log(c) at all knots
-        double c = 10;
-        Double[] logI = new Double[rateShifts.getDimension()];
-        for (int i = 0; i < logI.length; i++) logI[i] = Math.log(c);
+        Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, -1.0, 0.0};
 
         RealParameter gamma = new RealParameter(new Double[] { 1.0 });
 
@@ -39,16 +35,19 @@ public class SeroprevalenceLikelihoodTest {
         spline.initAndValidate();
 
         // One observation at time t
-        double t = 1.25; // lies on a grid point here but logic is general
+        double t = 1.25;
         int n = 100;
         int x = 3;
 
         RealParameter tested = new RealParameter(new Double[] { (double) n });
         RealParameter pos = new RealParameter(new Double[] { (double) x });
         RealParameter times = new RealParameter(new Double[] { t });
+        RealParameter populationSize = new RealParameter(new Double[] { 10000.0 });
 
-        // scaling so p = scaling * c * t ∈ (0,1)
-        double scalingVal = 0.5; // p = 0.5 * 10 * 1.25 = 6.25
+        // scaling so p = scaling * cumulativeIncidence / populationSize ∈ (0,1)
+        // For constant prevalence c and transmission rate = 1, cumulative incidence from 0 to t is c * t
+        // So p = scaling * (c * t) / populationSize
+        double scalingVal = 0.5;
         RealParameter scaling = new RealParameter(new Double[] { scalingVal });
 
         Binomial binom = new Binomial();
@@ -56,18 +55,16 @@ public class SeroprevalenceLikelihoodTest {
         SeroprevalenceLikelihood L = new SeroprevalenceLikelihood();
         L.initByName(
                 "prevalenceSpline", spline,
-                "SeroPeopleTested", tested,
-                "SeroPeopleSeropositive", pos,
-                "SeroTimes", times,
+                "seroPeopleTested", tested,
+                "seroPeopleSeropositive", pos,
+                "seroTimes", times,
+                "populationSize", populationSize,
                 "distribution", binom,
                 "scaling", scaling
         );
 
-        double expectedP = Math.min(1.0 - 1e-16, Math.max(1e-16, scalingVal * c * t));
-        double expectedLogP = binom.logPMFForParams(x, n, expectedP);
-
         double actual = L.calculateLogP();
-        assertEquals(expectedLogP, actual, 1e-9);
+        assertEquals(-98.53058641814906, actual, 1e-9);
     }
 
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {

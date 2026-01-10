@@ -19,11 +19,9 @@ public class WastewaterLikelihoodTest {
     @Test
     public void testSplinePrevalenceTwoDemes() throws Exception {
         Double[] times0 = new Double[] {0.0, 0.1, 0.52, 0.98, 1.47, 2.0};
-        // Wastewater concentrations as PMV-normalized ratios (typical range: 10^-6 to 10^-2)
-        // Values represent realistic SARS-CoV-2 or Influenza concentrations
-        Double[] concentrations0 = new Double[] {0.0025, 0.0037, 0.0021, 0.0048, 0.0052, 0.0001};
+        Double[] concentrations0 = new Double[] {0.0025, 0.2, 1.5, 35.7, 14.8, 0.8};
         Double[] times1 = new Double[] {0.0, 0.15, 0.56, 0.98, 1.78, 1.98};
-        Double[] concentrations1 = new Double[] {0.0013, 0.0018, 0.0023, 0.0026, 0.0031, 0.0008};
+        Double[] concentrations1 = new Double[] {0.01, 0.54, 2.3, 4.5, 1.2, 0.9};
         
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
         RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
@@ -63,6 +61,7 @@ public class WastewaterLikelihoodTest {
                 "prevalenceSpline", spline0,
                 "concentrations", new RealParameter(concentrations0),
                 "concentrationTimes", new RealParameter(times0),
+                "populationSize", new RealParameter(new Double[]{10000.0}),
                 "distribution", ln
         );
         llikDeme0.initAndValidate();
@@ -73,23 +72,23 @@ public class WastewaterLikelihoodTest {
                 "prevalenceSpline", spline1,
                 "concentrations", new RealParameter(concentrations1),
                 "concentrationTimes", new RealParameter(times1),
+                "populationSize", new RealParameter(new Double[]{10000.0}),
                 "distribution", ln
         );
         llikDeme1.initAndValidate();
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-1342.3012033247371, logP, 1e-6, "Wastewater concentration likelihood should match expected value.");
+        assertEquals(-1577.3565860026617, logP, 1e-6, "Wastewater concentration likelihood should match expected value.");
     }
     
     @Test
     public void testSplinePrevalenceTwoDemesScaling() throws Exception {
-        // Observations per deme: 6 time points each
+        // Observations per deme: 
         Double[] times0 = new Double[] {0.0, 0.1, 0.52, 0.98, 1.47, 2.0};
-        // Wastewater concentrations as PMV-normalized ratios (typical range: 10^-6 to 10^-2)
-        Double[] concentrations0 = new Double[] {0.0025, 0.0037, 0.0021, 0.0048, 0.0052, 0.0001};
+        Double[] concentrations0 = new Double[] {0.0025, 0.2, 1.5, 35.7, 14.8, 0.8};
         Double[] times1 = new Double[] {0.0, 0.15, 0.56, 0.98, 1.78, 1.98};
-        Double[] concentrations1 = new Double[] {0.0013, 0.0018, 0.0023, 0.0026, 0.0031, 0.0008};
+        Double[] concentrations1 = new Double[] {0.01, 0.54, 2.3, 4.5, 1.2, 0.9};
         
         // Spline prevalence with fractional shifts at 0.5 and 1.0 (root height = 2.0 in helper)
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
@@ -132,6 +131,7 @@ public class WastewaterLikelihoodTest {
                 "prevalenceSpline", spline0,
                 "concentrations", new RealParameter(concentrations0),
                 "concentrationTimes", new RealParameter(times0),
+                "populationSize", new RealParameter(new Double[]{10000.0}),
                 "distribution", ln,
                 "scaling", new RealParameter(new Double[]{0.1})
         );
@@ -143,6 +143,7 @@ public class WastewaterLikelihoodTest {
                 "prevalenceSpline", spline1,
                 "concentrations", new RealParameter(concentrations1),
                 "concentrationTimes", new RealParameter(times1),
+                "populationSize", new RealParameter(new Double[]{10000.0}),
                 "distribution", ln,
                 "scaling", new RealParameter(new Double[]{0.05})
         );
@@ -150,20 +151,15 @@ public class WastewaterLikelihoodTest {
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        // Expected value will be computed after first run - placeholder for now
-        // TODO: Update expected value after running test
-        assertEquals(-16547.834297265934, logP, 1e-6, "Wastewater concentration likelihood with scaling should match expected value.");
+        assertEquals(-66701.11332701507, logP, 1e-6, "Wastewater concentration likelihood with scaling should match expected value.");
     }
     
     @Test
     public void testSplinePrevalenceTwoDemesConcentrationsOutsideTree() throws Exception {
-        // Observations per deme: 7 time points each
         Double[] times0 = new Double[] {-0.1, 0.0, 0.1, 0.52, 0.98, 1.47, 2.0};
-        // Wastewater concentrations as PMV-normalized ratios (typical range: 10^-6 to 10^-2)
-        // Including some higher values during peak periods and very low values near baseline
-        Double[] concentrations0 = new Double[] {0.0008, 0.0085, 0.0092, 0.0065, 0.0038, 0.0012, 0.0001};
+        Double[] concentrations0 = new Double[] {0.002, 0.0025, 0.2, 1.5, 35.7, 14.8, 0.8};
         Double[] times1 = new Double[] {-0.1, 0.0, 0.15, 0.56, 0.98, 1.78, 1.98};
-        Double[] concentrations1 = new Double[] {0.0005, 0.0072, 0.0045, 0.0058, 0.0062, 0.0028, 0.0009};
+        Double[] concentrations1 = new Double[] {0.12, 0.01, 0.54, 2.3, 4.5, 1.2, 0.9};
         
         // Spline prevalence with fractional shifts at 0.5 and 1.0 (root height = 2.0 in helper)
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
@@ -206,6 +202,7 @@ public class WastewaterLikelihoodTest {
                 "prevalenceSpline", spline0,
                 "concentrations", new RealParameter(concentrations0),
                 "concentrationTimes", new RealParameter(times0),
+                "populationSize", new RealParameter(new Double[]{10000.0}),
                 "distribution", ln
         );
         llikDeme0.initAndValidate();
@@ -216,15 +213,14 @@ public class WastewaterLikelihoodTest {
                 "prevalenceSpline", spline1,
                 "concentrations", new RealParameter(concentrations1),
                 "concentrationTimes", new RealParameter(times1),
+                "populationSize", new RealParameter(new Double[]{10000.0}),
                 "distribution", ln
         );
         llikDeme1.initAndValidate();
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        // Expected value will be computed after first run - placeholder for now
-        // TODO: Update expected value after running test
-        assertEquals(-1373.2513362249608, logP, 1e-6, "Wastewater concentration likelihood with observations outside tree should match expected value.");
+        assertEquals(-1693.0659044120375, logP, 1e-6, "Wastewater concentration likelihood with observations outside tree should match expected value.");
     }
 
 

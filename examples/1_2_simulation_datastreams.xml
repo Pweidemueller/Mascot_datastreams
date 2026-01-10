@@ -172,6 +172,15 @@
       <parameter id="seroTestedTimes.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.0348086114823746 0.1104707833922 0.1905203703566503</parameter>
       <parameter id="seroprevalence.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" name="stateNode">1</parameter>
       <parameter id="seroprevalence.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" name="stateNode">1</parameter>
+      <parameter id="wastewaterConcentrations.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.01 18.5 0.98</parameter>
+      <parameter id="wastewaterConcentrationTimes.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.0500 0.1200 0.1800</parameter>
+      <parameter id="wastewaterConcentrations.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.21 1.5 24.7 5.4</parameter>
+      <parameter id="wastewaterConcentrationTimes.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.0400 0.1000 0.1400 0.1500</parameter>
+      <parameter id="wastewater.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">100</parameter>
+      <parameter id="wastewater.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">100</parameter>
+      <parameter id="wastewater.sigma:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">0.5</parameter>
+      <parameter id="PopSize.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1">50000</parameter>
+      <parameter id="PopSize.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1">50000</parameter>
     </state>
     <init spec="beast.base.evolution.tree.TreeParser" id="NewickTree.t:SimDataset" adjustTipHeights="false" initial="@Tree.t:SimDataset" taxa="@SimDataset" IsLabelledNewick="true" newick="((((((((((leaf_0:0.17634,leaf_64:0.04852):0.00203,leaf_97:0.03466):0.00147,leaf_18:0.08547):0.00410,leaf_120:0.02994):0.00895,leaf_3:0.15632):0.00254,((leaf_14:0.06887,leaf_54:0.03681):0.02548,(((((leaf_20:0.06931,leaf_72:0.03576):0.00020,leaf_86:0.03063):0.00985,leaf_49:0.05927):0.00038,(leaf_25:0.05818,leaf_39:0.05048):0.01324):0.00415,leaf_36:0.06974):0.00154):0.01340):0.00656,(((leaf_6:0.11306,leaf_83:0.05021):0.00017,((((leaf_7:0.08846,leaf_63:0.03725):0.00113,leaf_32:0.05700):0.01149,leaf_70:0.04761):0.00537,(leaf_12:0.07707,leaf_35:0.05358):0.01861):0.00265):0.00394,(leaf_37:0.07142,leaf_71:0.05356):0.00557):0.01272):0.00844,((leaf_30:0.09161,leaf_131:0.02588):0.01026,((leaf_61:0.03015,leaf_85:0.01997):0.01687,leaf_73:0.04186):0.03639):0.00190):0.00118,(((leaf_19:0.09105,leaf_45:0.07304):0.01435,leaf_80:0.06786):0.00106,(((((leaf_66:0.04504,leaf_94:0.03144):0.01064,leaf_112:0.03176):0.00680,leaf_99:0.04628):0.00154,(leaf_79:0.05458,(leaf_114:0.03364,leaf_130:0.02078):0.00177):0.00452):0.00857,(((leaf_68:0.04856,leaf_119:0.02353):0.01978,leaf_103:0.05118):0.00334,leaf_102:0.05487):0.00061):0.00173):0.00899):0.00494,((((((((((leaf_1:0.16065,(leaf_23:0.05569,leaf_56:0.03430):0.02739):0.01138,leaf_118:0.04056):0.00100,leaf_95:0.05206):0.00726,((leaf_40:0.05638,leaf_78:0.03641):0.01927,leaf_113:0.03619):0.01354):0.00396,((((leaf_2:0.12118,leaf_77:0.02098):0.02772,leaf_117:0.02855):0.01616,leaf_109:0.04698):0.00323,(leaf_28:0.08620,leaf_121:0.03793):0.00892):0.00516):0.00057,((((leaf_8:0.09773,((((leaf_24:0.02533,leaf_57:0.00566):0.03629,leaf_34:0.05370):0.00326,leaf_29:0.06000):0.00032,leaf_51:0.04854):0.00852):0.02314,leaf_107:0.04886):0.00151,((leaf_26:0.09178,(leaf_50:0.07307,((((leaf_65:0.05323,leaf_127:0.02212):0.00368,leaf_100:0.03974):0.00174,leaf_88:0.04992):0.00056,leaf_108:0.03720):0.00326):0.00639):0.00006,leaf_96:0.05355):0.00292):0.00166,leaf_27:0.09604):0.00492):0.00317,((((((leaf_5:0.11792,(leaf_60:0.06314,((leaf_75:0.04803,leaf_128:0.02056):0.00181,leaf_93:0.04040):0.00587):0.00186):0.00150,leaf_84:0.05632):0.00484,(leaf_16:0.08032,leaf_31:0.06498):0.02305):0.00045,(leaf_42:0.07145,leaf_52:0.06647):0.01177):0.00060,((leaf_17:0.08307,leaf_133:0.00191):0.02001,leaf_47:0.07996):0.00133):0.00727,(leaf_13:0.11483,(leaf_48:0.07331,leaf_106:0.04094):0.01219):0.00260):0.00510):0.00095,((((((leaf_10:0.08558,leaf_15:0.07495):0.00215,(leaf_67:0.02947,leaf_90:0.01904):0.00844):0.03391,((leaf_21:0.08558,leaf_62:0.05553):0.00886,leaf_89:0.05427):0.00846):0.00467,(((leaf_38:0.07287,(leaf_41:0.05982,leaf_82:0.03861):0.01242):0.00805,leaf_122:0.03852):0.00657,((leaf_46:0.05468,leaf_126:0.01109):0.01591,leaf_101:0.04077):0.01374):0.00501):0.00223,leaf_110:0.05572):0.00193,(leaf_105:0.05116,(leaf_111:0.04010,leaf_125:0.03328):0.00604):0.01084):0.00167):0.00082,((leaf_33:0.09296,(leaf_76:0.05679,leaf_81:0.05533):0.01285):0.00656,(leaf_55:0.07905,(((leaf_59:0.05722,leaf_123:0.02202):0.01563,leaf_116:0.04236):0.00016,leaf_69:0.06618):0.00415):0.00941):0.00281):0.00147,(((leaf_4:0.09115,leaf_104:0.00208):0.04758,(((((((leaf_9:0.10830,(leaf_87:0.04885,leaf_92:0.04315):0.00160):0.00291,leaf_124:0.03021):0.00223,((leaf_43:0.07170,leaf_74:0.05411):0.00511,leaf_115:0.03805):0.00079):0.00021,((leaf_11:0.08506,leaf_22:0.06817):0.02305,(leaf_98:0.02914,leaf_129:0.01084):0.01679):0.00170):0.00104,leaf_91:0.05154):0.00144,leaf_132:0.01988):0.00229,leaf_53:0.07738):0.00002):0.00671,(leaf_44:0.07874,leaf_58:0.07090):0.01050):0.01000):0.00354):0.00000;"/>
     <distribution id="posterior" spec="CompoundDistribution">
@@ -201,7 +210,7 @@
           <seroPeopleTested idref="seroTestedCounts.Deme1:SimDataset"/>
           <seroPeopleSeropositive idref="seroWithAntibodiesCounts.Deme1:SimDataset"/>
           <seroTimes idref="seroTestedTimes.Deme1:SimDataset"/>
-          <populationSize id="seroprevalence.PopSize.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1">50000</populationSize>
+          <populationSize idref="PopSize.Deme1:SimDataset"/>
           <scaling idref="seroprevalence.scaling.Deme1:SimDataset"/>
           <distribution id="binomial.seroprevalenceLikelihood.Deme1.t:Spec" spec="mascotdatastreams.distribution.Binomial"/>
         </distribution>
@@ -210,9 +219,25 @@
           <seroPeopleTested idref="seroTestedCounts.Deme2:SimDataset"/>
           <seroPeopleSeropositive idref="seroWithAntibodiesCounts.Deme2:SimDataset"/>
           <seroTimes idref="seroTestedTimes.Deme2:SimDataset"/>
-          <populationSize id="seroprevalence.PopSize.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1">50000</populationSize>
+          <populationSize idref="PopSize.Deme2:SimDataset"/>
           <scaling idref="seroprevalence.scaling.Deme2:SimDataset"/>
           <distribution id="binomial.seroprevalenceLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.Binomial"/>
+        </distribution>
+        <distribution id="wastewaterLikelihood.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.WastewaterLikelihood">
+          <prevalenceSpline idref="splinePrev.Deme1.t:SimDataset"/>
+          <concentrations idref="wastewaterConcentrations.Deme1:SimDataset"/>
+          <concentrationTimes idref="wastewaterConcentrationTimes.Deme1:SimDataset"/>
+          <populationSize idref="PopSize.Deme1:SimDataset"/>
+          <scaling idref="wastewater.scaling.Deme1:SimDataset"/>
+          <distribution id="logNormal.wastewaterLikelihood.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.LogNormal" sd="@wastewater.sigma:SimDataset"/>
+        </distribution>
+        <distribution id="wastewaterLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.WastewaterLikelihood">
+          <prevalenceSpline idref="splinePrev.Deme2.t:SimDataset"/>
+          <concentrations idref="wastewaterConcentrations.Deme2:SimDataset"/>
+          <concentrationTimes idref="wastewaterConcentrationTimes.Deme2:SimDataset"/>
+          <populationSize idref="PopSize.Deme1:SimDataset"/>
+          <scaling idref="wastewater.scaling.Deme2:SimDataset"/>
+          <distribution id="logNormal.wastewaterLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.LogNormal" sd="@wastewater.sigma:SimDataset"/>
         </distribution>
         <distribution id="Mascot.t:SimDataset" spec="mascot.distribution.Mascot" tree="@Tree.t:SimDataset">
           <dynamics id="StructuredSkyline.t:SimDataset" spec="mascotdatastreams.distribution.StructuredSkylinePrevalence" dimension="2" forwardsMigration="@migrationRatesSkyline.t:SimDataset" fromBeauti="true" maxRate="1000">
@@ -275,6 +300,24 @@
             <parameter id="SeroprevalenceScaling.Deme2.SDLog" spec="parameter.RealParameter" estimate="false" name="S">1.0</parameter>
           </LogNormal>
         </prior>
+        <prior id="WastewaterScaling.Deme1.Prior:SimDataset" name="distribution" x="@wastewater.scaling.Deme1:SimDataset">
+          <LogNormal id="WastewaterScaling.Deme1.LogNormal" name="distr">
+            <parameter id="WastewaterScaling.Deme1.MeanLog" spec="parameter.RealParameter" estimate="false" name="M">5.0</parameter>
+            <parameter id="WastewaterScaling.Deme1.SDLog" spec="parameter.RealParameter" estimate="false" name="S">1.2</parameter>
+          </LogNormal>
+        </prior>
+        <prior id="WastewaterScaling.Deme2.Prior:SimDataset" name="distribution" x="@wastewater.scaling.Deme2:SimDataset">
+          <LogNormal id="WastewaterScaling.Deme2.LogNormal" name="distr">
+            <parameter id="WastewaterScaling.Deme2.MeanLog" spec="parameter.RealParameter" estimate="false" name="M">5.0</parameter>
+            <parameter id="WastewaterScaling.Deme2.SDLog" spec="parameter.RealParameter" estimate="false" name="S">1.2</parameter>
+          </LogNormal>
+        </prior>
+        <prior id="WastewaterSigmaPrior.s:SimDataset" name="distribution" x="@wastewater.sigma:SimDataset">
+          <LogNormal id="WastewaterSigmaLogNormal" name="distr">
+            <parameter id="WastewaterSigmaMeanLog" spec="parameter.RealParameter" estimate="false" name="M">0.0</parameter>
+            <parameter id="WastewaterSigmaSDLog" spec="parameter.RealParameter" estimate="false" name="S">1.0</parameter>
+          </LogNormal>
+        </prior>
         <prior id="migrationRatesSkylinePrior.t:SimDataset" name="distribution" x="@migrationRatesSkyline.t:SimDataset">
           <Exponential id="Exponential.3" name="distr">
             <parameter id="RealParameter.8" spec="parameter.RealParameter" estimate="false" name="mean">1.0</parameter>
@@ -291,8 +334,26 @@
         <parameter idref="caseCounts.dispersion:SimDataset" name="f"/>
         <parameter idref="seroprevalence.scaling.Deme1:SimDataset" name="f"/>
         <parameter idref="seroprevalence.scaling.Deme2:SimDataset" name="f"/>
+        <parameter idref="wastewater.scaling.Deme1:SimDataset" name="f"/>
+        <parameter idref="wastewater.scaling.Deme2:SimDataset" name="f"/>
+        <parameter idref="wastewater.sigma:SimDataset" name="f"/>
       </transformations>
       <transformations id="AVMNNoTransform.Mascot.SimDataset" spec="operator.kernel.Transform$NoTransform">
+        <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="f"/>
+        <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="f"/>
+      </transformations>
+    </operator>
+    <operator id="AVMNOperator.Mascot.SimDataset2" spec="kernel.AdaptableVarianceMultivariateNormalOperator" allowNonsense="true" beta="0.1" burnin="400" initial="800" weight="2.0">
+      <transformations id="AVMNSumTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$LogConstrainedSumTransform"/>
+      <transformations id="AVMNLogTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$LogTransform">
+        <parameter idref="caseCounts.scaling.Deme1:SimDataset" name="f"/>
+        <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="f"/>
+        <parameter idref="seroprevalence.scaling.Deme1:SimDataset" name="f"/>
+        <parameter idref="seroprevalence.scaling.Deme2:SimDataset" name="f"/>
+        <parameter idref="wastewater.scaling.Deme1:SimDataset" name="f"/>
+        <parameter idref="wastewater.scaling.Deme2:SimDataset" name="f"/>
+      </transformations>
+      <transformations id="AVMNNoTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$NoTransform">
         <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="f"/>
         <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="f"/>
       </transformations>
@@ -301,27 +362,17 @@
       <upLogParameter idref="SkylinePrev.Deme1.t:SimDataset"/>
       <downRealParameter idref="caseCounts.scaling.Deme1:SimDataset"/>
       <downRealParameter idref="seroprevalence.scaling.Deme1:SimDataset"/>
+      <downRealParameter idref="wastewater.scaling.Deme1:SimDataset"/>
     </operator>
     <operator id="UpDownPrevScaling.Deme2:SimDataset" spec="mascotdatastreams.operators.UpDownLogScaleOperator" scaleFactor="0.5" weight="1.5" optimise="true">
       <upLogParameter idref="SkylinePrev.Deme2.t:SimDataset"/>
       <downRealParameter idref="caseCounts.scaling.Deme2:SimDataset"/>
       <downRealParameter idref="seroprevalence.scaling.Deme2:SimDataset"/>
+      <downRealParameter idref="wastewater.scaling.Deme2:SimDataset"/>
     </operator>
     <operator id="migrationRatesScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@migrationRatesSkyline.t:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.5"/>
     <operator id="CaseCountsDispersionScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.dispersion:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.5"/>
-    <operator id="AVMNOperator.Mascot.SimDataset2" spec="kernel.AdaptableVarianceMultivariateNormalOperator" allowNonsense="true" beta="0.1" burnin="400" initial="800" weight="2.0">
-      <transformations id="AVMNSumTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$LogConstrainedSumTransform"/>
-      <transformations id="AVMNLogTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$LogTransform">
-        <parameter idref="caseCounts.scaling.Deme1:SimDataset" name="f"/>
-        <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="f"/>
-        <parameter idref="seroprevalence.scaling.Deme1:SimDataset" name="f"/>
-        <parameter idref="seroprevalence.scaling.Deme2:SimDataset" name="f"/>
-      </transformations>
-      <transformations id="AVMNNoTransform.Mascot.SimDataset2" spec="operator.kernel.Transform$NoTransform">
-        <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="f"/>
-        <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="f"/>
-      </transformations>
-    </operator>
+    <operator id="WastewaterSigmaScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@wastewater.sigma:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.5"/>
     <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
       <log idref="posterior"/>
       <log idref="prior"/>
@@ -335,6 +386,11 @@
       <log idref="seroprevalenceLikelihood.Deme2.t:SimDataset" name="log"/>
       <parameter idref="seroprevalence.scaling.Deme1:SimDataset" name="log"/>
       <parameter idref="seroprevalence.scaling.Deme2:SimDataset" name="log"/>
+      <log idref="wastewaterLikelihood.Deme1.t:SimDataset" name="log"/>
+      <log idref="wastewaterLikelihood.Deme2.t:SimDataset" name="log"/>
+      <parameter idref="wastewater.scaling.Deme1:SimDataset" name="log"/>
+      <parameter idref="wastewater.scaling.Deme2:SimDataset" name="log"/>
+      <parameter idref="wastewater.sigma:SimDataset" name="log"/>
       <log idref="Mascot.t:SimDataset"/>
       <log id="nrEventslogger.t:SimDataset" spec="mascot.logger.MigrationCountLogger">
         <mappedMascot id="mascotEventsTreelog.t:SimDataset" spec="mascot.distribution.MappedMascot" dynamics="@StructuredSkyline.t:SimDataset" structuredTreeIntervals="@StructuredTreeIntervals.t:SimDataset" tree="@Tree.t:SimDataset"/>

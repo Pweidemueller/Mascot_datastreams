@@ -24,6 +24,7 @@ def compute_log_likelihood(
     observation_times: np.ndarray,
     concentrations: np.ndarray,
     sd_log: float,
+    population_size: float,
     scaling: float = 1.0,
 ) -> float:
     """
@@ -47,6 +48,8 @@ def compute_log_likelihood(
         Observed PMV-normalized wastewater concentrations (must be > 0)
     sd_log : float
         Standard deviation on log scale for the LogNormal distribution
+    population_size : float
+        Population size (used to convert absolute prevalence to per-capita prevalence)
     scaling : float, optional
         Scaling factor applied to prevalence-derived mean (default: 1.0)
 
@@ -68,6 +71,8 @@ def compute_log_likelihood(
         raise ValueError("sd_log must be > 0")
     if scaling <= 0:
         raise ValueError("scaling must be > 0")
+    if population_size <= 0:
+        raise ValueError("population_size must be > 0")
     if np.any(concentrations <= 0):
         raise ValueError("All concentrations must be > 0")
 
@@ -127,11 +132,14 @@ def compute_log_likelihood(
         # Get log-prevalence at observation time using closest grid point
         logI = get_value_at_grid_point(t)
 
-        # Convert to prevalence
-        meanI = np.exp(logI)
+        # Convert to prevalence (absolute number of infected)
+        I = np.exp(logI)
+
+        # Convert to per-capita prevalence (proportion of population infected)
+        I_N = I / population_size
 
         # Apply scaling factor
-        scaled_mean = meanI * scaling
+        scaled_mean = I_N * scaling
 
         # Validate
         if scaled_mean <= 0.0:
@@ -197,12 +205,13 @@ def main():
     logI_deme1 = np.array([0.0, 1.0, 3.0, 6.0, 8.0, 3.0, -2.0, 0.0, -0.5, -1.0, 0.0])
 
     times0 = np.array([0.0, 0.1, 0.52, 0.98, 1.47, 2.0])
-    concentrations0 = np.array([0.0025, 0.0037, 0.0021, 0.0048, 0.0052, 0.0001])
+    concentrations0 = np.array([0.0025, 0.2, 1.5, 35.7, 14.8, 0.8])
     times1 = np.array([0.0, 0.15, 0.56, 0.98, 1.78, 1.98])
-    concentrations1 = np.array([0.0013, 0.0018, 0.0023, 0.0026, 0.0031, 0.0008])
+    concentrations1 = np.array([0.01, 0.54, 2.3, 4.5, 1.2, 0.9])
 
     sd_log = 0.5
     scaling = 1.0
+    population_size = 10000.0
 
     logP0 = compute_log_likelihood(
         knots_times=knots_times,
@@ -211,6 +220,7 @@ def main():
         observation_times=times0,
         concentrations=concentrations0,
         sd_log=sd_log,
+        population_size=population_size,
         scaling=scaling,
     )
 
@@ -221,6 +231,7 @@ def main():
         observation_times=times1,
         concentrations=concentrations1,
         sd_log=sd_log,
+        population_size=population_size,
         scaling=scaling,
     )
 
@@ -232,6 +243,7 @@ def main():
     print("Test testSplinePrevalenceTwoDemesScaling")
     # Same spline and observations as test 1
     sd_log = 0.1
+    population_size = 10000.0
     scaling0 = 0.1
     scaling1 = 0.05
 
@@ -242,6 +254,7 @@ def main():
         observation_times=times0,
         concentrations=concentrations0,
         sd_log=sd_log,
+        population_size=population_size,
         scaling=scaling0,
     )
 
@@ -252,6 +265,7 @@ def main():
         observation_times=times1,
         concentrations=concentrations1,
         sd_log=sd_log,
+        population_size=population_size,
         scaling=scaling1,
     )
 
@@ -263,11 +277,12 @@ def main():
     print("Test testSplinePrevalenceTwoDemesConcentrationsOutsideTree")
     # Same spline setup
     times0 = np.array([-0.1, 0.0, 0.1, 0.52, 0.98, 1.47, 2.0])
-    concentrations0 = np.array([0.0008, 0.0085, 0.0092, 0.0065, 0.0038, 0.0012, 0.0001])
+    concentrations0 = np.array([0.002, 0.0025, 0.2, 1.5, 35.7, 14.8, 0.8])
     times1 = np.array([-0.1, 0.0, 0.15, 0.56, 0.98, 1.78, 1.98])
-    concentrations1 = np.array([0.0005, 0.0072, 0.0045, 0.0058, 0.0062, 0.0028, 0.0009])
+    concentrations1 = np.array([0.12, 0.01, 0.54, 2.3, 4.5, 1.2, 0.9])
 
     sd_log = 0.5
+    population_size = 10000.0  # Default population size (can be adjusted per test)
     scaling = 1.0
 
     logP0 = compute_log_likelihood(
@@ -277,6 +292,7 @@ def main():
         observation_times=times0,
         concentrations=concentrations0,
         sd_log=sd_log,
+        population_size=population_size,
         scaling=scaling,
     )
 
@@ -287,6 +303,7 @@ def main():
         observation_times=times1,
         concentrations=concentrations1,
         sd_log=sd_log,
+        population_size=population_size,
         scaling=scaling,
     )
 

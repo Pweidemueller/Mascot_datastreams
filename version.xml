@@ -10,6 +10,8 @@
     <provider classname="mascotdatastreams.distribution.SeroprevalenceLikelihood"/>
     <provider classname="mascotdatastreams.distribution.Binomial"/>
     <provider classname="mascotdatastreams.distribution.StructuredSkylinePrevalence"/>
+    <provider classname="mascotdatastreams.distribution.WastewaterLikelihood"/>
+    <provider classname="mascotdatastreams.distribution.LogNormal"/>
     <provider classname="mascotdatastreams.dynamics.Spline"/>
     <provider classname="mascotdatastreams.dynamics.SplinePrevalenceToNe"/>
     <provider classname="mascotdatastreams.util.TransmissionSmallerThan"/>
