@@ -21,7 +21,7 @@ public class SeroprevalenceLikelihoodTest {
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
         RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
 
-        Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, -1.0, 0.0};
+        Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, 2.0, 0.0};
 
         RealParameter gamma = new RealParameter(new Double[] { 1.0 });
 
@@ -64,7 +64,7 @@ public class SeroprevalenceLikelihoodTest {
         );
 
         double actual = L.calculateLogP();
-        assertEquals(-98.53058641814906, actual, 1e-9);
+        assertEquals(-16.971882317175133, actual, 1e-9);
     }
 
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {

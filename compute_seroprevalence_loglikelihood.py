@@ -311,7 +311,6 @@ def compute_log_likelihood(
 
         # Compute binomial log-likelihood
         log_pdf = binomial_logpmf(x_int, n_int, p)
-
         if np.isnan(log_pdf) or np.isinf(log_pdf):
             return -np.inf
 
@@ -353,7 +352,7 @@ def main():
         ]
     )
 
-    logI = np.array([0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, -1.0, 0.0])
+    logI = np.array([0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, 2.0, 0.0])
 
     # Test: constantPrevalence_integral_drivesLogLikelihood
     print("Test constantPrevalence_integral_drivesLogLikelihood")
@@ -363,13 +362,9 @@ def main():
     people_tested = np.array([100])
     people_seropositive = np.array([3])
 
-    uninfectious_rate = 1.0  # Transmission rate = 1 for constant prevalence
+    uninfectious_rate = 1.0
     population_size = 10000.0
     scaling = 0.5
-
-    # For constant prevalence c and transmission rate = 1, cumulative incidence = c * t
-    # Expected: cumulative incidence = 10 * 1.25 = 12.5
-    # p = 0.5 * 12.5 / 10000 = 0.00625
 
     logP = compute_log_likelihood(
         knots_times=knots_times,

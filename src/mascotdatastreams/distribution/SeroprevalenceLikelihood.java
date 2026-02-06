@@ -68,9 +68,18 @@ public class SeroprevalenceLikelihood extends Distribution {
         populationSize = populationSizeInput.get();
         dist = distInput.get();
         prevalenceSpline = prevalenceSplineInput.get();
+        Scaling = ScalingInput.get();
 
         if (!(dist instanceof Binomial)) {
             throw new IllegalArgumentException("SeroprevalenceLikelihood: 'distribution' must be Binomial");
+        }
+
+        // Validate optional scaling parameter if present
+        if (Scaling != null) {
+            double s = Scaling.getArrayValue();
+            if (!(s > 0.0)) {
+                throw new IllegalArgumentException("SeroprevalenceLikelihood: 'scaling' must be > 0, got " + s);
+            }
         }
 
         // Validate observation vectors
