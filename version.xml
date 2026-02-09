@@ -12,11 +12,13 @@
     <provider classname="mascotdatastreams.distribution.StructuredSkylinePrevalence"/>
     <provider classname="mascotdatastreams.distribution.WastewaterLikelihood"/>
     <provider classname="mascotdatastreams.distribution.LogNormal"/>
+    <provider classname="mascotdatastreams.distribution.MascotLogPflag"/>
     <provider classname="mascotdatastreams.dynamics.Spline"/>
     <provider classname="mascotdatastreams.dynamics.SplinePrevalenceToNe"/>
     <provider classname="mascotdatastreams.util.TransmissionSmallerThan"/>
     <provider classname="mascotdatastreams.operators.UpDownLogScaleOperator"/>
     <provider classname="mascotdatastreams.logger.CumulativeIncidenceLogger"/>
+    <provider classname="mascotdatastreams.logger.StructuredTreeLogger"/>
 
   </service>
 </package>
