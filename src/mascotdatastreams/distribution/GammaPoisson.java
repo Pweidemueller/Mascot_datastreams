@@ -72,7 +72,7 @@ public class GammaPoisson extends ParametricDistribution implements Distribution
 
     // Keep internal state up-to-date
     // TODO: Both instance methods (pmf/logPmf) use GammaPoissonDistributionImpl while
-    //       logPForMean is a stateless calculation using the same parameterization; these are consistent.
+    //       logPForMean is a stateless calculation using the same parameterization; these are consistent but should be unified.
     void refresh() {
         double mean = meanInput.get() == null ? 1.0 : meanInput.get().getArrayValue();
         double alpha = dispersionInput.get() == null ? 1.0 : dispersionInput.get().getArrayValue();

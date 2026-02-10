@@ -139,14 +139,14 @@ def compute_log_likelihood(
         I_N = I / population_size
 
         # Apply scaling factor
-        scaled_mean = I_N * scaling
+        scaled_mean = I_N * scaling + 1e-2
 
         # Validate
         if scaled_mean <= 0.0:
             return -np.inf
 
         # Parameterize LogNormal by mean in real space
-        # scipy.stats.lognorm uses: s (shape = σ on log scale) and scale = exp(μ) (where μ is mean of the normal component)
+        # scipy.stats.lognorm uses: s (shape = σ on log scale) and scale = exp(μ) (where μ is mean of the normal component aka in log space)
         # We want E[X] = scaled_mean, so: μ = log(scaled_mean) - σ²/2
         # Therefore: scale = exp(μ) = scaled_mean * exp(-σ²/2)
         scale = scaled_mean * np.exp(-0.5 * sd_log * sd_log)

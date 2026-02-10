@@ -10,13 +10,10 @@ import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
 
 /**
- * Log-normal distribution parameterised by mean (in real space) and standard deviation (on log scale).
+ * Log-normal distribution parameterised by mean on log scale (μ) and standard deviation on log scale (σ).
  *
- * If X ~ LogNormal(μ, σ²) where μ is the mean of log(X), then:
+ * If X ~ LogNormal(μ, σ²) then log(X) ~ Normal(μ, σ²), i.e. μ = E[log(X)] and σ = sd(log(X)).
  *   E[X] = exp(μ + σ²/2)
- *
- * To parameterize by mean in real space:
- *   Given E[X] = mean, we set μ = log(mean) - σ²/2
  *
  * PDF:
  *   f(x) = 1/(x σ √(2π)) * exp(-0.5 * ((log(x) - μ)² / σ²))
@@ -24,19 +21,16 @@ import beast.base.inference.parameter.RealParameter;
  * Log PDF:
  *   log f(x) = -log(x) - log(σ) - 0.5*log(2π) - 0.5*((log(x) - μ)² / σ²)
  */
-@Description("Log-normal distribution parameterised by mean (in real space) and standard deviation (on log scale).")
+@Description("Log-normal distribution parameterised by mean (on log scale) and standard deviation (on log scale).")
 public class LogNormal extends ParametricDistribution implements DistributionWithMean {
-    private static final double SQRT_2PI = Math.sqrt(2.0 * Math.PI);
-    private static final double LOG_SQRT_2PI = Math.log(SQRT_2PI);
-
-    public final Input<Function> meanInput = new Input<>("mean", "Mean (in real space) of the distribution.");
-    public final Input<Function> sdInput = new Input<>("sd", "Standard deviation (on log scale) of the distribution.");
+    public final Input<Function> meanInput = new Input<>("mean", "Mean on log scale, i.e. μ = E[log(X)].");
+    public final Input<Function> sdInput = new Input<>("sd", "Standard deviation on log scale, σ = sd(log(X)).");
 
     private LogNormalDistributionImpl dist;
 
     // Empty constructor for XML
     public LogNormal() {
-        dist = new LogNormalDistributionImpl(1.0, 0.5); // placeholder, refreshed in init/refresh
+        dist = new LogNormalDistributionImpl(0.0, 0.5); // placeholder, refreshed in init/refresh
     }
 
     public LogNormal(RealParameter mean, RealParameter sd) {
@@ -51,15 +45,6 @@ public class LogNormal extends ParametricDistribution implements DistributionWit
 
     @Override
     public void initAndValidate() {
-        if (meanInput.get() instanceof RealParameter) {
-            RealParameter meanParam = (RealParameter) meanInput.get();
-            if (meanParam.getLower() == null) {
-                meanParam.setLower(0.0);
-            }
-            if (meanParam.getUpper() == null) {
-                meanParam.setUpper(Double.POSITIVE_INFINITY);
-            }
-        }
         if (sdInput.get() instanceof RealParameter) {
             RealParameter sdParam = (RealParameter) sdInput.get();
             if (sdParam.getLower() == null) {
@@ -73,16 +58,11 @@ public class LogNormal extends ParametricDistribution implements DistributionWit
     }
 
     void refresh() {
-        double mean = meanInput.get() == null ? 1.0 : meanInput.get().getArrayValue();
+        double mu = meanInput.get() == null ? 0.0 : meanInput.get().getArrayValue();
         double sd = sdInput.get() == null ? 1.0 : sdInput.get().getArrayValue();
-        if (mean <= 0) {
-            throw new IllegalArgumentException("Mean must be > 0, got " + mean);
-        }
         if (sd <= 0) {
             throw new IllegalArgumentException("Standard deviation must be > 0, got " + sd);
         }
-        // Parameterize by mean in real space: μ = log(mean) - σ²/2
-        double mu = Math.log(mean) - 0.5 * sd * sd;
         dist = new LogNormalDistributionImpl(mu, sd);
     }
 
@@ -96,7 +76,7 @@ public class LogNormal extends ParametricDistribution implements DistributionWit
     public double getMeanWithoutOffset() {
         Function meanFn = meanInput.get();
         if (meanFn == null) {
-            return 1.0; // consistent with refresh() default
+            return 0.0; // consistent with refresh() default (μ on log scale)
         }
         return meanFn.getArrayValue();
     }
@@ -114,18 +94,18 @@ public class LogNormal extends ParametricDistribution implements DistributionWit
 
     @Override
     public double logPForMean(double observation, double mean) {
-        // Stateless log PDF for a given mean; do not mutate Inputs
+        // Stateless log PDF for a given mean; do not mutate Inputs.
+        // 'mean' is the mean in real space (E[X]). We convert to log-scale μ = log(mean) - σ²/2
+        // so that E[X] = mean, allowing callers to specify the real-space mean without knowing σ.
         if (observation <= 0.0) {
             return Double.NEGATIVE_INFINITY;
         }
-        // Standard deviation from input; default to 1.0 if absent, as in refresh()
         double sd = sdInput.get() == null ? 1.0 : sdInput.get().getArrayValue();
         if (!(mean > 0.0) || !(sd > 0.0)) {
             throw new IllegalArgumentException("LogNormal.logPForMean: mean and sd must be > 0. Got mean=" + mean + ", sd=" + sd);
         }
-        // Parameterize by mean in real space: μ = log(mean) - σ²/2
+        // Convert real-space mean to log-scale: μ = log(E[X]) - σ²/2
         double mu = Math.log(mean) - 0.5 * sd * sd;
-        // Delegate to the inner distribution to ensure a single implementation of the PDF
         return new LogNormalDistributionImpl(mu, sd).logDensity(observation);
     }
 }

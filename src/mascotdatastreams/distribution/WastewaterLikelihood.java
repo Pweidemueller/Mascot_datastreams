@@ -43,23 +43,6 @@ public class WastewaterLikelihood extends Distribution {
     final public Input<ParametricDistribution> distInput = new Input<>(
             "distribution", "Distribution used to calculate likelihood. Currently only LogNormal is supported.", Validate.REQUIRED);
     // Optional scaling of the mean (akin to a sampling/surveillance rate in a given deme); defaults to 1.0 (no scaling).
-    // 
-    // PRIOR RECOMMENDATIONS:
-    // PPMoV-normalized wastewater concentrations (copies/g pathogen per copies/g PPMoV) typically
-    // range from ~0.05 to ~1000. Number of infected per population size in the deme can range from 0-1. The scaling factor α converts prevalence to expected normalized concentration:
-    //   E[concentration] = α · I(t)/N
-    //
-    // Typical scaling values can range from ~10 to ~10,000, with values of 100-1000 being typical.
-    // For example: if I(t)/N = 0.01 and concentration = 1, then α = 100.
-    //
-    // Recommended prior: LogNormal with mean on log scale = 4.6 to 6.9 (centered around 100-1000)
-    // and SD = 1.0 to 1.5. Example:
-    //    <LogNormal name="distr">
-    //      <parameter name="M">5.0</parameter>  <!-- mean on log scale, exp(5.0) ≈ 148 -->
-    //      <parameter name="S">1.2</parameter>  <!-- SD on log scale -->
-    //    </LogNormal>
-    // This centers around exp(5.0) ≈ 148 with SD=1.2, allowing exploration from ~10 to ~10,000.
-    //
     public final Input<RealParameter> scalingInput = new Input<>(
             "scaling", "Scaling factor applied to the prevalence-derived mean; must be > 0.", Validate.OPTIONAL);
     
@@ -137,7 +120,8 @@ public class WastewaterLikelihood extends Distribution {
                     return Double.NEGATIVE_INFINITY;
                 }
             }
-            double scaledMean = I_N * scaling;
+            // Add a small epsilon to the scaled mean to avoid log(0) and allow baseline wastewater concentraion detection at very low prevalences
+            double scaledMean = I_N * scaling + 1e-2;
 
             // Validate parameters
             if (scaledMean <= 0.0 || concentration <= 0.0) {
@@ -146,6 +130,7 @@ public class WastewaterLikelihood extends Distribution {
             }
 
             // Calculate log likelihood using a stateless interface (no input mutation)
+            // Pass real-space mean; LogNormal will convert internally to log-scale using its σ parameter
             if (!(dist instanceof DistributionWithMean)) {
                 throw new IllegalArgumentException(
                         "WastewaterLikelihood requires distributions implementing DistributionWithMean. Got: "

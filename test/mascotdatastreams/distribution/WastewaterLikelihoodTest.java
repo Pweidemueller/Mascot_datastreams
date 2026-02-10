@@ -79,7 +79,7 @@ public class WastewaterLikelihoodTest {
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-1577.3565860026617, logP, 1e-6, "Wastewater concentration likelihood should match expected value.");
+        assertEquals(-583.492514105115, logP, 1e-6, "Wastewater concentration likelihood should match expected value.");
     }
     
     @Test
@@ -151,7 +151,7 @@ public class WastewaterLikelihoodTest {
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-66701.11332701507, logP, 1e-6, "Wastewater concentration likelihood with scaling should match expected value.");
+        assertEquals(-14947.577608353582, logP, 1e-6, "Wastewater concentration likelihood with scaling should match expected value.");
     }
     
     @Test
@@ -220,7 +220,7 @@ public class WastewaterLikelihoodTest {
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-1693.0659044120375, logP, 1e-6, "Wastewater concentration likelihood with observations outside tree should match expected value.");
+        assertEquals(-593.5951633398709, logP, 1e-6, "Wastewater concentration likelihood with observations outside tree should match expected value.");
     }
 
 
