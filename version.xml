@@ -17,6 +17,8 @@
     <provider classname="mascotdatastreams.dynamics.SplinePrevalenceToNe"/>
     <provider classname="mascotdatastreams.util.TransmissionSmallerThan"/>
     <provider classname="mascotdatastreams.operators.UpDownLogScaleOperator"/>
+    <provider classname="mascotdatastreams.operators.BactrianRandomWalkOperator"/>
+    <provider classname="mascotdatastreams.operators.BactrianRandomWalkBlockOperator"/>
     <provider classname="mascotdatastreams.logger.CumulativeIncidenceLogger"/>
     <provider classname="mascotdatastreams.logger.StructuredTreeLogger"/>
 
