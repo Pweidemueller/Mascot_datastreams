@@ -23,9 +23,9 @@ public class Spline extends CalculationNode {
             "Rate shifts to use as grid points for spline evaluation, should be given in absolute time units (backward from present)", Input.Validate.REQUIRED);
     final public Input<RealParameter> uninfectiousRateInput = new Input<>("uninfectiousRate",
             "Rate at which individuals become uninfectious", Input.Validate.REQUIRED);
-
-    // TODO revisit this, since ideally we don't need to use clipping but the sampler should reject unreasonable transmissionrate values
-    // private static final double TSR_MIN = 0.5;
+    final public Input<Boolean> clipTransRateInput = new Input<>("clipTransRate",
+            "If true, clip transmission rate to minimum value TR_MIN; if false, use raw rate (default true)",
+            true);
 
     RealParameter infected;
     RateShifts rateShifts;
@@ -45,12 +45,15 @@ public class Spline extends CalculationNode {
 
     boolean ratesKnows=false;
     boolean isValid = true;
+    private boolean clipTransRate;
+    private static final double TR_MIN = 1e-1;
 
     @Override
     public void initAndValidate() {
         infected = InfectedInput.get();
         rateShifts = rateShiftsInput.get();
         gridRateShifts = gridRateShiftsInput.get();
+        clipTransRate = clipTransRateInput.get();
         // infected dimension should match rateShifts dimension (rateShifts already includes time 0)
         infected.setDimension(rateShifts.getDimension());
         uninfectiousRate = uninfectiousRateInput.get();
@@ -94,8 +97,9 @@ public class Spline extends CalculationNode {
             // Rearranging: β = γ - d(log I)/dτ
             // Therefore: transmission_rate = β = γ - d(log I)/dτ_backward
             transmissionRate[i] = uninfectiousRate.getValue() - dLogI_dBackwardTime;
-            // TODO: revisit clamp transmission rate to minimum value to prevent division by zero
-            // transmissionRate[i] = Math.max(transmissionRate[i], TSR_MIN);
+            if (clipTransRate) {
+                transmissionRate[i] = Math.max(transmissionRate[i], TR_MIN);
+            }
         }
 
         ratesKnows = true;
