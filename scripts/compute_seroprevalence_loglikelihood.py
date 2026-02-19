@@ -59,18 +59,21 @@ def binomial_logpmf(x: int, n: int, p: float) -> float:
     return log_comb + x * log_p + (n - x) * log_1mp
 
 
-def compute_cumulative_incidence(
+def compute_cumulative_hazard_pop(
     knots_times: np.ndarray,
     knots_log_prevalence: np.ndarray,
     grid_times: np.ndarray,
     earliest_time: float,
     observation_time: float,
     uninfectious_rate: float,
+    population_size: float,
 ) -> float:
     """
-    Compute cumulative incidence by integrating incidence rate β(t) * I(t) from earliest_time to observation_time.
+    Compute population-level cumulative hazard by integrating incidence rate β(t) * I(t) from earliest_time to observation_time.
 
-    This matches the Java getCumulativeIncidence() behavior:
+    This method integrates the incidence rate assuming the entire population remains susceptible,
+    so the result equals Λ where Λ is the per-capita cumulative hazard (force of infection over time).
+
     - Times are in backward time (larger = further in past)
     - Integration uses trapezoidal rule over grid segments
     - Incidence rate = transmission_rate * prevalence
@@ -90,11 +93,12 @@ def compute_cumulative_incidence(
         End time for integration (closer to present, smaller value in backward time)
     uninfectious_rate : float
         Rate at which individuals become uninfectious (γ)
-
+    population_size : float
+        Population size
     Returns
     -------
     float
-        Cumulative incidence (integral of incidence rate)
+        Population-level cumulative hazard (integral of incidence rate)
     """
     # Times are in backward time: if earliest_time <= observation_time, return 0
     if earliest_time <= observation_time:
@@ -209,6 +213,9 @@ def compute_cumulative_incidence(
         # Note: t1 > t2 in backward time
         sum_incidence += (t1 - t2) * (incidence1 + incidence2) * 0.5
 
+    # divide by population size to get per-capita cumulative hazard
+    sum_incidence /= population_size
+
     return sum_incidence
 
 
@@ -289,17 +296,18 @@ def compute_log_likelihood(
             return -np.inf
 
         # Compute cumulative incidence
-        cumulative_incidence = compute_cumulative_incidence(
+        cumulative_hazard_pop = compute_cumulative_hazard_pop(
             knots_times=knots_times,
             knots_log_prevalence=knots_log_prevalence,
             grid_times=grid_times,
             earliest_time=earliest_time,
             observation_time=t,
             uninfectious_rate=uninfectious_rate,
+            population_size=population_size,
         )
 
         # Compute seroprevalence probability
-        p = scaling * cumulative_incidence / population_size
+        p = 1.0 - np.exp(-1 * scaling * cumulative_hazard_pop)
 
         # Validate and clamp p
         if np.isnan(p):
@@ -352,19 +360,19 @@ def main():
         ]
     )
 
-    logI = np.array([0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, 2.0, 0.0])
+    logI = np.array([0.0, 1.0, 2.0, 5.0, 7.0, 6.2, 7.5, 8.0, 4.0, 2.0, 0.0])
 
     # Test: constantPrevalence_integral_drivesLogLikelihood
     print("Test constantPrevalence_integral_drivesLogLikelihood")
 
-    # One observation at time t = 1.25
-    observation_times = np.array([1.25])
+    # One observation in backwards time
+    observation_times = np.array([0.1])
     people_tested = np.array([100])
-    people_seropositive = np.array([3])
+    people_seropositive = np.array([40])
 
-    uninfectious_rate = 1.0
-    population_size = 10000.0
-    scaling = 0.5
+    uninfectious_rate = 20
+    population_size = 50000.0
+    scaling = 1.5
 
     logP = compute_log_likelihood(
         knots_times=knots_times,

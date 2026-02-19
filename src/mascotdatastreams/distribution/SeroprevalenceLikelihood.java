@@ -98,63 +98,15 @@ public class SeroprevalenceLikelihood extends Distribution {
     }
     
     /**
-     * Computes the integral of prevalence from EarliestTime to endTime.
-     * This represents the cumulative cases over the time period.
+     * Computes the population-level cumulative hazard: the integral of β(t)·I(t) from EarliestTime to endTime.
+     * This integrates the incidence rate assuming the entire population remains susceptible,
+     * so the result equals Λ where Λ is the per-capita cumulative hazard (force of infection over time).
      * 
      * @param EarliestTime start time for integration
      * @param endTime end time for integration
-     * @return cumulative cases (integral of prevalence)
+     * @return cumulative hazard (integral of β·I, not a count of unique infections)
      */
-    private double getCumulativeCases(double EarliestTime, double endTime) {
-        // Times are relative to the most recent sample: backward time, so if EarliestTime is before endTime, return 0
-        // The integral needs to be calculated from the first infection (around tree root) to the observation time  
-        if (EarliestTime <= endTime) {
-            return 0.0;
-        }
-        
-        // Grid info
-        int n = prevalenceSpline.getGridPointCount();
-        if (n <= 1) {
-            return 0.0;
-        }
-
-        double gridMin = prevalenceSpline.getGridStart();
-        double gridMax = prevalenceSpline.getGridEnd();
-
-        // Clamp to grid range in backward time 
-        double from = Math.min(EarliestTime, gridMax);
-        double to = Math.max(endTime, gridMin);
-        if (from <= to) {
-            return 0.0;
-        }
-
-        // Find boundary indices in backward time
-        int maxIdx = prevalenceSpline.getRightGridIndex(from);
-        int minIdx = prevalenceSpline.getLeftGridIndex(to);
-        // Integrate using trapezoids over gridpoint segments
-        double sum = 0.0;
-
-        for (int i = maxIdx; i > minIdx; i--) {
-            double t1 = prevalenceSpline.getGridPointTime(i);
-            double t2 = prevalenceSpline.getGridPointTime(i - 1);
-            double I1 = prevalenceSpline.getPrevalenceAtGridPoint(t1);
-            double I2 = prevalenceSpline.getPrevalenceAtGridPoint(t2);
-
-            sum += (t1 - t2) * (I1 + I2) * 0.5;
-        }
-
-        return sum;
-    }
-
-    /**
-     * Computes the integral of incidence from EarliestTime to endTime.
-     * This represents the cumulative cases over the time period.
-     * 
-     * @param EarliestTime start time for integration
-     * @param endTime end time for integration
-     * @return cumulative incidence (integral of incidence)
-     */
-    public double getCumulativeIncidence(double EarliestTime, double endTime) {
+    public double getPopulationCumulativeHazard(double EarliestTime, double endTime) {
         // Times are relative to the most recent sample: backward time, so if EarliestTime is before endTime, return 0
         // The integral needs to be calculated from the first infection (around tree root) to the observation time  
         if (EarliestTime <= endTime) {
@@ -199,6 +151,9 @@ public class SeroprevalenceLikelihood extends Distribution {
             sum += (t1 - t2) * (incidence1 + incidence2) * 0.5;
         }
 
+        // divide by population size to get per-capita cumulative hazard
+        sum /= populationSize.getArrayValue();
+
         return sum;
     }
 
@@ -212,13 +167,14 @@ public class SeroprevalenceLikelihood extends Distribution {
      * @return proportion of seropositive people
      */
     public double propSeropositive(double EarliestTime, double t) {
-        // Apply optional scaling factor (default 1.0)
+        // Apply optional scaling factor (default 1.0), to adjust cumulative hazard for for more/less exposed individuals (e.g. healthcare workers vs. general population)
+        // Returns the probability of an individual being seropositive at time t based on cumulative hazard and assuming Poisson process for infection with cumulative hazard as rate
         double scaling = 1.0;
         if (Scaling != null) {
             scaling = Scaling.getArrayValue();
         }
-        double cumulativeIncidence = getCumulativeIncidence(EarliestTime, t);
-        return scaling * cumulativeIncidence / populationSize.getArrayValue();
+        double populationCumulativeHazard = getPopulationCumulativeHazard(EarliestTime, t);
+        return 1.0 - Math.exp(-1 * scaling * populationCumulativeHazard);
     }
     
     @Override
@@ -241,16 +197,8 @@ public class SeroprevalenceLikelihood extends Distribution {
             double t = SeroTimes.getArrayValue(i);
             int n = (int) Math.round(SeroPeopleTested.getArrayValue(i));
             int x = (int) Math.round(SeroPeopleSeropositive.getArrayValue(i));
-            // double scaling = 1.0;
-            // if (Scaling != null) {
-            //     scaling = Scaling.getArrayValue();
-            // }
-            // double cumulativeIncidence = getCumulativeIncidence(EarliestTime, t);
-            // double p = scaling * cumulativeIncidence / populationSize.getArrayValue();
+            // Probability of an individual being seropositive at time t based on cumulative incidence
             double p = propSeropositive(EarliestTime, t);
-            // Convert cumulative cases (expected count in whole population) to probability via scaling
-            // propSeropositive automatically uses the current inferred scaling parameter
-            // double p = propSeropositive(EarliestTime, t);
             if (Double.isNaN(p)) {
                 System.err.println("Warning: Invalid 'p' value: " + p);
                 return Double.NEGATIVE_INFINITY;
@@ -288,7 +236,10 @@ public class SeroprevalenceLikelihood extends Distribution {
         return logP;
     }
 
-    // Logging methods removed - use CumulativeIncidenceLogger instead
+    public double getCumulativeIncidence(double EarliestTime, double t) {
+        double populationCumulativeHazard = getPopulationCumulativeHazard(EarliestTime, t);
+        return (1 - Math.exp(-1 * populationCumulativeHazard)) * populationSize.getArrayValue();
+    }
     
     /**
      * Getter for prevalence spline (for use by loggers).

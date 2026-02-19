@@ -21,9 +21,9 @@ public class SeroprevalenceLikelihoodTest {
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
         RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
 
-        Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, 2.0, 0.0};
+        Double[] logI = new Double[] { 0.0, 1.0, 2.0, 5.0, 7.0, 6.2, 7.5, 8.0, 4.0, 2.0, 0.0};
 
-        RealParameter gamma = new RealParameter(new Double[] { 1.0 });
+        RealParameter gamma = new RealParameter(new Double[] { 20.0 });
 
         Spline spline = new Spline();
         spline.initByName(
@@ -35,19 +35,19 @@ public class SeroprevalenceLikelihoodTest {
         spline.initAndValidate();
 
         // One observation at time t
-        double t = 1.25;
+        double t = 0.1;
         int n = 100;
-        int x = 3;
+        int x = 40;
 
         RealParameter tested = new RealParameter(new Double[] { (double) n });
         RealParameter pos = new RealParameter(new Double[] { (double) x });
         RealParameter times = new RealParameter(new Double[] { t });
-        RealParameter populationSize = new RealParameter(new Double[] { 10000.0 });
+        RealParameter populationSize = new RealParameter(new Double[] { 50000.0 });
 
         // scaling so p = scaling * cumulativeIncidence / populationSize ∈ (0,1)
         // For constant prevalence c and transmission rate = 1, cumulative incidence from 0 to t is c * t
         // So p = scaling * (c * t) / populationSize
-        double scalingVal = 0.5;
+        double scalingVal = 1.5;
         RealParameter scaling = new RealParameter(new Double[] { scalingVal });
 
         Binomial binom = new Binomial();
@@ -64,7 +64,7 @@ public class SeroprevalenceLikelihoodTest {
         );
 
         double actual = L.calculateLogP();
-        assertEquals(-16.971882317175133, actual, 1e-9);
+        assertEquals(-6.798412353743345, actual, 1e-9);
     }
 
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {

@@ -66,13 +66,13 @@ public class CumulativeIncidenceLogger extends BEASTObject implements Loggable {
         // Log cumulative incidence for every 10th grid point (matching headers)
         for (int i = 0; i < prevalenceSpline.getGridPointCount(); i += 10) {
             double t = prevalenceSpline.getGridPointTime(i);
-            double incidence = seroprevalenceLikelihood.getCumulativeIncidence(earliestTime, t);
-            printStream.print(incidence + "\t");
+            double cumulativeIncidence = seroprevalenceLikelihood.getCumulativeIncidence(earliestTime, t);
+            printStream.print(cumulativeIncidence + "\t");
         }
         for (int i = 0; i < prevalenceSpline.getGridPointCount(); i += 10) {
             double t = prevalenceSpline.getGridPointTime(i);
-            double incidence = seroprevalenceLikelihood.propSeropositive(earliestTime, t);
-            printStream.print(incidence + "\t");
+            double prob_seropositive = seroprevalenceLikelihood.propSeropositive(earliestTime, t);
+            printStream.print(prob_seropositive + "\t");
         }
     }
     
