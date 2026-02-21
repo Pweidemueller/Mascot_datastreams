@@ -59,7 +59,7 @@ def binomial_logpmf(x: int, n: int, p: float) -> float:
     return log_comb + x * log_p + (n - x) * log_1mp
 
 
-def compute_cumulative_hazard_pop(
+def compute_cumulative_inicidence_pop(
     knots_times: np.ndarray,
     knots_log_prevalence: np.ndarray,
     grid_times: np.ndarray,
@@ -213,9 +213,6 @@ def compute_cumulative_hazard_pop(
         # Note: t1 > t2 in backward time
         sum_incidence += (t1 - t2) * (incidence1 + incidence2) * 0.5
 
-    # divide by population size to get per-capita cumulative hazard
-    sum_incidence /= population_size
-
     return sum_incidence
 
 
@@ -296,7 +293,7 @@ def compute_log_likelihood(
             return -np.inf
 
         # Compute cumulative incidence
-        cumulative_hazard_pop = compute_cumulative_hazard_pop(
+        cumulative_incidence = compute_cumulative_inicidence_pop(
             knots_times=knots_times,
             knots_log_prevalence=knots_log_prevalence,
             grid_times=grid_times,
@@ -306,8 +303,25 @@ def compute_log_likelihood(
             population_size=population_size,
         )
 
+        percapita_cumulative_incidence = cumulative_incidence / population_size
+
+        if percapita_cumulative_incidence <= 0.0:
+            percapita_cumulative_incidence = 0.0
+
+        C_THRESH = 0.95
+
+        if percapita_cumulative_incidence < C_THRESH:
+            logOneMinusC = np.log(1.0 - percapita_cumulative_incidence)
+        else:
+            # At C_THRESH: value = log(1 - C_THRESH)
+            #              slope = -1 / (1 - C_THRESH)
+            logAtThresh = np.log(1.0 - C_THRESH)
+            slopeAtThresh = -1.0 / (1.0 - C_THRESH)
+            logOneMinusC = logAtThresh + slopeAtThresh * (
+                percapita_cumulative_incidence - C_THRESH
+            )
         # Compute seroprevalence probability
-        p = 1.0 - np.exp(-1 * scaling * cumulative_hazard_pop)
+        p = 1.0 - np.exp(scaling * logOneMinusC)
 
         # Validate and clamp p
         if np.isnan(p):
@@ -362,8 +376,8 @@ def main():
 
     logI = np.array([0.0, 1.0, 2.0, 5.0, 7.0, 6.2, 7.5, 8.0, 4.0, 2.0, 0.0])
 
-    # Test: constantPrevalence_integral_drivesLogLikelihood
-    print("Test constantPrevalence_integral_drivesLogLikelihood")
+    # Test: SeroprevalenceLogLikelihood
+    print("Test SeroprevalenceLogLikelihood")
 
     # One observation in backwards time
     observation_times = np.array([0.1])

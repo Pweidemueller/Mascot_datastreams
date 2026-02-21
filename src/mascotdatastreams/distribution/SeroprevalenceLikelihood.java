@@ -106,7 +106,7 @@ public class SeroprevalenceLikelihood extends Distribution {
      * @param endTime end time for integration
      * @return cumulative hazard (integral of β·I, not a count of unique infections)
      */
-    public double getPopulationCumulativeHazard(double EarliestTime, double endTime) {
+    public double getCumulativeIncidence(double EarliestTime, double endTime) {
         // Times are relative to the most recent sample: backward time, so if EarliestTime is before endTime, return 0
         // The integral needs to be calculated from the first infection (around tree root) to the observation time  
         if (EarliestTime <= endTime) {
@@ -151,9 +151,6 @@ public class SeroprevalenceLikelihood extends Distribution {
             sum += (t1 - t2) * (incidence1 + incidence2) * 0.5;
         }
 
-        // divide by population size to get per-capita cumulative hazard
-        sum /= populationSize.getArrayValue();
-
         return sum;
     }
 
@@ -173,8 +170,28 @@ public class SeroprevalenceLikelihood extends Distribution {
         if (Scaling != null) {
             scaling = Scaling.getArrayValue();
         }
-        double populationCumulativeHazard = getPopulationCumulativeHazard(EarliestTime, t);
-        return 1.0 - Math.exp(-1 * scaling * populationCumulativeHazard);
+        double C = getCumulativeIncidence(EarliestTime, t) / populationSize.getArrayValue();
+        if (C <= 0.0) return 0.0;
+
+        // Exact (1-C)^s via exp(s * ln(1-C)), with smooth
+        // linear extension of ln(1-C) beyond threshold
+        // cumulative hazard is -1 * ln(1-C)
+        // propbability of individual being seropositive taking into account risk adjusted scaling: 1 - exp(scaling * -1 * -1 * ln(1-C))
+        double logOneMinusC;
+        final double C_THRESH = 0.95;
+
+        if (C < C_THRESH) {
+            logOneMinusC = Math.log(1.0 - C);
+        } else {
+            // At C_THRESH: value = log(1 - C_THRESH)
+            //              slope = -1 / (1 - C_THRESH)
+            double logAtThresh = Math.log(1.0 - C_THRESH);
+            double slopeAtThresh = -1.0 / (1.0 - C_THRESH);
+            logOneMinusC = logAtThresh
+                + slopeAtThresh * (C - C_THRESH);
+        }
+
+        return 1.0 - Math.exp(scaling * logOneMinusC);
     }
     
     @Override
@@ -234,11 +251,6 @@ public class SeroprevalenceLikelihood extends Distribution {
             logP += intervalLogP;
         }
         return logP;
-    }
-
-    public double getCumulativeIncidence(double EarliestTime, double t) {
-        double populationCumulativeHazard = getPopulationCumulativeHazard(EarliestTime, t);
-        return (1 - Math.exp(-1 * populationCumulativeHazard)) * populationSize.getArrayValue();
     }
     
     /**

@@ -17,7 +17,7 @@ import mascotdatastreams.dynamics.Spline;
 public class SeroprevalenceLikelihoodTest {
 
     @Test
-    public void constantPrevalence_integral_drivesLogLikelihood() throws Exception {
+    public void SeroprevalenceLogLikelihood() throws Exception {
         RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
         RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
 
@@ -64,7 +64,7 @@ public class SeroprevalenceLikelihoodTest {
         );
 
         double actual = L.calculateLogP();
-        assertEquals(-6.798412353743345, actual, 1e-9);
+        assertEquals(-18.26923852217979, actual, 1e-9);
     }
 
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {
