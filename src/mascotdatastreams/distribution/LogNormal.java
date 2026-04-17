@@ -10,16 +10,13 @@ import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
 
 /**
- * Log-normal distribution parameterised by mean on log scale (μ) and standard deviation on log scale (σ).
+ * Log-normal distribution parameterised by μ (mean of log(X)) and σ (sd of log(X)).
  *
- * If X ~ LogNormal(μ, σ²) then log(X) ~ Normal(μ, σ²), i.e. μ = E[log(X)] and σ = sd(log(X)).
- *   E[X] = exp(μ + σ²/2)
+ * If X ~ LogNormal(μ, σ²) then log(X) ~ Normal(μ, σ²).
+ *   median(X) = exp(μ),   E[X] = exp(μ + σ²/2)
  *
  * PDF:
- *   f(x) = 1/(x σ √(2π)) * exp(-0.5 * ((log(x) - μ)² / σ²))
- *
- * Log PDF:
- *   log f(x) = -log(x) - log(σ) - 0.5*log(2π) - 0.5*((log(x) - μ)² / σ²)
+ *   f(x) = 1/(x σ √(2π)) · exp(-½ ((log x − μ)² / σ²))
  */
 @Description("Log-normal distribution parameterised by mean (on log scale) and standard deviation (on log scale).")
 public class LogNormal extends ParametricDistribution implements DistributionWithMean {
@@ -94,19 +91,16 @@ public class LogNormal extends ParametricDistribution implements DistributionWit
 
     @Override
     public double logPForMean(double observation, double mean) {
-        // Stateless log PDF for a given mean; do not mutate Inputs.
-        // 'mean' is the mean in real space (E[X]). We convert to log-scale μ = log(mean) - σ²/2
-        // so that E[X] = mean, allowing callers to specify the real-space mean without knowing σ.
+        // mean is μ, the mean of the underlying normal in log space (= log of the real-space median).
+        // No σ-dependent conversion: the caller is responsible for computing μ = log(median) upstream.
         if (observation <= 0.0) {
             return Double.NEGATIVE_INFINITY;
         }
         double sd = sdInput.get() == null ? 1.0 : sdInput.get().getArrayValue();
-        if (!(mean > 0.0) || !(sd > 0.0)) {
-            throw new IllegalArgumentException("LogNormal.logPForMean: mean and sd must be > 0. Got mean=" + mean + ", sd=" + sd);
+        if (!(sd > 0.0)) {
+            throw new IllegalArgumentException("LogNormal.logPForMean: sd must be > 0. Got sd=" + sd);
         }
-        // Convert real-space mean to log-scale: μ = log(E[X]) - σ²/2
-        double mu = Math.log(mean) - 0.5 * sd * sd;
-        return new LogNormalDistributionImpl(mu, sd).logDensity(observation);
+        return new LogNormalDistributionImpl(mean, sd).logDensity(observation);
     }
 }
 

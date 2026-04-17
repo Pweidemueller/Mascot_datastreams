@@ -128,10 +128,10 @@ public class Spline extends CalculationNode {
 
     @Override
     public void store() {
-        transmissionRateStored = new double[transmissionRate.length];
-        System.arraycopy(transmissionRate, 0, transmissionRateStored, 0, transmissionRate.length);
-        I_stored = new double[I.length];
-        System.arraycopy(I, 0, I_stored, 0, I.length);
+        // transmissionRateStored = new double[transmissionRate.length];
+        // System.arraycopy(transmissionRate, 0, transmissionRateStored, 0, transmissionRate.length);
+        // I_stored = new double[I.length];
+        // System.arraycopy(I, 0, I_stored, 0, I.length);
         splineFunction_stored = splineFunction;
         super.store();
     }

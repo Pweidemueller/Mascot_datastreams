@@ -20,12 +20,10 @@ import java.util.Random;
  * rate shift points.
  * 
  * The generative model assumes:
- *   log(concentration) ~ Normal(log(α · I(t)), σ²)
- * 
- * Or equivalently:
- *   concentration ~ LogNormal(log(α · I(t)), σ²)
- * 
- * where α is an optional scaling factor and I(t) is the prevalence at time t.
+ *   log(concentration) ~ Normal(μ, σ²),  where μ = log(α · I(t) / N)
+ *
+ * Equivalently, concentration ~ LogNormal(μ, σ²) with median = α · I(t) / N.
+ * α is an optional scaling factor, I(t) is the prevalence, and N is the population size.
  */
 public class WastewaterLikelihood extends Distribution {
     // Single-deme prevalence input provided via Spline.
@@ -120,25 +118,27 @@ public class WastewaterLikelihood extends Distribution {
                     return Double.NEGATIVE_INFINITY;
                 }
             }
-            // Add a small epsilon to the scaled mean to avoid log(0) and allow baseline wastewater concentraion detection at very low prevalences
-            double scaledMean = I_N * scaling + 1e-2;
+            // Clip to a detection-limit floor to avoid log(0); also guards against MASCOT
+            // producing near-zero prevalence that would cause numerical issues.
+            double scaledMedian = Math.max(I_N * scaling, 1e-3);
 
-            // Validate parameters
-            if (scaledMean <= 0.0 || concentration <= 0.0) {
-                System.err.println("Warning: Invalid parameters - scaled mean: " + scaledMean + ", concentration: " + concentration);
+            if (concentration <= 0.0) {
+                System.err.println("Warning: Invalid concentration: " + concentration);
                 return Double.NEGATIVE_INFINITY;
             }
 
-            // Calculate log likelihood using a stateless interface (no input mutation)
-            // Pass real-space mean; LogNormal will convert internally to log-scale using its σ parameter
+            // Convert real-space median to log-space mean μ = log(median).
+            // logPForMean on LogNormal expects μ directly (mean of the underlying normal in log space).
+            double mu = Math.log(scaledMedian);
+
             if (!(dist instanceof DistributionWithMean)) {
                 throw new IllegalArgumentException(
                         "WastewaterLikelihood requires distributions implementing DistributionWithMean. Got: "
                                 + dist.getClass().getName());
             }
-            double intervalLogP = ((DistributionWithMean) dist).logPForMean(concentration, scaledMean);
+            double intervalLogP = ((DistributionWithMean) dist).logPForMean(concentration, mu);
             if (Double.isNaN(intervalLogP)) {
-                System.err.println("Warning: NaN likelihood for observation index " + i + ": concentration=" + concentration + ", scaled mean=" + scaledMean);
+                System.err.println("Warning: NaN likelihood for observation index " + i + ": concentration=" + concentration + ", scaled mean=" + scaledMedian);
                 return Double.NEGATIVE_INFINITY;
             }
 

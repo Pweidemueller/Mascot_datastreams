@@ -175,6 +175,20 @@ public class SplinePrevalenceToNeTest {
         // outside the knot intervals
         assertEquals(dyn.getNeTime(-0.1), dyn.getNeTime(0.0), tolerance, "Ne at t=-0.1");
         assertEquals(dyn.getNeTime(2.0), dyn.getNeTime(2.05), tolerance, "Ne at t=2.05");
+
+        // Apply NeScaler and ensure Ne(t) values scale multiplicatively.
+        SplinePrevalenceToNe dynScaled = new SplinePrevalenceToNe();
+        dynScaled.initByName(
+                "spline", spline,
+                "coalescentScale", new RealParameter(new Double[] { 2.0 }),
+                "NeScaler", new RealParameter(new Double[] { 2.0 })
+        );
+        dynScaled.initAndValidate();
+
+        assertEquals(0.007162782463310597 * 2.0, dynScaled.getNeTime(0.0), tolerance, "NeScaler at t=0.0");
+        assertEquals(0.011958148340766807 * 2.0, dynScaled.getNeTime(0.1), tolerance, "NeScaler at t=0.1");
+        assertEquals(0.01914630507153202 * 2.0, dynScaled.getNeTime(1.5), tolerance, "NeScaler at t=1.5");
+        assertEquals(0.007677784323246716 * 2.0, dynScaled.getNeTime(2.0), tolerance, "NeScaler at t=2.0");
    }
   
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {

@@ -36,10 +36,15 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     final public Input<RealParameter> coalescentScaleInput = new Input<>("coalescentScale",
             "Coalescent scaling constant c in Ne = I / (c * transmission_rate)", 
             Input.Validate.OPTIONAL);
+
+    final public Input<RealParameter> NeScalerInput = new Input<>("NeScaler",
+            "Additional scaling factor applied to Ne(t): Ne = NeScaler * I / (c * transmission_rate). Default: 1.0",
+            Input.Validate.OPTIONAL);
     
     // Member variables
     private Spline spline;
     private RealParameter coalescentScale;
+    private RealParameter neScaler;
     
     boolean NesKnown = false;
     boolean returnNaN = false;
@@ -49,6 +54,10 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     public void initAndValidate() {
         spline = splineInput.get();
         coalescentScale = coalescentScaleInput.get();
+        neScaler = NeScalerInput.get();
+        if (neScaler == null) {
+            neScaler = new RealParameter(new Double[] { 1.0 });
+        }
         
         // Set time flag for NeDynamics
         isTime = true;
@@ -87,9 +96,10 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         
         // Get coalescent scaling constant
         double c = coalescentScale.getArrayValue();
+        double scaler = neScaler.getArrayValue();
         
         // Compute Ne: Ne = I / (c * transmission_rate)
-        return I_t / (c * transmissionRate);
+        return scaler * I_t / (c * transmissionRate);
     }
     
     // TODO: change to more salient recalculation criterion, e.g. just recalculate the splines and then return super.requiresRecalculation()

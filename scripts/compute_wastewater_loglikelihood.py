@@ -5,10 +5,11 @@ Compute log-likelihood for wastewater concentration observations using natural s
 This script replicates the logic from WastewaterLikelihood.java:
 - Creates a natural spline from log-prevalence knot values
 - For each observation, interpolates log-prevalence at observation time
-- Computes log-likelihood using LogNormal distribution parameterized by mean in real space
+- Computes log-likelihood using LogNormal distribution parameterized by median in real space
 
-Model: log(concentration) ~ Normal(log(α · I(t))-σ²/2, σ²)
-where I(t) = exp(spline(t)) is the prevalence at time t, and α is an optional scaling factor.
+Model: log(concentration) ~ Normal(μ, σ²),  where μ = log(α · I(t) / N)
+Equivalently: concentration ~ LogNormal(μ, σ²) with median = α · I(t) / N.
+I(t) = exp(spline(t)) is the prevalence, N is the population size, α is an optional scaling factor.
 """
 
 import numpy as np
@@ -51,7 +52,7 @@ def compute_log_likelihood(
     population_size : float
         Population size (used to convert absolute prevalence to per-capita prevalence)
     scaling : float, optional
-        Scaling factor applied to prevalence-derived mean (default: 1.0)
+        Scaling factor applied to prevalence-derived median (default: 1.0)
 
     Returns
     -------
@@ -138,23 +139,12 @@ def compute_log_likelihood(
         # Convert to per-capita prevalence (proportion of population infected)
         I_N = I / population_size
 
-        # Apply scaling factor
-        scaled_mean = I_N * scaling + 1e-2
+        # Apply scaling factor; clip to detection-limit floor (matching Java)
+        scaled_median = max(I_N * scaling, 1e-3)
 
-        # Validate
-        if scaled_mean <= 0.0:
-            return -np.inf
-
-        # Parameterize LogNormal by mean in real space
-        # scipy.stats.lognorm uses: s (shape = σ on log scale) and scale = exp(μ) (where μ is mean of the normal component aka in log space)
-        # We want E[X] = scaled_mean, so: μ = log(scaled_mean) - σ²/2
-        # Therefore: scale = exp(μ) = scaled_mean * exp(-σ²/2)
-        scale = scaled_mean * np.exp(-0.5 * sd_log * sd_log)
-
-        # Compute log PDF using scipy's lognorm
-        # s = sd_log (standard deviation on log scale)
-        # scale = exp(μ) where μ is mean on log scale
-        log_pdf = lognorm.logpdf(concentration, s=sd_log, scale=scale)
+        # Parameterize LogNormal by median in real space.
+        # scipy.stats.lognorm(s=σ, scale=exp(μ)): median = exp(μ), so scale = scaled_median.
+        log_pdf = lognorm.logpdf(concentration, s=sd_log, scale=scaled_median)
 
         if np.isnan(log_pdf) or np.isinf(log_pdf):
             return -np.inf

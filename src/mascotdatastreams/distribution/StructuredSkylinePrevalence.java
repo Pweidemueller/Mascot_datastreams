@@ -108,6 +108,8 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 			}			
 		}
 
+		storedIntTimes = new double[intTimes.length];
+
     }
 
     private void computeIntTimes() {
@@ -452,7 +454,6 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 	}
 	
 	public void store() {
-		storedIntTimes = new double[intTimes.length];
 		System.arraycopy(intTimes, 0, storedIntTimes, 0, intTimes.length);
 		super.store();
 	}

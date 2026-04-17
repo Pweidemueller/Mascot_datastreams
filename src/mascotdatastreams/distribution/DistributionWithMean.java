@@ -1,19 +1,21 @@
 package mascotdatastreams.distribution;
 
 /**
- * A small interface for distributions (both discrete and continuous) that can compute
- * a per-observation log-likelihood given a mean without mutating BEAST Inputs during evaluation.
- * 
- * This interface is used by both count distributions (e.g., GammaPoisson) and continuous
- * distributions (e.g., LogNormal) that can be parameterized by their mean.
+ * Interface for distributions parameterised by a mean, allowing stateless per-observation
+ * log-likelihood evaluation without mutating BEAST Inputs.
+ *
+ * The {@code mean} parameter is always the mean of the distribution in its natural
+ * parameterisation:
+ * <ul>
+ *   <li>{@link LogNormal}: {@code mean} is μ, the mean of the underlying normal distribution
+ *       in log space (so the real-space median is exp(μ)).</li>
+ *   <li>{@link GammaPoisson}: {@code mean} is the real-space count mean.</li>
+ * </ul>
  */
 public interface DistributionWithMean {
     /**
      * Compute log P(X = observation | mean, other distribution parameters)
      * without mutating any BEAST Inputs.
-     * 
-     * For discrete distributions, this is log P(X = observation).
-     * For continuous distributions, this is log f(observation) where f is the PDF.
      */
     double logPForMean(double observation, double mean);
 }
