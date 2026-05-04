@@ -36,7 +36,7 @@ public class TransmissionSmallerThan extends Distribution {
         // Check all transmission rates at grid points
         int gridPointCount = spline.getGridPointCount();
         for (int i = 0; i < gridPointCount; i++) {
-            double transmissionRate = spline.getTranssmissionRateAtGridPoint(spline.getGridPointTime(i));
+            double transmissionRate = spline.getTransmissionRate(spline.getGridPointTime(i));
             if (transmissionRate <= 0) {
                 logP = Double.NEGATIVE_INFINITY;
                 return Double.NEGATIVE_INFINITY;

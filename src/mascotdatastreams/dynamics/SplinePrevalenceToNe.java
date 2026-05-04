@@ -80,7 +80,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
      * @return prevalence at time t
      */
     public double getPrevalenceTime(double t) {
-        return spline.getPrevalenceAtGridPoint(t);
+        return spline.getPrevalence(t);
     }
     
     @Override
@@ -89,7 +89,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         double I_t = getPrevalenceTime(t);
         
         // Compute transmission rate = -dlogI/dt (forward in time)
-        double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
+        double transmissionRate = spline.getTransmissionRate(t);
         
        if (transmissionRate <= 0.0)
        	System.err.println("Warning: non-positive transmission rate at time " + t + ": " + transmissionRate);
@@ -153,7 +153,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         }
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
             double t = spline.getGridPointTime(i);
-            double transmissionRate = spline.getTranssmissionRateAtGridPoint(t);
+            double transmissionRate = spline.getTransmissionRate(t);
             printStream.print(transmissionRate + "\t");
         }
     }

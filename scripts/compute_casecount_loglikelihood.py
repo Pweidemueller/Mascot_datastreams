@@ -1,21 +1,44 @@
 #!/usr/bin/env python3
 """
-Compute log-likelihood for wastewater concentration observations using natural spline interpolation.
+Compute log-likelihood for case count observations using natural spline interpolation.
 
-This script replicates the logic from WastewaterLikelihood.java:
-- Creates a natural spline from log-prevalence knot values
-- For each observation, interpolates log-prevalence at observation time
-- Computes log-likelihood using LogNormal distribution parameterized by median in real space
-
-Model: log(concentration) ~ Normal(μ, σ²),  where μ = log(α · I(t) / N)
-Equivalently: concentration ~ LogNormal(μ, σ²) with median = α · I(t) / N.
-I(t) = exp(spline(t)) is the prevalence, N is the population size, α is an optional scaling factor.
+This script replicates the logic from CaseCountLikelihood.java + Spline.java:
+- Creates a natural cubic spline from log-prevalence knot values
+- Pre-calculates log-prevalence at grid points (matches Java Spline.recalculateRates)
+- For each observation time, linearly interpolates logI between bordering grid
+  points, then exponentiates to get prevalence (matches Java Spline.getPrevalence
+  via getLogPrevalence)
+- Computes log-likelihood using a Gamma-Poisson (Negative Binomial) PMF with
+  mean = prevalence * scaling and dispersion alpha.
 """
+
+import math
+from typing import List
 
 import numpy as np
 import scipy.interpolate
-from scipy.stats import lognorm
-from typing import Optional, Union, List
+
+
+def gamma_poisson_logpmf(k: float, mean: float, alpha: float) -> float:
+    """Log PMF of Negative Binomial parameterised by mean and dispersion alpha.
+
+    r = 1/alpha, p = r / (r + mean)
+    log PMF = ln Γ(r + x) - ln Γ(r) - ln Γ(x+1) + r ln p + x ln(1 - p)
+    """
+    if mean <= 0.0 or alpha <= 0.0 or k < 0.0:
+        return float("-inf")
+    x = int(round(k))
+    r = 1.0 / alpha
+    p = r / (r + mean)
+    # Clamp as Java code does to avoid log(0)
+    p = min(1.0 - 1e-16, max(1e-16, p))
+    return (
+        math.lgamma(r + x)
+        - math.lgamma(r)
+        - math.lgamma(x + 1.0)
+        + r * math.log(p)
+        + x * math.log(1.0 - p)
+    )
 
 
 def compute_log_likelihood(
@@ -23,18 +46,17 @@ def compute_log_likelihood(
     knots_log_prevalence: np.ndarray,
     grid_times: np.ndarray,
     observation_times: np.ndarray,
-    concentrations: np.ndarray,
-    sd_log: float,
-    population_size: float,
+    case_counts: np.ndarray,
+    alpha: float,
     scaling: float = 1.0,
 ) -> float:
     """
-    Compute log-likelihood for wastewater concentration observations.
+    Compute log-likelihood for case count observations.
 
-    This matches the Java Spline.getLogPrevalence() behaviour:
+    This matches the Java Spline.getLogPrevalence() / getPrevalence() behaviour:
     - Pre-calculates log-prevalence at grid points
     - For each observation time, linearly interpolates in log space between the
-      two bordering grid points (clamping at the boundaries)
+      two bordering grid points (clamping at the boundaries), then exponentiates.
 
     Parameters
     ----------
@@ -43,17 +65,15 @@ def compute_log_likelihood(
     knots_log_prevalence : np.ndarray
         Log-prevalence values at knot points
     grid_times : np.ndarray
-        Grid point times where log-prevalence will be pre-calculated
+        Grid point times where log-prevalence is pre-calculated
     observation_times : np.ndarray
-        Times at which wastewater concentrations were observed
-    concentrations : np.ndarray
-        Observed PMV-normalized wastewater concentrations (must be > 0)
-    sd_log : float
-        Standard deviation on log scale for the LogNormal distribution
-    population_size : float
-        Population size (used to convert absolute prevalence to per-capita prevalence)
+        Times at which case counts were observed
+    case_counts : np.ndarray
+        Observed case counts (non-negative)
+    alpha : float
+        Dispersion parameter of the Gamma-Poisson (Negative Binomial)
     scaling : float, optional
-        Scaling factor applied to prevalence-derived median (default: 1.0)
+        Scaling factor applied to prevalence-derived mean (default: 1.0)
 
     Returns
     -------
@@ -65,18 +85,16 @@ def compute_log_likelihood(
         raise ValueError(
             "knots_times and knots_log_prevalence must have the same length"
         )
-    if len(observation_times) != len(concentrations):
+    if len(observation_times) != len(case_counts):
         raise ValueError(
-            "observation_times and concentrations must have the same length"
+            "observation_times and case_counts must have the same length"
         )
-    if sd_log <= 0:
-        raise ValueError("sd_log must be > 0")
+    if alpha <= 0:
+        raise ValueError("alpha must be > 0")
     if scaling <= 0:
         raise ValueError("scaling must be > 0")
-    if population_size <= 0:
-        raise ValueError("population_size must be > 0")
-    if np.any(concentrations <= 0):
-        raise ValueError("All concentrations must be > 0")
+    if np.any(case_counts < 0):
+        raise ValueError("All case counts must be >= 0")
 
     # Create natural spline interpolation (cubic spline with natural boundary conditions)
     spline = scipy.interpolate.make_interp_spline(
@@ -119,29 +137,11 @@ def compute_log_likelihood(
 
     # Compute log-likelihood for each observation
     log_likelihood = 0.0
-
-    for t, concentration in zip(observation_times, concentrations):
-        # Get log-prevalence at observation time by linear interpolation
-        logI = get_log_prevalence(t)
-
-        # Convert to prevalence (absolute number of infected)
-        I = np.exp(logI)
-
-        # Convert to per-capita prevalence (proportion of population infected)
-        I_N = I / population_size
-
-        # Apply scaling factor. Note: Java code has the detection-limit floor
-        # (Math.max(I_N * scaling, 1e-3)) commented out, so we match that here
-        # and use the raw value.
-        scaled_median = I_N * scaling
-
-        # Parameterize LogNormal by median in real space.
-        # scipy.stats.lognorm(s=σ, scale=exp(μ)): median = exp(μ), so scale = scaled_median.
-        log_pdf = lognorm.logpdf(concentration, s=sd_log, scale=scaled_median)
-
-        if np.isnan(log_pdf) or np.isinf(log_pdf):
-            return -np.inf
-
+    for t, k in zip(observation_times, case_counts):
+        mean = math.exp(get_log_prevalence(t)) * scaling
+        log_pdf = gamma_poisson_logpmf(k, mean, alpha)
+        if math.isnan(log_pdf) or math.isinf(log_pdf):
+            return -math.inf
         log_likelihood += log_pdf
 
     return log_likelihood
@@ -149,10 +149,8 @@ def compute_log_likelihood(
 
 def main():
     """
-    Compute log-likelihoods for all test cases in WastewaterLikelihoodTest.java
+    Compute log-likelihoods for all test cases in CaseCountLikelihoodTest.java
     """
-
-    tree_height = 2.0
 
     # Common spline setup (same for all tests)
     knots_times = np.array([0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0])
@@ -182,28 +180,26 @@ def main():
         ]
     )
 
-    # Test 1: testSplinePrevalenceTwoDemes
-    print("Test testSplinePrevalenceTwoDemes")
     logI_deme0 = np.array([0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, -1.0, 0.0])
     logI_deme1 = np.array([0.0, 1.0, 3.0, 6.0, 8.0, 3.0, -2.0, 0.0, -0.5, -1.0, 0.0])
 
+    # Test 1: testSplinePrevalenceTwoDemes
+    print("Test testSplinePrevalenceTwoDemes")
     times0 = np.array([0.0, 0.1, 0.52, 0.98, 1.47, 2.0])
-    concentrations0 = np.array([0.0025, 0.2, 1.5, 35.7, 14.8, 0.8])
+    counts0 = np.array([5.0, 7.0, 6.0, 8.0, 10.0, 0.0])
     times1 = np.array([0.0, 0.15, 0.56, 0.98, 1.78, 1.98])
-    concentrations1 = np.array([0.01, 0.54, 2.3, 4.5, 1.2, 0.9])
+    counts1 = np.array([3.0, 4.0, 5.0, 6.0, 8.0, 2.0])
 
-    sd_log = 0.5
+    alpha = 0.5
     scaling = 1.0
-    population_size = 10000.0
 
     logP0 = compute_log_likelihood(
         knots_times=knots_times,
         knots_log_prevalence=logI_deme0,
         grid_times=grid_times,
         observation_times=times0,
-        concentrations=concentrations0,
-        sd_log=sd_log,
-        population_size=population_size,
+        case_counts=counts0,
+        alpha=alpha,
         scaling=scaling,
     )
 
@@ -212,9 +208,8 @@ def main():
         knots_log_prevalence=logI_deme1,
         grid_times=grid_times,
         observation_times=times1,
-        concentrations=concentrations1,
-        sd_log=sd_log,
-        population_size=population_size,
+        case_counts=counts1,
+        alpha=alpha,
         scaling=scaling,
     )
 
@@ -224,9 +219,8 @@ def main():
 
     # Test 2: testSplinePrevalenceTwoDemesScaling
     print("Test testSplinePrevalenceTwoDemesScaling")
-    # Same spline and observations as test 1
-    sd_log = 0.1
-    population_size = 10000.0
+    # Same observations as test 1; different alpha and per-deme scaling.
+    alpha = 0.1
     scaling0 = 0.1
     scaling1 = 0.05
 
@@ -235,9 +229,8 @@ def main():
         knots_log_prevalence=logI_deme0,
         grid_times=grid_times,
         observation_times=times0,
-        concentrations=concentrations0,
-        sd_log=sd_log,
-        population_size=population_size,
+        case_counts=counts0,
+        alpha=alpha,
         scaling=scaling0,
     )
 
@@ -246,9 +239,8 @@ def main():
         knots_log_prevalence=logI_deme1,
         grid_times=grid_times,
         observation_times=times1,
-        concentrations=concentrations1,
-        sd_log=sd_log,
-        population_size=population_size,
+        case_counts=counts1,
+        alpha=alpha,
         scaling=scaling1,
     )
 
@@ -256,16 +248,14 @@ def main():
     print(f"logP = {logP}")
     print()
 
-    # Test 3: testSplinePrevalenceTwoDemesConcentrationsOutsideTree
-    print("Test testSplinePrevalenceTwoDemesConcentrationsOutsideTree")
-    # Same spline setup
+    # Test 3: testSplinePrevalenceTwoDemesCaseCountsOutsideTree
+    print("Test testSplinePrevalenceTwoDemesCaseCountsOutsideTree")
     times0 = np.array([-0.1, 0.0, 0.1, 0.52, 0.98, 1.47, 2.0])
-    concentrations0 = np.array([0.002, 0.0025, 0.2, 1.5, 35.7, 14.8, 0.8])
+    counts0 = np.array([2.0, 100.0, 5480.0, 1500.0, 560.0, 34.0, 0.0])
     times1 = np.array([-0.1, 0.0, 0.15, 0.56, 0.98, 1.78, 1.98])
-    concentrations1 = np.array([0.12, 0.01, 0.54, 2.3, 4.5, 1.2, 0.9])
+    counts1 = np.array([1.0, 124.0, 178.0, 1000.0, 1487.0, 246.0, 2.0])
 
-    sd_log = 0.5
-    population_size = 10000.0  # Default population size (can be adjusted per test)
+    alpha = 0.5
     scaling = 1.0
 
     logP0 = compute_log_likelihood(
@@ -273,9 +263,8 @@ def main():
         knots_log_prevalence=logI_deme0,
         grid_times=grid_times,
         observation_times=times0,
-        concentrations=concentrations0,
-        sd_log=sd_log,
-        population_size=population_size,
+        case_counts=counts0,
+        alpha=alpha,
         scaling=scaling,
     )
 
@@ -284,9 +273,8 @@ def main():
         knots_log_prevalence=logI_deme1,
         grid_times=grid_times,
         observation_times=times1,
-        concentrations=concentrations1,
-        sd_log=sd_log,
-        population_size=population_size,
+        case_counts=counts1,
+        alpha=alpha,
         scaling=scaling,
     )
 

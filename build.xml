@@ -248,10 +248,14 @@
     </target>
 
 
-    <!-- Run unit tests -->
+    <!-- Run unit tests via the JUnit Platform (JUnit 5).
+         The legacy <junit> task only knows JUnit 3/4 annotations, so it reports
+         "No runnable methods" for our org.junit.jupiter.api.Test classes.
+         <junitlauncher> (Ant 1.10.6+) delegates to the JUnit Platform Launcher
+         and picks up the Jupiter engine bundled inside
+         beast-source/lib/junit/junit-platform-console-standalone-1.8.2.jar. -->
     <target name="test" depends="compile-test">
-      <junit printsummary="yes" failureproperty="testFailed" showoutput="true"
-             maxmemory="4G">
+      <junitlauncher printSummary="true" failureProperty="testFailed">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <pathelement path="${build}" />
@@ -263,14 +267,17 @@
                 <fileset dir="deps/BEAST_CLASSIC" includes="**/*.jar"/>
                 <fileset dir="deps/Mascot" includes="**/*.jar"/>
             </classpath>
-            <batchtest fork="true" todir="${test-reports}">
-                <fileset dir="${test}">
-                    <include name="**/*Test.java"/>
+            <testclasses outputdir="${test-reports}">
+                <fileset dir="${build-test}">
+                    <include name="**/*Test.class"/>
                 </fileset>
-                <formatter type="plain"/>
-                <formatter type="plain" usefile="false"/> <!-- to screen -->
-            </batchtest>
-        </junit>
+                <fork>
+                    <jvmarg value="-Xmx4G"/>
+                </fork>
+                <listener type="legacy-plain" sendSysOut="true"/>
+                <listener type="legacy-xml" sendSysOut="true"/>
+            </testclasses>
+        </junitlauncher>
 
         <fail if="testFailed" status="1" message="Unit test failed."/>
     </target>

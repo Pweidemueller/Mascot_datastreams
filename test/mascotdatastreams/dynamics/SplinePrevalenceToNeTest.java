@@ -68,17 +68,16 @@ public class SplinePrevalenceToNeTest {
         assertEquals(2.654981149109626, dyn.getPrevalenceTime(1.5), tolerance, "Prevalence at t=1.5");
         
         // Test interpolation at times not on grid
-        assertEquals(dyn.getPrevalenceTime(0.0), dyn.getPrevalenceTime(0.01), tolerance, "Prevalence at t=0.01");
-        assertEquals(dyn.getPrevalenceTime(0.0), dyn.getPrevalenceTime(0.05), tolerance, "Prevalence at t=0.05");
-        assertEquals(dyn.getPrevalenceTime(0.1), dyn.getPrevalenceTime(0.09), tolerance, "Prevalence at t=0.09");
-        
-        assertEquals(dyn.getPrevalenceTime(1.9), dyn.getPrevalenceTime(1.91), tolerance, "Prevalence at t=1.9");
-        assertEquals(dyn.getPrevalenceTime(1.9), dyn.getPrevalenceTime(1.95), tolerance, "Prevalence at t=1.95");
-        assertEquals(dyn.getPrevalenceTime(2.0), dyn.getPrevalenceTime(1.98), tolerance, "Prevalence at t=1.98");
+        assertEquals(1.0528075333474662, dyn.getPrevalenceTime(0.01), tolerance, "Prevalence at t=0.01");
+        assertEquals(1.2934359252818004, dyn.getPrevalenceTime(0.05), tolerance, "Prevalence at t=0.05");
+        assertEquals(1.5890620458330644, dyn.getPrevalenceTime(0.09), tolerance, "Prevalence at t=0.09");
+        assertEquals(0.4587726242235013, dyn.getPrevalenceTime(1.91), tolerance, "Prevalence at t=1.91");
+        assertEquals(0.6486323549478357, dyn.getPrevalenceTime(1.95), tolerance, "Prevalence at t=1.95");
+        assertEquals(0.8410066760378204, dyn.getPrevalenceTime(1.98), tolerance, "Prevalence at t=1.98");
         
         // Test at times outside the knot intervals
-        assertEquals(dyn.getPrevalenceTime(-0.1), dyn.getPrevalenceTime(0.0), tolerance, "Prevalence at t=-0.1");
-        assertEquals(dyn.getPrevalenceTime(2.0), dyn.getPrevalenceTime(2.05), tolerance, "Prevalence at t=2.05");
+        assertEquals(1.0, dyn.getPrevalenceTime(0.0), tolerance, "Prevalence at t=-0.1");
+        assertEquals(1.0, dyn.getPrevalenceTime(2.05), tolerance, "Prevalence at t=2.05");
         
     }
 
@@ -120,13 +119,12 @@ public class SplinePrevalenceToNeTest {
         assertEquals(1.2441976859534918, dyn.getPrevalenceTime(1.68), tolerance, "Prevalence at t=1.68");
         
         // Test interpolation at times not on grid
-        assertEquals(dyn.getPrevalenceTime(0.0), dyn.getPrevalenceTime(0.01), tolerance, "Prevalence at t=0.01");
-        assertEquals(dyn.getPrevalenceTime(0.0), dyn.getPrevalenceTime(0.05), tolerance, "Prevalence at t=0.05");
-        assertEquals(dyn.getPrevalenceTime(0.1), dyn.getPrevalenceTime(0.09), tolerance, "Prevalence at t=0.09");
-        
-        assertEquals(dyn.getPrevalenceTime(0.24), dyn.getPrevalenceTime(0.15), tolerance, "Prevalence at t=1.9");
-        assertEquals(dyn.getPrevalenceTime(0.24), dyn.getPrevalenceTime(0.49), tolerance, "Prevalence at t=1.95");
-        assertEquals(dyn.getPrevalenceTime(0.24), dyn.getPrevalenceTime(0.27), tolerance, "Prevalence at t=1.98");
+        assertEquals(1.0504525803565143, dyn.getPrevalenceTime(0.01), tolerance, "Prevalence at t=0.01");
+        assertEquals(1.2790345059335768, dyn.getPrevalenceTime(0.05), tolerance, "Prevalence at t=0.05");
+        assertEquals(1.557356607961807,  dyn.getPrevalenceTime(0.09), tolerance, "Prevalence at t=0.09");
+        assertEquals(2.0924099822312656, dyn.getPrevalenceTime(0.15), tolerance, "Prevalence at t=0.15");
+        assertEquals(208.1789262746285,  dyn.getPrevalenceTime(0.49), tolerance, "Prevalence at t=0.49");
+        assertEquals(5.366400513902776,  dyn.getPrevalenceTime(0.27), tolerance, "Prevalence at t=0.27");
    }
    
    @Test
@@ -169,12 +167,12 @@ public class SplinePrevalenceToNeTest {
         assertEquals(0.007677784323246716, dyn.getNeTime(2.0), tolerance, "Ne at t=2.0");
         
         // outside grid points
-        assertEquals(dyn.getNeTime(0.5), dyn.getNeTime(0.48), tolerance, "Ne at t=0.48");
-        assertEquals(dyn.getNeTime(1.8), dyn.getNeTime(1.82), tolerance, "Ne at t=1.82");
+        assertEquals(0.12153367392149209,  dyn.getNeTime(0.48),  tolerance, "Ne at t=0.48");          
+        assertEquals(0.0024361235349888563, dyn.getNeTime(1.82),  tolerance, "Ne at t=1.82");
         
         // outside the knot intervals
-        assertEquals(dyn.getNeTime(-0.1), dyn.getNeTime(0.0), tolerance, "Ne at t=-0.1");
-        assertEquals(dyn.getNeTime(2.0), dyn.getNeTime(2.05), tolerance, "Ne at t=2.05");
+        assertEquals(0.007162782463310597, dyn.getNeTime(-0.1),  tolerance, "Ne at t=-0.1");          
+        assertEquals(0.007677784323246716, dyn.getNeTime(2.05),  tolerance, "Ne at t=2.05");     
 
         // Apply NeScaler and ensure Ne(t) values scale multiplicatively.
         SplinePrevalenceToNe dynScaled = new SplinePrevalenceToNe();

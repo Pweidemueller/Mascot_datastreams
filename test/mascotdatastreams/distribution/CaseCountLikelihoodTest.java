@@ -77,7 +77,7 @@ public class CaseCountLikelihoodTest {
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-53.950267384878, logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
+        assertEquals(-55.887154708950376, logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
     }
     
     @Test
@@ -147,7 +147,7 @@ public class CaseCountLikelihoodTest {
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-156.616656999962, logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
+        assertEquals(-147.41434371498906, logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
     }
     
     @Test
@@ -215,7 +215,7 @@ public class CaseCountLikelihoodTest {
         double logP1 = llikDeme1.calculateLogP();
         double logP = logP0 + logP1;
 
-        assertEquals(-5543.832990969199, logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
+        assertEquals(-5359.761854065588 , logP, 1e-9, "Prevalence-based likelihood should match manual sum for Mascot Skygrowth prevalence.");
     }
 
 

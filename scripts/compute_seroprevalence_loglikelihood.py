@@ -151,7 +151,10 @@ def compute_cumulative_inicidence_pop(
 
         grid_transmission_rate[i] = uninfectious_rate - dlogI_dtau
 
-    # Find boundary indices in backward time
+    # Find boundary indices in backward time. The integration runs from
+    # grid_times[max_idx] down to grid_times[min_idx] using direct grid-point
+    # values, so no snap-vs-interpolation distinction applies here (the Java
+    # equivalent calls getPrevalence/getTransmissionRate at exact grid times).
     # getRightGridIndex: smallest i such that grid_times[i] >= from_time
     # getLeftGridIndex: largest i such that grid_times[i] <= to_time
 

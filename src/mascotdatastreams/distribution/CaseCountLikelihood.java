@@ -90,7 +90,7 @@ public class CaseCountLikelihood extends Distribution {
 
             // Get prevalence at this time via spline interpolation
             // The spline provides log-prevalence values, so we need to exponentiate
-            double logI = prevalenceSpline.getValueAtGridPoint(t);
+            double logI = prevalenceSpline.getLogPrevalence(t);
             double meanI = Math.exp(logI);
 
             // Apply optional scaling factor (default 1.0)

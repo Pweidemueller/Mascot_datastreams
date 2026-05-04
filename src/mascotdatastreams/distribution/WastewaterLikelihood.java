@@ -104,7 +104,7 @@ public class WastewaterLikelihood extends Distribution {
 
             // Get prevalence at this time via spline interpolation
             // The spline provides log-prevalence values, so we need to exponentiate
-            double logI = prevalenceSpline.getValueAtGridPoint(t);
+            double logI = prevalenceSpline.getLogPrevalence(t);
             double I = Math.exp(logI);
             double I_N = I / populationSize.getArrayValue();
 
@@ -120,7 +120,8 @@ public class WastewaterLikelihood extends Distribution {
             }
             // Clip to a detection-limit floor to avoid log(0); also guards against MASCOT
             // producing near-zero prevalence that would cause numerical issues.
-            double scaledMedian = Math.max(I_N * scaling, 1e-3);
+            // double scaledMedian = Math.max(I_N * scaling, 1e-3);
+            double scaledMedian = I_N * scaling;
 
             if (concentration <= 0.0) {
                 System.err.println("Warning: Invalid concentration: " + concentration);

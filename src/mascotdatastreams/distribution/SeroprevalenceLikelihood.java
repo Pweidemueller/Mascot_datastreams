@@ -139,11 +139,11 @@ public class SeroprevalenceLikelihood extends Distribution {
             double t1 = prevalenceSpline.getGridPointTime(i);
             double t2 = prevalenceSpline.getGridPointTime(i - 1);
 
-            double b1 = prevalenceSpline.getTranssmissionRateAtGridPoint(t1);
-            double b2 = prevalenceSpline.getTranssmissionRateAtGridPoint(t2);
+            double b1 = prevalenceSpline.getTransmissionRate(t1);
+            double b2 = prevalenceSpline.getTransmissionRate(t2);
 
-            double I1 = prevalenceSpline.getPrevalenceAtGridPoint(t1);
-            double I2 = prevalenceSpline.getPrevalenceAtGridPoint(t2);
+            double I1 = prevalenceSpline.getPrevalence(t1);
+            double I2 = prevalenceSpline.getPrevalence(t2);
 
             double incidence1 = b1 * I1;
             double incidence2 = b2 * I2;

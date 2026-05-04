@@ -5,6 +5,7 @@ import beast.base.core.Input;
 import beast.base.inference.CalculationNode;
 import beast.base.inference.parameter.RealParameter;
 import mascot.dynamics.RateShifts;
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
@@ -33,13 +34,13 @@ public class Spline extends CalculationNode {
     RealParameter uninfectiousRate;
 
     double[] transmissionRate;
-    double[] transmissionRateStored;
 
-    double[] I;
-    double[] I_stored;
+    double[] logI;
 
     PolynomialSplineFunction splineFunction;
+    UnivariateFunction splineDerivative;
     PolynomialSplineFunction splineFunction_stored;
+    UnivariateFunction splineDerivative_stored;
 
     double[] time;
 
@@ -60,57 +61,45 @@ public class Spline extends CalculationNode {
         recalculateRates();
     }
 
-    // computes the Ne's at the break points from the growth rates and the transmission rates
+    // Precomputes log-prevalence and transmission rate on the evaluation grid.
     private void recalculateRates() {
-        // Build the spline using Apache Commons Math
         buildSpline();
+        // Cache derivative once per recompute: PolynomialSplineFunction#derivative()
+        // allocates a new spline, so we don't want to call it per query.
+        splineDerivative = splineFunction.derivative();
 
-        // use grid rate shifts as grid points
         int n = gridRateShifts.getDimension();
         time = new double[n];
-        I = new double[n];
+        logI = new double[n];
         transmissionRate = new double[n];
 
         isValid = true;
 
-        // Evaluate spline at all grid points
-        for (int i = 0; i < gridRateShifts.getDimension(); i++) {
+        double firstKnot = rateShifts.getValue(0);
+        double lastKnot = rateShifts.getValue(rateShifts.getDimension() - 1);
+        double gamma = uninfectiousRate.getValue();
+
+        for (int i = 0; i < n; i++) {
             time[i] = gridRateShifts.getValue(i);
 
-            double logI;
+            // Clamp evaluation time to the spline's knot domain.
             // TODO: check if we want to throw an error or take value at first or last knot
-            if (time[i] < rateShifts.getValue(0)) {
-                logI = splineFunction.value(rateShifts.getValue(0)); 
-            } else if (time[i] > rateShifts.getValue(rateShifts.getDimension() - 1)) {
-                logI = splineFunction.value(rateShifts.getValue(rateShifts.getDimension() - 1)); // logI at last knot
-            } else {
-                logI = splineFunction.value(time[i]);
-            }
-            I[i] = Math.exp(logI);
+            double tEval = time[i];
+            if (tEval < firstKnot) tEval = firstKnot;
+            else if (tEval > lastKnot) tEval = lastKnot;
 
-            // Evaluate spline derivative d(log I)/dτ where τ is backward time
-            double dLogI_dBackwardTime = splineFunction.derivative().value(time[i]);
+            logI[i] = splineFunction.value(tEval);
 
-            // Epidemiological model in forward time: dI/dt_fwd = (β - γ) * I
-            // This means: d(log I)/dt_fwd = β - γ
-            // In backward time τ: d(log I)/dτ = -d(log I)/dt_fwd = -(β - γ) = γ - β
-            // Rearranging: β = γ - d(log I)/dτ
-            // Therefore: transmission_rate = β = γ - d(log I)/dτ_backward
-            transmissionRate[i] = uninfectiousRate.getValue() - dLogI_dBackwardTime;
+            // Forward time: d(log I)/dt_fwd = β - γ. Backward time τ flips the sign,
+            // so β = γ - d(log I)/dτ.
+            double dLogI_dBackwardTime = splineDerivative.value(tEval);
+            transmissionRate[i] = gamma - dLogI_dBackwardTime;
             if (clipTransRate) {
                 transmissionRate[i] = Math.max(transmissionRate[i], TR_MIN);
             }
         }
 
         ratesKnows = true;
-    }
-
-    private double findSplineSegmentStartKnotTime(int segmentIndex) {
-        return rateShifts.getValue(segmentIndex);
-    }
-
-    private double findSplineSegmentEndKnotTime(int segmentIndex) {
-        return rateShifts.getValue(segmentIndex+1);
     }
 
     public boolean update() {
@@ -128,11 +117,8 @@ public class Spline extends CalculationNode {
 
     @Override
     public void store() {
-        // transmissionRateStored = new double[transmissionRate.length];
-        // System.arraycopy(transmissionRate, 0, transmissionRateStored, 0, transmissionRate.length);
-        // I_stored = new double[I.length];
-        // System.arraycopy(I, 0, I_stored, 0, I.length);
         splineFunction_stored = splineFunction;
+        splineDerivative_stored = splineDerivative;
         super.store();
     }
 
@@ -140,145 +126,80 @@ public class Spline extends CalculationNode {
     public void restore() {
         ratesKnows=false;
         splineFunction = splineFunction_stored;
+        splineDerivative = splineDerivative_stored;
         super.restore();
     }
 
 
     /**
-     * Get the log-prevalence value at a specific time using precomputed grid points.
-     *
-     * @param t time (backward from present)
-     * @return log-prevalence at time t
+     * Largest index k with time[k] <= t. Assumes time[0] < t < time[last] (callers
+     * handle out-of-range clamping).
      */
-    public double getValueAtGridPoint(double t) {
-        if (!ratesKnows) {
-            recalculateRates();
-        }
-
-        // Find the appropriate grid point
-        if (t <= time[0]) {
-            return Math.log(I[0]);
-        }
-        
-        // Binary search for the closest sgment in the grid, returns the left grid point of the segment in which t lies
+    private int findLeftIndex(double t) {
         int left = 0, right = time.length - 1;
-        while (left < right) {
-            int mid = (left + right ) / 2;
-            if (time[mid] <= t && time[mid+1] > t) {
-            	left = mid;
-            	break;
-            }
-            if (time[mid] <= t) {
-                left = mid+1;
-            } else {
-                right = mid;
-            }
+        while (left < right - 1) {
+            int mid = (left + right) / 2;
+            if (time[mid] <= t) left = mid; else right = mid;
         }
-        // check if left or right grid point is closer to t
-        if (left == time.length - 1) {
-            return Math.log(I[left]);
-        }
-        else if (Math.abs(time[left] - t) <= Math.abs(time[left+1] - t)) {
-        	return Math.log(I[left]);
-            
-        } 
-        return Math.log(I[left+1]);
-        
+        return left;
     }
 
     /**
-     * Get the log-prevalence value at a specific time using precomputed grid points.
-     *
-     * @param t time (backward from present)
-     * @return log-prevalence at time t
+     * Linear interpolation of a per-grid-point value at time t. Out-of-range
+     * t is clamped to the boundary value.
      */
-    public double getPrevalenceAtGridPoint(double t) {
-        if (!ratesKnows) {
-            recalculateRates();
-        }
-
-        // Find the appropriate grid point
-        if (t <= time[0]) {
-            return I[0];
-        }
-        // Binary search for the closest grid point
-        // Binary search for the closest sgment in the grid, returns the left grid point of the segment in which t lies
-        int left = 0, right = time.length - 1;
-        while (left < right) {
-            int mid = (left + right ) / 2;
-            if (time[mid] <= t && time[mid+1] > t) {
-            	left = mid;
-            	break;
-            }
-            if (time[mid] <= t) {
-                left = mid+1;
-            } else {
-                right = mid;
-            }
-        }
-        // check if left or right grid point is closer to t
-        if (left == time.length - 1) {
-            return I[left];
-        }
-        else if (Math.abs(time[left] - t) <= Math.abs(time[left+1] - t)) {
-        	return I[left];
-            
-        } 
-        return I[left+1];
+    private double interpolate(double[] values, double t) {
+        if (t <= time[0]) return values[0];
+        if (t >= time[time.length - 1]) return values[values.length - 1];
+        int left = findLeftIndex(t);
+        double w = (t - time[left]) / (time[left + 1] - time[left]);
+        return values[left] + w * (values[left + 1] - values[left]);
     }
 
     /**
-     * Get the derivative of log-prevalence at a specific time.
+     * Log-prevalence at time t, linearly interpolated between grid points.
      *
      * @param t time (backward from present)
-     * @return log-prevalence at time t
      */
-    public double getDerivative(double t) {
-        if (!ratesKnows) {
-            recalculateRates();
-        }
+    public double getLogPrevalence(double t) {
+        if (!ratesKnows) recalculateRates();
+        return interpolate(logI, t);
+    }
+
+    /**
+     * Prevalence at time t. Interpolation happens in log space (matching the
+     * spline's native parameterisation), then exponentiated.
+     *
+     * @param t time (backward from present)
+     */
+    public double getPrevalence(double t) {
+        return Math.exp(getLogPrevalence(t));
+    }
+
+    /**
+     * Transmission rate β(t) = γ - d(logI)/dτ, linearly interpolated between
+     * grid points (with optional clipping to TR_MIN applied at grid points).
+     *
+     * @param t time (backward from present)
+     */
+    public double getTransmissionRate(double t) {
+        if (!ratesKnows) recalculateRates();
+        return interpolate(transmissionRate, t);
+    }
+
+    /**
+     * Exact spline derivative d(log I)/dτ at time t (no grid interpolation).
+     * Returns 0 outside the knot range.
+     *
+     * @param t time (backward from present)
+     */
+    public double getLogPrevalenceDerivative(double t) {
+        if (!ratesKnows) recalculateRates();
         // TODO: check if we want to throw an error or return 0.0
         if (t < time[0] || t > time[time.length - 1]) {
             return 0.0;
-        } else {
-            return splineFunction.derivative().value(t);
         }
-    }
-
-    public double getTranssmissionRateAtGridPoint(double t) {
-        if (!ratesKnows) {
-            recalculateRates();
-        }
-        // Find the appropriate grid point
-        if (t <= time[0]) {
-            // Return transmission rate at first point using spline coefficients
-            // This is the first knot so dt = 0 
-            return transmissionRate[0];
-        }
-        
-         // Binary search for the closest sgment in the grid, returns the left grid point of the segment in which t lies
-        int left = 0, right = time.length - 1;
-        while (left < right) {
-            int mid = (left + right ) / 2;
-            if (time[mid] <= t && time[mid+1] > t) {
-            	left = mid;
-            	break;
-            }
-            if (time[mid] <= t) {
-                left = mid+1;
-            } else {
-                right = mid;
-            }
-        }
-        // check if left or right grid point is closer to t
-        if (left == time.length - 1) {
-            return transmissionRate[left];
-        }
-        else if (Math.abs(time[left] - t) <= Math.abs(time[left+1] - t)) {
-        	return transmissionRate[left];
-            
-        } 
-        return transmissionRate[left+1];
+        return splineDerivative.value(t);
     }
 
     /**
