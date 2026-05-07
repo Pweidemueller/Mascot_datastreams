@@ -155,15 +155,68 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 		if (!intTimesKnown)
 			computeIntTimes();
 
-		int intervalNr;
+		int intervalNr = mapIndexToIntervalNr(i);
+    	double t = rateShiftsInput.get().getIntervalMidpoint(intervalNr);
+		return getCoalescentRateAt(t, intervalNr);
+    }
+
+	@Override
+    public double[] getBackwardsMigration(int i){
+		if (!intTimesKnown)
+			computeIntTimes();
+
+		int intervalNr = mapIndexToIntervalNr(i);
+    	double t = rateShiftsInput.get().getIntervalMidpoint(intervalNr);
+		return getBackwardsMigrationAt(t, intervalNr);
+    }
+
+	/**
+	 * Time-based coalescent rate query for max-interval mode. Returns the same
+	 * rate vector as getCoalescentRate(int) would at the corresponding interval
+	 * midpoint when t is at that midpoint; for arbitrary t, evaluates the
+	 * underlying parametric Ne(t) directly (for time-based dynamics) or falls
+	 * back to the enclosing interval index (for interval-based dynamics).
+	 */
+	public double[] getCoalescentRateAtTime(double t) {
+		if (!intTimesKnown)
+			computeIntTimes();
+		return getCoalescentRateAt(t, findIntervalNr(t));
+	}
+
+	/**
+	 * Time-based migration rate query for max-interval mode. Same semantics as
+	 * getBackwardsMigration(int) but evaluated at arbitrary t.
+	 */
+	public double[] getBackwardsMigrationAtTime(double t) {
+		if (!intTimesKnown)
+			computeIntTimes();
+		return getBackwardsMigrationAt(t, findIntervalNr(t));
+	}
+
+	private int mapIndexToIntervalNr(int i) {
     	if (i >= rateShiftsInput.get().getDimension()-firstlargerzero-1)
-    		intervalNr = rateShiftsInput.get().getDimension()-2;
-    	else
-    		intervalNr = i + firstlargerzero;
+    		return rateShiftsInput.get().getDimension()-2;
+    	return i + firstlargerzero;
+	}
 
-    	// get the current time as the midpoint of the current intervals
-    	double t = rateShiftsInput.get().getIntervalMidpoint(intervalNr);   
+	// Largest intervalNr with rateShifts.getValue(intervalNr) <= t, clamped to
+	// [firstlargerzero, dim-2] to match the convention of mapIndexToIntervalNr.
+	private int findIntervalNr(double t) {
+		RateShifts rs = rateShiftsInput.get();
+		int n = rs.getDimension();
+		int lo = firstlargerzero;
+		int hi = n - 2;
+		if (hi < lo) return lo;
+		if (t <= rs.getValue(lo)) return lo;
+		if (t >= rs.getValue(hi)) return hi;
+		while (lo + 1 < hi) {
+			int mid = (lo + hi) >>> 1;
+			if (rs.getValue(mid) <= t) lo = mid; else hi = mid;
+		}
+		return lo;
+	}
 
+	private double[] getCoalescentRateAt(double t, int intervalNr) {
 		double[] coal = new double[getDimension()];
 		for (int j = 0; j < coal.length; j++){
 			if (parametricFunction.get(j).isTime)
@@ -172,28 +225,13 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 				coal[j] = Math.min(maxRateInput.get(), 1/parametricFunction.get(j).getNeInterval(intervalNr));
 		}
 		return coal;
-    }
-    
-	@Override    
-    public double[] getBackwardsMigration(int i){
-		if (!intTimesKnown)
-			computeIntTimes();
-		
-		
-		int intervalNr;
-    	if (i >= rateShiftsInput.get().getDimension()-firstlargerzero-1)
-    		intervalNr = rateShiftsInput.get().getDimension()-2;
-    	else
-    		intervalNr = i + firstlargerzero;
-		
+	}
+
+	private double[] getBackwardsMigrationAt(double t, int intervalNr) {
     	int dim = dimensionInput.get();
-    	int start = intervalNr*dim*(dim-1);
-    	
 		double[] m = new double[dim * dim];
-		
 		double[] NeInt = new double[dim];
-    	double t = rateShiftsInput.get().getIntervalMidpoint(intervalNr);   	
-		
+
 		for (int j = 0; j < NeInt.length; j++){
 			if (parametricFunction.get(j).isTime) {
 				if (parametricFunction.get(j) instanceof SplinePrevalenceToNe) {
@@ -206,7 +244,6 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 			}
 		}
 
-		
 		for (int a = 0; a < dim; a++){
 			for (int b = 0; b < dim; b++){
 				if (a!=b){
@@ -216,9 +253,9 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 						m[a * dim + b] = 0.0;
 				}
 			}
-		}	
+		}
 		return m;
-    }
+	}
 
 //	@Override
 //	public void recalculate() {

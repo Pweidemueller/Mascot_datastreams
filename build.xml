@@ -248,6 +248,208 @@
     </target>
 
 
+    <!-- Tier-1 correctness benchmark for the max-interval ODE subdivider.
+         Reads XMLs from -Dtier1.xmls (a comma-separated list, defaults to
+         everything in sandbox/tier1/) and writes a CSV row per XML to
+         -Dtier1.out (default sandbox/tier1_results.csv).
+         Run after `python scripts/tier1_generate_xmls.py`. -->
+    <target name="tier1" depends="compile-test">
+        <property name="tier1.out" location="sandbox/tier1_results.csv"/>
+        <fileset id="tier1.fileset" dir="sandbox/tier1" includes="*.xml"/>
+        <pathconvert refid="tier1.fileset" property="tier1.xmls" pathsep=" "/>
+        <java classname="mascotdatastreams.benchmark.Tier1Runner" fork="true" failonerror="true">
+            <jvmarg value="-Xmx4G"/>
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <pathelement path="${build}"/>
+                <pathelement path="${build-test}"/>
+                <fileset dir="${lib}" includes="**/*.jar"/>
+                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
+                <pathelement path="${build-beast}"/>
+                <fileset dir="deps/BEAST_CLASSIC" includes="**/*.jar"/>
+                <fileset dir="deps/Mascot" includes="**/*.jar"/>
+            </classpath>
+            <arg value="${tier1.out}"/>
+            <arg line="${tier1.xmls}"/>
+        </java>
+    </target>
+
+    <!-- Tier-2 timing benchmark. Reads sandbox/tier2/*.xml, writes
+         sandbox/tier2_results.csv. Configurable iterations:
+           ant clean tier2 -Dtier2.warmup=5 -Dtier2.timed=30 -->
+    <!-- Determinism check for a single XML.
+         ant clean repeat -Drepeat.xml=path/to.xml -Drepeat.n=10 -->
+    <!-- No-deps version of repeat. Assumes build/, build-test/, and deps/
+         are already current. -->
+    <target name="repeat-only">
+        <property name="repeat.n" value="10"/>
+        <property name="user.beast.packages" location="${user.home}/Library/Application Support/BEAST/2.7"/>
+        <java classname="mascotdatastreams.benchmark.RepeatabilityCheck" fork="true" failonerror="true">
+            <jvmarg value="-Xmx8G"/>
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <pathelement path="${build}"/>
+                <pathelement path="${build-test}"/>
+                <fileset dir="${lib}" includes="**/*.jar"/>
+                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
+                <pathelement path="${build-beast}"/>
+                <fileset dir="deps/BEAST_CLASSIC" includes="**/*.jar"/>
+                <fileset dir="deps/Mascot" includes="**/*.jar"/>
+                <fileset dir="${user.beast.packages}" includes="*/lib/*.jar"
+                         erroronmissingdir="false"/>
+            </classpath>
+            <arg value="${repeat.xml}"/>
+            <arg value="${repeat.n}"/>
+        </java>
+    </target>
+
+    <target name="repeat" depends="compile-test">
+        <property name="repeat.n" value="10"/>
+        <property name="user.beast.packages" location="${user.home}/Library/Application Support/BEAST/2.7"/>
+        <java classname="mascotdatastreams.benchmark.RepeatabilityCheck" fork="true" failonerror="true">
+            <jvmarg value="-Xmx8G"/>
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <pathelement path="${build}"/>
+                <pathelement path="${build-test}"/>
+                <fileset dir="${lib}" includes="**/*.jar"/>
+                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
+                <pathelement path="${build-beast}"/>
+                <fileset dir="deps/BEAST_CLASSIC" includes="**/*.jar"/>
+                <fileset dir="deps/Mascot" includes="**/*.jar"/>
+                <fileset dir="${user.beast.packages}" includes="*/lib/*.jar"
+                         erroronmissingdir="false"/>
+            </classpath>
+            <arg value="${repeat.xml}"/>
+            <arg value="${repeat.n}"/>
+        </java>
+    </target>
+
+    <target name="tier2" depends="compile-test">
+        <property name="tier2.out" location="sandbox/tier2_results.csv"/>
+        <property name="tier2.warmup" value="5"/>
+        <property name="tier2.timed" value="30"/>
+        <property name="tier2.dir" location="sandbox/tier2"/>
+        <property name="user.beast.packages" location="${user.home}/Library/Application Support/BEAST/2.7"/>
+        <fileset id="tier2.fileset" dir="${tier2.dir}" includes="*.xml"/>
+        <pathconvert refid="tier2.fileset" property="tier2.xmls" pathsep=" "/>
+        <java classname="mascotdatastreams.benchmark.Tier2Runner" fork="true" failonerror="true">
+            <jvmarg value="-Xmx8G"/>
+            <sysproperty key="tier2.warmup" value="${tier2.warmup}"/>
+            <sysproperty key="tier2.timed" value="${tier2.timed}"/>
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <pathelement path="${build}"/>
+                <pathelement path="${build-test}"/>
+                <fileset dir="${lib}" includes="**/*.jar"/>
+                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
+                <pathelement path="${build-beast}"/>
+                <fileset dir="deps/BEAST_CLASSIC" includes="**/*.jar"/>
+                <fileset dir="deps/Mascot" includes="**/*.jar"/>
+                <!-- Pull in user-installed BEAST packages (e.g. TargetedBeast)
+                     that the example XMLs reference. erroronmissingdir=false
+                     keeps things clean if the user has none installed. -->
+                <fileset dir="${user.beast.packages}" includes="*/lib/*.jar"
+                         erroronmissingdir="false"/>
+            </classpath>
+            <arg value="${tier2.out}"/>
+            <arg line="${tier2.xmls}"/>
+        </java>
+    </target>
+
+    <!-- Dump the (length, t_start, t_end, event_at_start) interval list that
+         MascotLogPflag would iterate, for one XML in old or new mode.
+           ant intervals -Dintervals.xml=path/to.xml -Dintervals.mode=old -Dintervals.out=foo.csv
+           ant intervals -Dintervals.xml=path/to.xml -Dintervals.mode=new -Dintervals.maxInterval=0.005 -Dintervals.out=foo.csv
+         No-deps version (assumes build/ build-test/ deps/ already current). -->
+    <target name="intervals">
+        <property name="intervals.maxInterval" value="0"/>
+        <property name="user.beast.packages" location="${user.home}/Library/Application Support/BEAST/2.7"/>
+        <java classname="mascotdatastreams.benchmark.IntervalDumper" fork="true" failonerror="true">
+            <jvmarg value="-Xmx8G"/>
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <pathelement path="${build}"/>
+                <pathelement path="${build-test}"/>
+                <fileset dir="${lib}" includes="**/*.jar"/>
+                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
+                <pathelement path="${build-beast}"/>
+                <fileset dir="deps/BEAST_CLASSIC" includes="**/*.jar"/>
+                <fileset dir="deps/Mascot" includes="**/*.jar"/>
+                <fileset dir="${user.beast.packages}" includes="*/lib/*.jar"
+                         erroronmissingdir="false"/>
+            </classpath>
+            <arg value="${intervals.out}"/>
+            <arg value="${intervals.xml}"/>
+            <arg value="${intervals.mode}"/>
+            <arg value="${intervals.maxInterval}"/>
+        </java>
+    </target>
+
+    <!-- "no-compile" multi-param target: assumes build/, build-test/, deps/,
+         and beast-source/ are already current. Use this after a `ant clean
+         tier2` invocation, to avoid ant re-evaluating the install-dependencies
+         chain (which then fails because deps/ is already populated). -->
+    <target name="tier2-multiparam-only">
+        <property name="tier2mp.out" location="sandbox/tier2_multiparam_results.csv"/>
+        <property name="tier2mp.warmup" value="3"/>
+        <property name="tier2mp.timed" value="10"/>
+        <property name="tier2mp.dir" location="sandbox/tier2_multiparam"/>
+        <property name="user.beast.packages" location="${user.home}/Library/Application Support/BEAST/2.7"/>
+        <fileset id="tier2mp.fileset.only" dir="${tier2mp.dir}" includes="*.xml"/>
+        <pathconvert refid="tier2mp.fileset.only" property="tier2mp.xmls.only" pathsep=" "/>
+        <java classname="mascotdatastreams.benchmark.Tier2Runner" fork="true" failonerror="true">
+            <jvmarg value="-Xmx8G"/>
+            <sysproperty key="tier2.warmup" value="${tier2mp.warmup}"/>
+            <sysproperty key="tier2.timed" value="${tier2mp.timed}"/>
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <pathelement path="${build}"/>
+                <pathelement path="${build-test}"/>
+                <fileset dir="${lib}" includes="**/*.jar"/>
+                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
+                <pathelement path="${build-beast}"/>
+                <fileset dir="deps/BEAST_CLASSIC" includes="**/*.jar"/>
+                <fileset dir="deps/Mascot" includes="**/*.jar"/>
+                <fileset dir="${user.beast.packages}" includes="*/lib/*.jar"
+                         erroronmissingdir="false"/>
+            </classpath>
+            <arg value="${tier2mp.out}"/>
+            <arg line="${tier2mp.xmls.only}"/>
+        </java>
+    </target>
+
+    <!-- Multi-parameter bias-stability spot check. Reads sandbox/tier2_multiparam/*.xml,
+         writes sandbox/tier2_multiparam_results.csv. -->
+    <target name="tier2-multiparam" depends="compile-test">
+        <property name="tier2mp.out" location="sandbox/tier2_multiparam_results.csv"/>
+        <property name="tier2mp.warmup" value="3"/>
+        <property name="tier2mp.timed" value="10"/>
+        <property name="tier2mp.dir" location="sandbox/tier2_multiparam"/>
+        <property name="user.beast.packages" location="${user.home}/Library/Application Support/BEAST/2.7"/>
+        <fileset id="tier2mp.fileset" dir="${tier2mp.dir}" includes="*.xml"/>
+        <pathconvert refid="tier2mp.fileset" property="tier2mp.xmls" pathsep=" "/>
+        <java classname="mascotdatastreams.benchmark.Tier2Runner" fork="true" failonerror="true">
+            <jvmarg value="-Xmx8G"/>
+            <sysproperty key="tier2.warmup" value="${tier2mp.warmup}"/>
+            <sysproperty key="tier2.timed" value="${tier2mp.timed}"/>
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <pathelement path="${build}"/>
+                <pathelement path="${build-test}"/>
+                <fileset dir="${lib}" includes="**/*.jar"/>
+                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
+                <pathelement path="${build-beast}"/>
+                <fileset dir="deps/BEAST_CLASSIC" includes="**/*.jar"/>
+                <fileset dir="deps/Mascot" includes="**/*.jar"/>
+                <fileset dir="${user.beast.packages}" includes="*/lib/*.jar"
+                         erroronmissingdir="false"/>
+            </classpath>
+            <arg value="${tier2mp.out}"/>
+            <arg line="${tier2mp.xmls}"/>
+        </java>
+    </target>
+
     <!-- Run unit tests via the JUnit Platform (JUnit 5).
          The legacy <junit> task only knows JUnit 3/4 annotations, so it reports
          "No runnable methods" for our org.junit.jupiter.api.Test classes.

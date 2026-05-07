@@ -19,3 +19,4 @@ src/beast/mascot/operators/BitFlipBSSVSOperator.java
 *state
 *.log
 *.trees
+/sandbox/

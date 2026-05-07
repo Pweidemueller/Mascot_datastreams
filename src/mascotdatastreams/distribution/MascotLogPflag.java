@@ -29,12 +29,34 @@ import java.util.Arrays;
 public class MascotLogPflag extends StructuredTreeDistribution {
 
 	public static boolean debug = false;
+
+	/**
+	 * Mechanism-level metric for benchmarking: how many ODE steps were taken
+	 * across all calculateLogP / calculateLogP_maxInterval calls since the
+	 * counter was last reset. Incremented in both doEuler and doEulerAtTime.
+	 * Process-wide static — only meaningful when running one likelihood at a
+	 * time (true for our benchmark harnesses).
+	 */
+	public static long doEulerCallCount = 0;
+	public static long getAndResetDoEulerCallCount() {
+		long v = doEulerCallCount;
+		doEulerCallCount = 0;
+		return v;
+	}
+
 	public Input<Dynamics> dynamicsInput = new Input<>("dynamics", "Input of rates", Input.Validate.REQUIRED);
 	public Input<Double> epsilonInput = new Input<>("epsilon", "step size for the RK4 integration",0.001);
 	public Input<Double> maxStepInput = new Input<>("maxStep", "step size for the RK4 integration", Double.POSITIVE_INFINITY);
 
 	public Input<Boolean> cacheInput = new Input<>("useCache", "use cache to speed things up (may be fragile)", false);
 	public Input<Boolean> computeLikelihoodInput = new Input<>("compute_likelihood", "If true, compute the Mascot tree likelihood; if false, return 0 after initialization.", true);
+
+	public Input<Boolean> useMaxIntervalInput = new Input<>("useMaxInterval",
+			"If true, ignore the dynamics grid for ODE subdivision; subdivide each tree-event interval into ceil(L / maxInterval) equal pieces and evaluate rates at each subinterval midpoint. Requires implementation=java, useCache=false, and StructuredSkylinePrevalence dynamics.",
+			false);
+	public Input<Double> maxIntervalInput = new Input<>("maxInterval",
+			"Maximum length of any single ODE step when useMaxInterval=true.",
+			Double.POSITIVE_INFINITY);
 
 	enum MascotImplementation {java, indicators, allnative};
 	public Input<MascotImplementation> implementationInput = new Input<>("implementation", "implementation, one of " + MascotImplementation.values().toString(),
@@ -213,6 +235,30 @@ public class MascotLogPflag extends StructuredTreeDistribution {
         	Log.warning("Using " + euler.getClass().getSimpleName());
     	}
 
+    	if (useMaxIntervalInput.get()) {
+    		if (cacheInput.get())
+    			throw new IllegalArgumentException("useMaxInterval=true is incompatible with useCache=true");
+    		if (implementationInput.get() != MascotImplementation.java)
+    			throw new IllegalArgumentException("useMaxInterval=true requires implementation=\"java\"");
+    		if (!(dynamics instanceof StructuredSkylinePrevalence))
+    			throw new IllegalArgumentException("useMaxInterval=true requires dynamics of type StructuredSkylinePrevalence");
+    		if (maxIntervalInput.get() <= 0.0)
+    			throw new IllegalArgumentException("maxInterval must be > 0");
+
+    		// Swap in the vendored Euler classes (mascotdatastreams.ode) which
+    		// fix initWithIndicators (upstream forgets to allocate sumDotStates).
+    		// doEulerAtTime relies on initWithIndicators to enable the
+    		// indicator-based sparsity optimisation in the inner loop.
+    		switch (states) {
+    		case 2: euler = new mascotdatastreams.ode.Euler2ndOrder2(); break;
+    		case 3: euler = new mascotdatastreams.ode.Euler2ndOrder3(); break;
+    		case 4: euler = new mascotdatastreams.ode.Euler2ndOrder4(); break;
+    		default: euler = new mascotdatastreams.ode.Euler2ndOrder(); break;
+    		}
+    		euler.setup(MAX_SIZE, states, epsilonInput.get(), maxStepInput.get());
+    		Log.warning("MascotLogPflag: useMaxInterval=true, maxInterval=" + maxIntervalInput.get()
+    				+ ", euler=" + euler.getClass().getName());
+    	}
 
     }
 
@@ -288,6 +334,10 @@ public class MascotLogPflag extends StructuredTreeDistribution {
     	// correctly calculate the daughter nodes at coalescent intervals in the case of
     	// bifurcation or in case two nodes are at the same height
     	treeIntervals.swap();
+
+    	if (useMaxIntervalInput.get()) {
+    		return calculateLogP_maxInterval();
+    	}
 
     	if (mascotImpl != null) {
     		Node [] nodes = tree.getNodesAsArray();
@@ -499,6 +549,166 @@ public class MascotLogPflag extends StructuredTreeDistribution {
 		return logP;
     }
 
+    // Per-mascotshifts-cell rate cache for calculateLogP_maxInterval. Mirrors
+    // what setUpDynamics builds for the legacy path: rates are evaluated once
+    // per epoch midpoint (per likelihood call when dynamics are dirty), then
+    // looked up by cell index inside the inner loop. Avoids the per-step
+    // double[] allocation and the spline binary-search that the original
+    // getCoalescentRateAtTime / getBackwardsMigrationAtTime do.
+    private double[][] mxCoalRates;
+    private double[][] mxMigRates;
+    private double[]   mxRateShiftEnds;   // cumulative time at the END of each cell
+    private int[]      mxIndicators;      // time-invariant indicators
+    private int        mxNumCells;
+
+    /** Recompute the per-cell rate cache. Called when dynamics are dirty. */
+    private void precomputeMaxIntervalCache() {
+        int n = dynamics.getEpochCount();
+        if (mxCoalRates == null || mxCoalRates.length != n) {
+            mxCoalRates = new double[n][];
+            mxMigRates = new double[n][];
+            mxRateShiftEnds = new double[n];
+        }
+        double cum = 0.0;
+        for (int i = 0; i < n; i++) {
+            mxCoalRates[i] = dynamics.getCoalescentRate(i);
+            mxMigRates[i] = dynamics.getBackwardsMigration(i);
+            cum += dynamics.getInterval(i);
+            mxRateShiftEnds[i] = cum;
+        }
+        mxIndicators = dynamics.getIndicators(0);
+        mxNumCells = n;
+    }
+
+    /**
+     * Max-interval variant of calculateLogP. Subdivides each tree-event interval
+     * into ceil(L / maxInterval) equal sub-intervals; rates inside each
+     * sub-interval are taken from the precomputed per-cell cache (constant
+     * across each mascotshifts cell, matching the legacy path's resolution).
+     * Caching is disabled; only the java implementation path and
+     * StructuredSkylinePrevalence dynamics are supported (validated in
+     * initAndValidate).
+     */
+    public double calculateLogP_maxInterval() {
+        double maxInt = maxIntervalInput.get();
+
+        activeLineages.clear();
+        logP = 0;
+        nrLineages = 0;
+        linProbsLength = 0;
+
+        int treeInterval = 0;
+        double currentTime = 0.0;
+        double nextTreeEvent;
+        try {
+            nextTreeEvent = treeIntervals.getInterval(treeInterval);
+        } catch (Exception e) {
+            first++;
+            return logP;
+        }
+
+        if (first == 0 || !dynamics.areDynamicsKnown()) {
+            precomputeMaxIntervalCache();
+            dynamics.setDynamicsKnown();
+        }
+
+        if (!computeLikelihood) {
+            first++;
+            return 0;
+        }
+
+        // Running cursor over the precomputed cells. Advances monotonically
+        // because currentTime advances monotonically through the tree.
+        int rateCell = 0;
+
+        do {
+            double L = nextTreeEvent;
+
+            if (L > 0) {
+                int nSub = (Double.isFinite(maxInt) && L > maxInt)
+                           ? (int) Math.ceil(L / maxInt) : 1;
+                double subL = L / nSub;
+                for (int k = 0; k < nSub; k++) {
+                    double tMid = currentTime + (k + 0.5) * subL;
+                    while (rateCell < mxNumCells - 1 && tMid > mxRateShiftEnds[rateCell]) {
+                        rateCell++;
+                    }
+                    coalescentRates = mxCoalRates[rateCell];
+                    double[] migrationRates = mxMigRates[rateCell];
+                    logP += doEulerAtTime(subL, coalescentRates, migrationRates, mxIndicators);
+                    if (logP == Double.NEGATIVE_INFINITY) {
+                        first++;
+                        return logP;
+                    }
+                }
+                currentTime += L;
+            }
+
+            // Set rates at the event time so coalesce() uses the correct coalescentRates field.
+            while (rateCell < mxNumCells - 1 && currentTime > mxRateShiftEnds[rateCell]) {
+                rateCell++;
+            }
+            coalescentRates = mxCoalRates[rateCell];
+
+            IntervalType type = treeIntervals.getIntervalType(treeInterval);
+            if (type == IntervalType.COALESCENT) {
+                nrLineages--;
+                logP += coalesce(treeInterval, 0, 0.0, Double.POSITIVE_INFINITY);
+            } else if (type == IntervalType.SAMPLE) {
+                nrLineages++;
+                sample(treeInterval, 0, 0.0, Double.POSITIVE_INFINITY);
+            }
+
+            if (logP == Double.NEGATIVE_INFINITY) {
+                first++;
+                return logP;
+            }
+
+            treeInterval++;
+            try {
+                nextTreeEvent = treeIntervals.getInterval(treeInterval);
+            } catch (Exception e) {
+                break;
+            }
+        } while (nextTreeEvent <= Double.POSITIVE_INFINITY);
+
+        first++;
+        return logP;
+    }
+
+    /**
+     * Run a single Euler/RK4 step over `duration` with rates and indicators
+     * supplied directly (no grid lookup). Mirrors doEuler() but bypasses the
+     * ratesInterval index path.
+     */
+    public double doEulerAtTime(double duration, double[] coalRates, double[] migRates, int[] inds) {
+        doEulerCallCount++;
+        if (linProbs_tmp.length != linProbsLength + 1) {
+            linProbs_tmp = new double[linProbsLength + 1];
+        }
+        System.arraycopy(linProbs, 0, linProbs_tmp, 0, linProbsLength);
+        linProbs_tmp[linProbsLength] = 0;
+        if (linProbsLength > 0) {
+            linProbs[linProbsLength - 1] = 0;
+        }
+
+        // Use initWithIndicators when indicators are present so the integrator
+        // can skip iterating over zero migration entries (sparsity win for
+        // BSSVS-style models). The vendored Euler2ndOrder fork in
+        // mascotdatastreams.ode patches the upstream bug where
+        // initWithIndicators forgot to allocate sumDotStates. Fall back to
+        // init when indicators are unavailable.
+        if (inds != null && inds.length > 0) {
+            euler.initWithIndicators(migRates, inds, coalRates, nrLineages);
+        } else {
+            euler.init(migRates, coalRates, nrLineages);
+        }
+        euler.calculateValues(duration, linProbs_tmp, linProbsLength + 1);
+
+        System.arraycopy(linProbs_tmp, 0, linProbs, 0, linProbsLength);
+        return linProbs_tmp[linProbsLength];
+    }
+
 	protected void setUpDynamics() {
     	int n = dynamics.getEpochCount();
     	double [][] coalescentRates = new double[n][];
@@ -520,6 +730,7 @@ public class MascotLogPflag extends StructuredTreeDistribution {
     int storedNrLineages = -1;
 
 	public double doEuler(double nextEventTime, int ratesInterval) {
+		doEulerCallCount++;
 		//for (int i = 0; i < linProbs.length; i++) linProbs_tmp[i] = linProbs[i];
 		if (linProbs_tmp.length != linProbsLength + 1) {
 			linProbs_tmp= new double[linProbsLength + 1];
