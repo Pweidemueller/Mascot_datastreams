@@ -118,9 +118,6 @@ public class WastewaterLikelihood extends Distribution {
                     return Double.NEGATIVE_INFINITY;
                 }
             }
-            // Clip to a detection-limit floor to avoid log(0); also guards against MASCOT
-            // producing near-zero prevalence that would cause numerical issues.
-            // double scaledMedian = Math.max(I_N * scaling, 1e-3);
             double scaledMedian = I_N * scaling;
 
             if (concentration <= 0.0) {

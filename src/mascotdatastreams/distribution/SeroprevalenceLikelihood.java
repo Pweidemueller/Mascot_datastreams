@@ -174,7 +174,7 @@ public class SeroprevalenceLikelihood extends Distribution {
         if (C <= 0.0) return 0.0;
 
         // Exact (1-C)^s via exp(s * ln(1-C)), with smooth
-        // linear extension of ln(1-C) beyond threshold
+        // linear extension of ln(1-C) beyond threshold to avoid issues during MCMC when C>1
         // cumulative hazard is -1 * ln(1-C)
         // propbability of individual being seropositive taking into account risk adjusted scaling: 1 - exp(scaling * -1 * -1 * ln(1-C))
         double logOneMinusC;
