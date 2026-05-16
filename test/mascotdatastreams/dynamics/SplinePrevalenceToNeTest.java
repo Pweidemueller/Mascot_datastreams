@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 
 import beast.base.inference.parameter.RealParameter;
@@ -189,6 +191,79 @@ public class SplinePrevalenceToNeTest {
         assertEquals(0.007677784323246716 * 2.0, dynScaled.getNeTime(2.0), tolerance, "NeScaler at t=2.0");
    }
   
+    @Test
+    public void testLocalTransmissionRateAndNe() throws Exception {
+        // Two-deme setup. Deme i is "self", deme j is "other". A single forward
+        // migration rate m_{j -> i} subtracts from i's aggregate transmission rate.
+        RateShifts rateShifts = buildRateShifts("0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0");
+        RateShifts gridRateShifts = buildRateShifts("0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0");
+
+        Double[] logI_i = new Double[] { 0.0, 1.0, 2.0, 5.0, 10.0, 2.5, -2.0, 0.0, 1.0, -1.0, 0.0 };
+        Double[] logI_j = new Double[] { 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5 };
+
+        RealParameter gamma = new RealParameter(new Double[] { 75.0 });
+
+        Spline splineI = new Spline();
+        splineI.initByName(
+                "logInfected", new RealParameter(logI_i),
+                "rateShifts", rateShifts,
+                "gridRateShifts", gridRateShifts,
+                "uninfectiousRate", gamma);
+        splineI.initAndValidate();
+
+        Spline splineJ = new Spline();
+        splineJ.initByName(
+                "logInfected", new RealParameter(logI_j),
+                "rateShifts", rateShifts,
+                "gridRateShifts", gridRateShifts,
+                "uninfectiousRate", gamma);
+        splineJ.initAndValidate();
+
+        // Baseline (no migration subtraction) so we can compute the expected
+        // aggregate transmission rate via the same code path as the production class.
+        SplinePrevalenceToNe baseline = new SplinePrevalenceToNe();
+        baseline.initByName(
+                "spline", splineI,
+                "coalescentScale", new RealParameter(new Double[] { 2.0 }));
+        baseline.initAndValidate();
+
+        double m_ji = 0.3;
+        SplinePrevalenceToNe withMig = new SplinePrevalenceToNe();
+        withMig.initByName(
+                "spline", splineI,
+                "coalescentScale", new RealParameter(new Double[] { 2.0 }),
+                "otherSpline", Arrays.asList(splineJ),
+                "incomingForwardMigration", new RealParameter(new Double[] { m_ji }));
+        withMig.initAndValidate();
+
+        double tolerance = 1e-9;
+        double[] testTimes = { 0.0, 0.1, 0.55, 1.0, 1.5, 2.0 };
+        for (double t : testTimes) {
+            double I_i = splineI.getPrevalence(t);
+            double I_j = splineJ.getPrevalence(t);
+            double betaTotal = splineI.getTransmissionRate(t);
+            double expectedMig = m_ji * I_j / I_i;
+            double expectedLocal = betaTotal - expectedMig;
+
+            assertEquals(expectedMig, withMig.getMigrationTransmissionRate(t), tolerance,
+                    "migration rate at t=" + t);
+            assertEquals(expectedLocal, withMig.getLocalTransmissionRate(t), tolerance,
+                    "local rate at t=" + t);
+
+            // Ne should use the local rate when migration info is wired.
+            double expectedNe = I_i / (2.0 * expectedLocal);
+            assertEquals(expectedNe, withMig.getNeTime(t), tolerance, "Ne at t=" + t);
+
+            // Baseline still uses the aggregate rate.
+            assertEquals(betaTotal, baseline.getLocalTransmissionRate(t), tolerance,
+                    "baseline local == total at t=" + t);
+            assertEquals(0.0, baseline.getMigrationTransmissionRate(t), tolerance,
+                    "baseline migration is zero at t=" + t);
+            assertEquals(I_i / (2.0 * betaTotal), baseline.getNeTime(t), tolerance,
+                    "baseline Ne uses total beta at t=" + t);
+        }
+    }
+
     private static RateShifts buildRateShifts(String shiftValues) throws Exception {
         RateShifts rs = new RateShifts();
         rs.initByName("value", shiftValues);

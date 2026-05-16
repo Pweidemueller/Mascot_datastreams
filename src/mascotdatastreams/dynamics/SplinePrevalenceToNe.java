@@ -3,10 +3,12 @@ package mascotdatastreams.dynamics;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Loggable;
+import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
 import mascot.parameterdynamics.NeDynamics;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,11 +42,35 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     final public Input<RealParameter> NeScalerInput = new Input<>("NeScaler",
             "Additional scaling factor applied to Ne(t): Ne = NeScaler * I / (c * transmission_rate). Default: 1.0",
             Input.Validate.OPTIONAL);
-    
+
+    final public Input<List<Spline>> otherSplinesInput = new Input<>("otherSpline",
+            "Splines for other demes (j != i). If provided together with incomingForwardMigration, "
+                    + "the migration contribution to the transmission rate is subtracted to obtain "
+                    + "the local transmission rate, which is then used in getNeTime.",
+            new ArrayList<>());
+
+    final public Input<RealParameter> incomingForwardMigrationInput = new Input<>("incomingForwardMigration",
+            "Forward migration rates m^fw_{j -> i} into this deme. By default, the parameter's dimension "
+                    + "must equal the number of otherSpline entries (value k applies to otherSpline[k]). "
+                    + "If forwardMigrationIndices is also provided, this parameter can be a larger shared "
+                    + "vector (e.g. the same flat migration matrix used by StructuredSkylinePrevalence) "
+                    + "and only the selected indices are read. Required when otherSpline is non-empty.",
+            Input.Validate.OPTIONAL);
+
+    final public Input<IntegerParameter> forwardMigrationIndicesInput = new Input<>("forwardMigrationIndices",
+            "Optional indices into incomingForwardMigration, one per otherSpline entry (same order). "
+                    + "Lets multiple SplinePrevalenceToNe instances share a single flat migration parameter "
+                    + "while each picks out the rates incoming into its own deme.",
+            Input.Validate.OPTIONAL);
+
     // Member variables
     private Spline spline;
     private RealParameter coalescentScale;
     private RealParameter neScaler;
+    private List<Spline> otherSplines;
+    private RealParameter incomingForwardMigration;
+    private int[] forwardMigrationIndices;
+    private boolean hasMigration;
     
     boolean NesKnown = false;
     boolean returnNaN = false;
@@ -66,6 +92,45 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         if (spline == null) {
             throw new IllegalArgumentException("spline input is required");
         }
+
+        otherSplines = otherSplinesInput.get();
+        incomingForwardMigration = incomingForwardMigrationInput.get();
+        IntegerParameter idxParam = forwardMigrationIndicesInput.get();
+        hasMigration = otherSplines != null && !otherSplines.isEmpty();
+        if (hasMigration) {
+            if (incomingForwardMigration == null) {
+                throw new IllegalArgumentException(
+                        "incomingForwardMigration is required when otherSpline is provided");
+            }
+            int n = otherSplines.size();
+            forwardMigrationIndices = new int[n];
+            if (idxParam == null) {
+                if (incomingForwardMigration.getDimension() != n) {
+                    throw new IllegalArgumentException(
+                            "incomingForwardMigration dimension (" + incomingForwardMigration.getDimension()
+                                    + ") must match the number of otherSpline entries (" + n + "); "
+                                    + "alternatively, provide forwardMigrationIndices to pick elements out of "
+                                    + "a larger shared parameter.");
+                }
+                for (int k = 0; k < n; k++) forwardMigrationIndices[k] = k;
+            } else {
+                if (idxParam.getDimension() != n) {
+                    throw new IllegalArgumentException(
+                            "forwardMigrationIndices dimension (" + idxParam.getDimension()
+                                    + ") must match the number of otherSpline entries (" + n + ")");
+                }
+                int dim = incomingForwardMigration.getDimension();
+                for (int k = 0; k < n; k++) {
+                    int idx = idxParam.getValue(k);
+                    if (idx < 0 || idx >= dim) {
+                        throw new IllegalArgumentException(
+                                "forwardMigrationIndices[" + k + "] = " + idx
+                                        + " is out of bounds for incomingForwardMigration of dimension " + dim);
+                    }
+                    forwardMigrationIndices[k] = idx;
+                }
+            }
+        }
     }
     
     public List<String> getParameterIds() {
@@ -82,24 +147,74 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     public double getPrevalenceTime(double t) {
         return spline.getPrevalence(t);
     }
-    
+
+    /**
+     * Migration contribution to the transmission rate at time t:
+     *   beta^migration_i(t) = sum_{j != i} m^fw_{j -> i} * I_j(t) / I_i(t).
+     *
+     * Returns 0 if no otherSpline/incomingForwardMigration inputs were provided.
+     */
+    public double getMigrationTransmissionRate(double t) {
+        if (!hasMigration) return 0.0;
+        double I_i = spline.getPrevalence(t);
+        double sum = 0.0;
+        for (int k = 0; k < otherSplines.size(); k++) {
+            double m_ji = incomingForwardMigration.getArrayValue(forwardMigrationIndices[k]);
+            double I_j = otherSplines.get(k).getPrevalence(t);
+            sum += m_ji * I_j / I_i;
+        }
+        return sum;
+    }
+
+    /**
+     * Local transmission rate at time t:
+     *   beta^local_i(t) = beta_i(t) - beta^migration_i(t).
+     *
+     * Falls back to the full spline transmission rate when no migration inputs are set.
+     */
+    public double getLocalTransmissionRate(double t) {
+        double beta = spline.getTransmissionRate(t);
+        if (!hasMigration) return beta;
+        return beta - getMigrationTransmissionRate(t);
+    }
+
+    // First non-positive transmission-rate event is reported to stderr; subsequent ones are
+    // counted silently so MCMC runs that frequently visit such states don't flood the log.
+    private static boolean nonPositiveRateWarned = false;
+    private static long nonPositiveRateCount = 0;
+
+    /** Number of times getNeTime has seen a non-positive effective transmission rate. */
+    public static long getNonPositiveRateCount() {
+        return nonPositiveRateCount;
+    }
+
     @Override
     public double getNeTime(double t) {
         // Get prevalence using precomputed grid points for efficiency
         double I_t = getPrevalenceTime(t);
-        
-        // Compute transmission rate = -dlogI/dt (forward in time)
-        double transmissionRate = spline.getTransmissionRate(t);
-        
-       if (transmissionRate <= 0.0)
-       	System.err.println("Warning: non-positive transmission rate at time " + t + ": " + transmissionRate);
-        
+
+        // Use the local (intra-deme) transmission rate when migration info is provided,
+        // otherwise fall back to the aggregate spline transmission rate.
+        double effectiveRate = hasMigration ? getLocalTransmissionRate(t) : spline.getTransmissionRate(t);
+
+        if (effectiveRate <= 0.0) {
+            nonPositiveRateCount++;
+            if (!nonPositiveRateWarned) {
+                nonPositiveRateWarned = true;
+                System.err.println("Warning: non-positive "
+                        + (hasMigration ? "local " : "")
+                        + "transmission rate at time " + t + ": " + effectiveRate
+                        + ". Further occurrences will be counted silently; use "
+                        + "SplinePrevalenceToNe.getNonPositiveRateCount() to read the total.");
+            }
+        }
+
         // Get coalescent scaling constant
         double c = coalescentScale.getArrayValue();
         double scaler = neScaler.getArrayValue();
-        
-        // Compute Ne: Ne = I / (c * transmission_rate)
-        return scaler * I_t / (c * transmissionRate);
+
+        // Compute Ne: Ne = I / (c * effectiveRate)
+        return scaler * I_t / (c * effectiveRate);
     }
     
     // TODO: change to more salient recalculation criterion, e.g. just recalculate the splines and then return super.requiresRecalculation()
@@ -136,11 +251,14 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
             printStream.print("transmissionRate_" + i + "\t");
         }
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            printStream.print("localTransmissionRate_" + i + "\t");
+        }
     }
 
     @Override
     public void log(long l, PrintStream printStream) {
- 
+
         for (int i = 0; i < spline.getGridPointCount(); i+=10) {
             double t = spline.getGridPointTime(i);
             double prevalence = getPrevalenceTime(t);
@@ -155,6 +273,10 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
             double t = spline.getGridPointTime(i);
             double transmissionRate = spline.getTransmissionRate(t);
             printStream.print(transmissionRate + "\t");
+        }
+        for (int i = 0; i < spline.getGridPointCount(); i+=10) {
+            double t = spline.getGridPointTime(i);
+            printStream.print(getLocalTransmissionRate(t) + "\t");
         }
     }
 
