@@ -36,7 +36,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     
     // Optional inputs
     final public Input<RealParameter> coalescentScaleInput = new Input<>("coalescentScale",
-            "Coalescent scaling constant c in Ne = I / (c * transmission_rate)", 
+            "Coalescent scaling constant c in Ne = I / (c * transmission_rate). Default: 2.0",
             Input.Validate.OPTIONAL);
 
     final public Input<RealParameter> NeScalerInput = new Input<>("NeScaler",
@@ -80,6 +80,9 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
     public void initAndValidate() {
         spline = splineInput.get();
         coalescentScale = coalescentScaleInput.get();
+        if (coalescentScale == null) {
+            coalescentScale = new RealParameter(new Double[] { 2.0 });
+        }
         neScaler = NeScalerInput.get();
         if (neScaler == null) {
             neScaler = new RealParameter(new Double[] { 1.0 });
@@ -213,7 +216,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         double c = coalescentScale.getArrayValue();
         double scaler = neScaler.getArrayValue();
 
-        // Compute Ne: Ne = I / (c * effectiveRate)
+        // Compute Ne based on Volz et al. (2012)
         return scaler * I_t / (c * effectiveRate);
     }
     
