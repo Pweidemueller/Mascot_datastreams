@@ -92,8 +92,7 @@ public class UpDownLogScaleOperator extends Operator {
                     double newValue = oldValue + logScaler;
                     param.setValue(i, newValue);
                 }
-                // Hastings ratio contribution: logScaler for each dimension
-                logHR += logScaler * param.getDimension();
+                // no Hastings ratio needed bc logScaler is symmetric
             }
 
             // DOWN parameters in LOG space: directly subtract logScaler
@@ -105,8 +104,7 @@ public class UpDownLogScaleOperator extends Operator {
                     double newValue = oldValue - logScaler;
                     param.setValue(i, newValue);
                 }
-                // Hastings ratio contribution: -logScaler for each dimension
-                logHR -= logScaler * param.getDimension();
+                // no Hastings ratio needed bc logScaler is symmetric
             }
 
             // UP parameters in REAL space: multiply by exp(logScaler)

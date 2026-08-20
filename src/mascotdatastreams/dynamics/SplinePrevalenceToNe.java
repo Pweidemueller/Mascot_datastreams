@@ -216,7 +216,7 @@ public class SplinePrevalenceToNe extends NeDynamics implements Loggable {
         double c = coalescentScale.getArrayValue();
         double scaler = neScaler.getArrayValue();
 
-        // Compute Ne: Ne = I / (c * effectiveRate)
+        // Compute Ne based on Volz et al. (2012)
         return scaler * I_t / (c * effectiveRate);
     }
     
