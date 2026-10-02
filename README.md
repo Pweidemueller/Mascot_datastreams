@@ -19,6 +19,10 @@ You can also build MASCOT-DS from source using ant:
 ```
 ant build
 ```
+## How to run
+We are still working on a Beauti integration. For now, you can use the xml file in the `examples` folder as a reference on how to add different data types, associated priors and operators. Running the `2deme_fixedtree.xml` with beast after you've installed the Mascot-DS package the analysis should progress with approximately 40min per 1M samples (tested in MacBook Air M3 using one thread). 1 million samples should be sufficient to investigate convergence in tracer.
+
+
 
 ## Citation
 MASCOT-DS improves transmission dynamics inference by integrating multiple epidemiological data streams with phylodynamic inference
