@@ -13,13 +13,17 @@ Because all these likelihoods share the same underlying prevalence dynamics as t
 MASCOT-DS does not yet have BEAUti support — analyses are set up by editing an example XML file directly (see [tutorial.md](tutorial.md)).
 
 ## Installation
-You can build MASCOT-DS from source using ant:
+We are still working on a Beauti integration. For now, you can use MASCOT-DS by simply placing the provided zipped jar file (under Releases) in the package folder of your BEAST2 installation (for MACOS this is often: `/Users/<username>/Library/Application Support/BEAST/2.7/`) and unzip it there (make sure it's in a dedicated folder called `MASCOTDS`). Make sure to also install MASCOT either via the instructions [here](https://github.com/CompEvol/Mascot) or via Beauti.
+
+You can also build MASCOT-DS from source using ant:
 ```
 ant build
 ```
-Or you can simply place the provided zipped jar file in the package folder of your BEAST2 installation (for MACOS this is often: `/Users/<username>/Library/Application Support/BEAST/2.7/`) and unzip it there (make sure it's in a dedicated folder called `MASCOTDS`).
 
 ## Citation
+MASCOT-DS improves transmission dynamics inference by integrating multiple epidemiological data streams with phylodynamic inference
+Paula H. Weidemüller, Luis R. Esquivel Gomez, Isabel Rodriguez-Barraquer, Nicola F. Müller
+medRxiv 2026.08.21.26361056; doi: https://doi.org/10.64898/2026.08.21.26361056
 
 ## License
 The java source code is licensed under the [GNU General Public License v3.0](LICENSE)
