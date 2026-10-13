@@ -15,6 +15,7 @@
     <provider classname="mascotdatastreams.distribution.MascotLogPflag"/>
     <provider classname="mascotdatastreams.dynamics.Spline"/>
     <provider classname="mascotdatastreams.dynamics.SplinePrevalenceToNe"/>
+    <provider classname="mascotdatastreams.util.IntroductionFraction"/>
     <provider classname="mascotdatastreams.util.TransmissionSmallerThan"/>
     <provider classname="mascotdatastreams.util.LocalTransmissionSmallerThan"/>
     <provider classname="mascotdatastreams.operators.UpDownLogScaleOperator"/>

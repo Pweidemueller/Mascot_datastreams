@@ -6,6 +6,7 @@ import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.core.Loggable;
 import beast.base.inference.parameter.BooleanParameter;
+import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
 import mascot.dynamics.Dynamics;
 import mascot.dynamics.RateShifts;
@@ -32,6 +33,13 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 
 	public Input<Double> maxRateInput = new Input<>(
 			"maxRate", "maximum rate used for integration", Double.POSITIVE_INFINITY);
+
+	public Input<IntegerParameter> migrationIndicesInput = new Input<>(
+			"migrationIndices", "Optional indices into forwardsMigration, one per directed pair of demes "
+					+ "(n*(n-1) entries, row-major over the off-diagonal: 1->2, 1->3, ..., 2->1, ...). "
+					+ "Pairs that share an index share the same estimated rate (and indicator). "
+					+ "If given, forwardsMigration and indicators keep their dimension, which must be "
+					+ "max(index)+1.", Validate.OPTIONAL);
     
 
 	double[] intTimes;	
@@ -63,7 +71,9 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 		isForward = true;
 
     	// check the dimension of the migration rates
-    	if (dimensionInput.get()*(dimensionInput.get()-1)!=migration.getDimension() || fromBeautiInput.get()){
+    	if (migrationIndicesInput.get() != null) {
+    		validateMigrationIndices();
+    	} else if (dimensionInput.get()*(dimensionInput.get()-1)!=migration.getDimension() || fromBeautiInput.get()){
     		System.err.println("the dimension of " + migration.getID() + " is set to " + (dimensionInput.get()*(dimensionInput.get()-1)) + " from " + migration.getDimension());
     		if (dimensionInput.get()*(dimensionInput.get()-1)>0)
     			migration.setDimension(dimensionInput.get()*(dimensionInput.get()-1));
@@ -102,7 +112,10 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 		for (int a = 0; a < dimensionInput.get(); a++) {
 			for (int b = 0; b < dimensionInput.get(); b++) {
 				if (a!=b) {
-					dirs[a][b] = c;
+					if (migrationIndicesInput.get() != null)
+						dirs[a][b] = migrationIndicesInput.get().getValue(c);
+					else
+						dirs[a][b] = c;
 					c++;
 				}					
 			}			
@@ -110,6 +123,28 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 
 		storedIntTimes = new double[intTimes.length];
 
+    }
+
+    private void validateMigrationIndices() {
+    	IntegerParameter indices = migrationIndicesInput.get();
+    	int nrPairs = dimensionInput.get()*(dimensionInput.get()-1);
+    	if (indices.getDimension() != nrPairs)
+    		throw new IllegalArgumentException("migrationIndices must have " + nrPairs
+    				+ " entries (one per directed pair of demes), but has " + indices.getDimension());
+
+    	int maxIndex = -1;
+    	for (int i = 0; i < nrPairs; i++) {
+    		int idx = indices.getValue(i);
+    		if (idx < 0 || idx >= migration.getDimension())
+    			throw new IllegalArgumentException("migrationIndices entry " + i + " is " + idx
+    					+ ", but must be between 0 and " + (migration.getDimension()-1)
+    					+ " (dimension of " + migration.getID() + ")");
+    		maxIndex = Math.max(maxIndex, idx);
+    	}
+    	if (maxIndex+1 != migration.getDimension())
+    		throw new IllegalArgumentException("dimension of " + migration.getID() + " is "
+    				+ migration.getDimension() + ", but migrationIndices only uses " + (maxIndex+1)
+    				+ " rates; unused rates would be unidentifiable");
     }
 
     private void computeIntTimes() {
@@ -247,10 +282,12 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 	
 	@Override
 	public int[] getIndicators(int i) {
+		// count active directed pairs; with migrationIndices several pairs can share one indicator
 		int nrTrue = 0;
-		for (int j = 0; j < indicatorInput.get().getDimension(); j++)
-			if (indicatorInput.get().getArrayValue(j) > 0.5)
-				nrTrue++;		
+		for (int a = 0; a < dimensionInput.get(); a++)
+			for (int b = 0; b < dimensionInput.get(); b++)
+				if (a!=b && indicatorInput.get().getArrayValue(dirs[b][a]) > 0.5)
+					nrTrue++;
 
 		int[] m = new int[nrTrue*2];
     	int c = 0;
@@ -379,6 +416,9 @@ public class StructuredSkylinePrevalence extends Dynamics implements Loggable {
 		for (int i = 0; i < migration.getDimension(); i++)
 			if(migration.isDirty(i))
 				return true;
+
+		if(indicatorInput.get().somethingIsDirty())
+			return true;
 
 		if(rateShiftsInput.get().somethingIsDirty()) {
 			intTimesKnown = false;

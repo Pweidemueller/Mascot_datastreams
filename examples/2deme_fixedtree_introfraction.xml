@@ -1,0 +1,464 @@
+<?xml version="1.0" ?>
+<beast beautitemplate="Standard" beautistatus="" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.7:Mascot v3.0.7" version="2.7">
+  <data id="SimDataset" spec="Alignment" name="alignment">
+    <sequence id="seq_leaf_0" spec="Sequence" taxon="leaf_0" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_1" spec="Sequence" taxon="leaf_1" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_10" spec="Sequence" taxon="leaf_10" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_100" spec="Sequence" taxon="leaf_100" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_101" spec="Sequence" taxon="leaf_101" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_102" spec="Sequence" taxon="leaf_102" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_103" spec="Sequence" taxon="leaf_103" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_104" spec="Sequence" taxon="leaf_104" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_105" spec="Sequence" taxon="leaf_105" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_106" spec="Sequence" taxon="leaf_106" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_107" spec="Sequence" taxon="leaf_107" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_108" spec="Sequence" taxon="leaf_108" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_109" spec="Sequence" taxon="leaf_109" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_11" spec="Sequence" taxon="leaf_11" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_110" spec="Sequence" taxon="leaf_110" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_111" spec="Sequence" taxon="leaf_111" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_112" spec="Sequence" taxon="leaf_112" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_113" spec="Sequence" taxon="leaf_113" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_114" spec="Sequence" taxon="leaf_114" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_115" spec="Sequence" taxon="leaf_115" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_116" spec="Sequence" taxon="leaf_116" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_117" spec="Sequence" taxon="leaf_117" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_118" spec="Sequence" taxon="leaf_118" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_119" spec="Sequence" taxon="leaf_119" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_12" spec="Sequence" taxon="leaf_12" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_120" spec="Sequence" taxon="leaf_120" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_121" spec="Sequence" taxon="leaf_121" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_122" spec="Sequence" taxon="leaf_122" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_123" spec="Sequence" taxon="leaf_123" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_124" spec="Sequence" taxon="leaf_124" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_125" spec="Sequence" taxon="leaf_125" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_126" spec="Sequence" taxon="leaf_126" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_127" spec="Sequence" taxon="leaf_127" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_128" spec="Sequence" taxon="leaf_128" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_129" spec="Sequence" taxon="leaf_129" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_13" spec="Sequence" taxon="leaf_13" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_130" spec="Sequence" taxon="leaf_130" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_131" spec="Sequence" taxon="leaf_131" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_132" spec="Sequence" taxon="leaf_132" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_133" spec="Sequence" taxon="leaf_133" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_134" spec="Sequence" taxon="leaf_134" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_135" spec="Sequence" taxon="leaf_135" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_136" spec="Sequence" taxon="leaf_136" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_137" spec="Sequence" taxon="leaf_137" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_138" spec="Sequence" taxon="leaf_138" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_139" spec="Sequence" taxon="leaf_139" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_14" spec="Sequence" taxon="leaf_14" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_140" spec="Sequence" taxon="leaf_140" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_141" spec="Sequence" taxon="leaf_141" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_142" spec="Sequence" taxon="leaf_142" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_143" spec="Sequence" taxon="leaf_143" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_144" spec="Sequence" taxon="leaf_144" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_145" spec="Sequence" taxon="leaf_145" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_146" spec="Sequence" taxon="leaf_146" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_147" spec="Sequence" taxon="leaf_147" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_148" spec="Sequence" taxon="leaf_148" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_149" spec="Sequence" taxon="leaf_149" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_15" spec="Sequence" taxon="leaf_15" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_150" spec="Sequence" taxon="leaf_150" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_151" spec="Sequence" taxon="leaf_151" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_152" spec="Sequence" taxon="leaf_152" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_153" spec="Sequence" taxon="leaf_153" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_154" spec="Sequence" taxon="leaf_154" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_155" spec="Sequence" taxon="leaf_155" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_156" spec="Sequence" taxon="leaf_156" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_157" spec="Sequence" taxon="leaf_157" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_158" spec="Sequence" taxon="leaf_158" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_159" spec="Sequence" taxon="leaf_159" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_16" spec="Sequence" taxon="leaf_16" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_160" spec="Sequence" taxon="leaf_160" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_17" spec="Sequence" taxon="leaf_17" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_18" spec="Sequence" taxon="leaf_18" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_19" spec="Sequence" taxon="leaf_19" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_2" spec="Sequence" taxon="leaf_2" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_20" spec="Sequence" taxon="leaf_20" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_21" spec="Sequence" taxon="leaf_21" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_22" spec="Sequence" taxon="leaf_22" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_23" spec="Sequence" taxon="leaf_23" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_24" spec="Sequence" taxon="leaf_24" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_25" spec="Sequence" taxon="leaf_25" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_26" spec="Sequence" taxon="leaf_26" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_27" spec="Sequence" taxon="leaf_27" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_28" spec="Sequence" taxon="leaf_28" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_29" spec="Sequence" taxon="leaf_29" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_3" spec="Sequence" taxon="leaf_3" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_30" spec="Sequence" taxon="leaf_30" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_31" spec="Sequence" taxon="leaf_31" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_32" spec="Sequence" taxon="leaf_32" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_33" spec="Sequence" taxon="leaf_33" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_34" spec="Sequence" taxon="leaf_34" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_35" spec="Sequence" taxon="leaf_35" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_36" spec="Sequence" taxon="leaf_36" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_37" spec="Sequence" taxon="leaf_37" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_38" spec="Sequence" taxon="leaf_38" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_39" spec="Sequence" taxon="leaf_39" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_4" spec="Sequence" taxon="leaf_4" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_40" spec="Sequence" taxon="leaf_40" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_41" spec="Sequence" taxon="leaf_41" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_42" spec="Sequence" taxon="leaf_42" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_43" spec="Sequence" taxon="leaf_43" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_44" spec="Sequence" taxon="leaf_44" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_45" spec="Sequence" taxon="leaf_45" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_46" spec="Sequence" taxon="leaf_46" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_47" spec="Sequence" taxon="leaf_47" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_48" spec="Sequence" taxon="leaf_48" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_49" spec="Sequence" taxon="leaf_49" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_5" spec="Sequence" taxon="leaf_5" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_50" spec="Sequence" taxon="leaf_50" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_51" spec="Sequence" taxon="leaf_51" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_52" spec="Sequence" taxon="leaf_52" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_53" spec="Sequence" taxon="leaf_53" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_54" spec="Sequence" taxon="leaf_54" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_55" spec="Sequence" taxon="leaf_55" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_56" spec="Sequence" taxon="leaf_56" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_57" spec="Sequence" taxon="leaf_57" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_58" spec="Sequence" taxon="leaf_58" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_59" spec="Sequence" taxon="leaf_59" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_6" spec="Sequence" taxon="leaf_6" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_60" spec="Sequence" taxon="leaf_60" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_61" spec="Sequence" taxon="leaf_61" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_62" spec="Sequence" taxon="leaf_62" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_63" spec="Sequence" taxon="leaf_63" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_64" spec="Sequence" taxon="leaf_64" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_65" spec="Sequence" taxon="leaf_65" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_66" spec="Sequence" taxon="leaf_66" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_67" spec="Sequence" taxon="leaf_67" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_68" spec="Sequence" taxon="leaf_68" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_69" spec="Sequence" taxon="leaf_69" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_7" spec="Sequence" taxon="leaf_7" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_70" spec="Sequence" taxon="leaf_70" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_71" spec="Sequence" taxon="leaf_71" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_72" spec="Sequence" taxon="leaf_72" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_73" spec="Sequence" taxon="leaf_73" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_74" spec="Sequence" taxon="leaf_74" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_75" spec="Sequence" taxon="leaf_75" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_76" spec="Sequence" taxon="leaf_76" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_77" spec="Sequence" taxon="leaf_77" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_78" spec="Sequence" taxon="leaf_78" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_79" spec="Sequence" taxon="leaf_79" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_8" spec="Sequence" taxon="leaf_8" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_80" spec="Sequence" taxon="leaf_80" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_81" spec="Sequence" taxon="leaf_81" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_82" spec="Sequence" taxon="leaf_82" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_83" spec="Sequence" taxon="leaf_83" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_84" spec="Sequence" taxon="leaf_84" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_85" spec="Sequence" taxon="leaf_85" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_86" spec="Sequence" taxon="leaf_86" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_87" spec="Sequence" taxon="leaf_87" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_88" spec="Sequence" taxon="leaf_88" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_89" spec="Sequence" taxon="leaf_89" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_9" spec="Sequence" taxon="leaf_9" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_90" spec="Sequence" taxon="leaf_90" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_91" spec="Sequence" taxon="leaf_91" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_92" spec="Sequence" taxon="leaf_92" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_93" spec="Sequence" taxon="leaf_93" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_94" spec="Sequence" taxon="leaf_94" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_95" spec="Sequence" taxon="leaf_95" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_96" spec="Sequence" taxon="leaf_96" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_97" spec="Sequence" taxon="leaf_97" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_98" spec="Sequence" taxon="leaf_98" totalcount="4" value="????"/>
+    <sequence id="seq_leaf_99" spec="Sequence" taxon="leaf_99" totalcount="4" value="????"/>
+  </data>
+  <map name="Uniform">beast.base.inference.distribution.Uniform</map>
+  <map name="Exponential">beast.base.inference.distribution.Exponential</map>
+  <map name="LogNormal">beast.base.inference.distribution.LogNormalDistributionModel</map>
+  <map name="Normal">beast.base.inference.distribution.Normal</map>
+  <map name="Beta">beast.base.inference.distribution.Beta</map>
+  <map name="Gamma">beast.base.inference.distribution.Gamma</map>
+  <map name="LaplaceDistribution">beast.base.inference.distribution.LaplaceDistribution</map>
+  <map name="prior">beast.base.inference.distribution.Prior</map>
+  <map name="InverseGamma">beast.base.inference.distribution.InverseGamma</map>
+  <map name="OneOnX">beast.base.inference.distribution.OneOnX</map>
+  <run id="mcmc" spec="MCMC" chainLength="1000000">
+    <state id="state" spec="State" storeEvery="5000">
+      <tree id="Tree.t:SimDataset" spec="beast.base.evolution.tree.Tree" name="stateNode">
+        <taxonset id="TaxonSet.SimDataset" spec="TaxonSet">
+          <alignment idref="SimDataset"/>
+        </taxonset>
+      </tree>
+      <parameter id="migrationRatesSkyline.t:SimDataset" spec="parameter.RealParameter" dimension="2" lower="0.0" name="stateNode">1.0</parameter>
+      <parameter id="SkylinePrev.Deme1.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-15" name="stateNode" upper="15">0.0</parameter>
+      <parameter id="SkylinePrev.Deme2.t:SimDataset" spec="parameter.RealParameter" dimension="11" lower="-15" name="stateNode" upper="15">0.0</parameter>
+      <parameter id="uninfectiousRate.t:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">71.94392198760261</parameter>
+      <parameter id="caseCounts.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">5 13 4 6 3 7 11 1 3 31 2 26 8 7 11 26 11 22 16 29 17 141 108 121 21 12 55 206 118 19 67 317 224 169 80 156 641 31 297 69 314 433 223 70 54 152 390 225 382 200 263 370 312 193 36 314 188 60 41 29 25 23 16 9 16 42 6 9 4 2 4 0 0 1 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</parameter>
+      <parameter id="caseTimes.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.0010160787300281 0.0037558047574254 0.0064955307848226 0.0092352568122199 0.0119749828396171 0.0147147088670144 0.0174544348944117 0.0201941609218089 0.0229338869492062 0.0256736129766034 0.0284133390040007 0.031153065031398 0.0338927910587952 0.0366325170861925 0.0393722431135897 0.042111969140987 0.0448516951683843 0.0475914211957815 0.0503311472231788 0.053070873250576 0.0558105992779733 0.0585503253053706 0.0612900513327678 0.0640297773601651 0.0667695033875623 0.0695092294149596 0.0722489554423569 0.0749886814697541 0.0777284074971514 0.0804681335245486 0.0832078595519459 0.0859475855793432 0.0886873116067404 0.0914270376341377 0.0941667636615349 0.0969064896889322 0.0996462157163295 0.1023859417437267 0.105125667771124 0.1078653937985212 0.1106051198259185 0.1133448458533158 0.116084571880713 0.1188242979081103 0.1215640239355076 0.1243037499629048 0.1270434759903021 0.1297832020176993 0.1325229280450966 0.1352626540724939 0.1380023800998911 0.1407421061272884 0.1434818321546856 0.1462215581820829 0.1489612842094801 0.1517010102368774 0.1544407362642747 0.1571804622916719 0.1599201883190692 0.1626599143464664 0.1653996403738637 0.168139366401261 0.1708790924286582 0.1736188184560555 0.1763585444834527 0.17909827051085 0.1818379965382473 0.1845777225656446 0.1873174485930418 0.190057174620439 0.1927969006478363 0.1955366266752336 0.1982763527026309 0.2010160787300281 0.2037558047574253 0.2064955307848226 0.2092352568122199 0.2119749828396172 0.2147147088670144 0.2174544348944117 0.2201941609218089 0.2229338869492062 0.2256736129766035 0.2284133390040007 0.231153065031398 0.2338927910587952 0.2366325170861925 0.2393722431135898 0.242111969140987 0.2448516951683843 0.2475914211957815 0.2503311472231788 0.2530708732505761 0.2558105992779733 0.2585503253053706 0.2612900513327679 0.2640297773601651 0.2667695033875624</parameter>
+      <parameter id="caseCounts.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">3 0 1 9 1 1 1 4 1 11 1 1 8 8 5 13 6 27 17 5 38 19 25 7 26 59 44 155 36 115 27 107 67 16 101 188 104 129 231 756 64 494 73 7 244 633 781 469 149 714 307 501 248 841 32 265 193 251 75 370 52 70 928 183 339 380 181 67 244 140 131 60 66 27 5 8 30 5 4 8 2 11 2 0 2 1 2 2 2 0 1 0 0 2 0 0 0 0</parameter>
+      <parameter id="caseTimes.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.0010160787300281 0.0037558047574254 0.0064955307848226 0.0092352568122199 0.0119749828396171 0.0147147088670144 0.0174544348944117 0.0201941609218089 0.0229338869492062 0.0256736129766034 0.0284133390040007 0.031153065031398 0.0338927910587952 0.0366325170861925 0.0393722431135897 0.042111969140987 0.0448516951683843 0.0475914211957815 0.0503311472231788 0.053070873250576 0.0558105992779733 0.0585503253053706 0.0612900513327678 0.0640297773601651 0.0667695033875623 0.0695092294149596 0.0722489554423569 0.0749886814697541 0.0777284074971514 0.0804681335245486 0.0832078595519459 0.0859475855793432 0.0886873116067404 0.0914270376341377 0.0941667636615349 0.0969064896889322 0.0996462157163295 0.1023859417437267 0.105125667771124 0.1078653937985212 0.1106051198259185 0.1133448458533158 0.116084571880713 0.1188242979081103 0.1215640239355076 0.1243037499629048 0.1270434759903021 0.1297832020176993 0.1325229280450966 0.1352626540724939 0.1380023800998911 0.1407421061272884 0.1434818321546856 0.1462215581820829 0.1489612842094801 0.1517010102368774 0.1544407362642747 0.1571804622916719 0.1599201883190692 0.1626599143464664 0.1653996403738637 0.168139366401261 0.1708790924286582 0.1736188184560555 0.1763585444834527 0.17909827051085 0.1818379965382473 0.1845777225656446 0.1873174485930418 0.190057174620439 0.1927969006478363 0.1955366266752336 0.1982763527026309 0.2010160787300281 0.2037558047574253 0.2064955307848226 0.2092352568122199 0.2119749828396172 0.2147147088670144 0.2174544348944117 0.2201941609218089 0.2229338869492062 0.2256736129766035 0.2284133390040007 0.231153065031398 0.2338927910587952 0.2366325170861925 0.2393722431135898 0.242111969140987 0.2448516951683843 0.2475914211957815 0.2503311472231788 0.2530708732505761 0.2558105992779733 0.2585503253053706 0.2612900513327679 0.2640297773601651 0.2667695033875624</parameter>
+      <parameter id="caseCounts.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">1</parameter>
+      <parameter id="caseCounts.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">1</parameter>
+      <parameter id="caseCounts.dispersion:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">0.25</parameter>
+      <parameter id="seroTestedCounts.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">51 693 831</parameter>
+      <parameter id="seroWithAntibodiesCounts.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">43 133 0</parameter>
+      <parameter id="seroTestedTimes.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.0338927910587952 0.1434818321546856 0.2147147088670144</parameter>
+      <parameter id="seroTestedCounts.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">585 433 175</parameter>
+      <parameter id="seroWithAntibodiesCounts.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">481 307 1</parameter>
+      <parameter id="seroTestedTimes.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.031153065031398 0.1270434759903021 0.2229338869492062</parameter>
+      <parameter id="seroprevalence.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" estimate="false" name="stateNode">1</parameter>
+      <parameter id="seroprevalence.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" estimate="false" name="stateNode">1</parameter>
+      <parameter id="wastewaterConcentration.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.1621200010241373 0.0500587166624855 0.1501968722286104 0.1564957896655217 0.1390382926001208 0.1853622234909935 0.4061465696062171 0.3967088361524578 0.1478734944173525 0.4175891150038074 0.2148820894605722 1.059241105440564 0.4806660442545212 0.2300666087981117 0.3928702943456779 0.57422097005652 0.2035847809053153 0.6055837995530436 0.5928844779611628 0.9343785657110936 3.754638109551227 1.0149540580639196 2.197135174103681 3.1020110176318823 2.400973820124294 0.9561793338706386 4.654227391765181 2.3195174148862683 2.2082954189838 2.245102331987635 3.983361698486561 4.099265169599019 10.29671961549903 2.907209781325315 7.31576338756514 8.035466294003726 11.575823921649151 8.11219359691849 18.62191667480226 5.805154344610743 8.940747102811475 11.79731063970059 12.504635494096418 5.769948050917662 4.922995867840165 3.144741735449613 6.722293911789109 8.268152809434106 17.51565131756873 3.5278479708935446 7.880574019209458 6.717833573356506 6.447994329029415 4.020444267482856 16.22152755718594 1.868944458525944 2.105597306880688 1.5564256702872872 2.4247381620306188 0.6710975617826209 3.740982759121876 0.9831178550396312 0.6533961421593387 0.5978822941563547 0.7148777933268456 0.458617402008051 0.3776398551588341 0.1357039696459389 0.0872311236093854 0.1900274490070077 0.0816975442172854 0.069513454209608 0.0811491907505341 0.0575654742814601 0.0421461830909821 0.0167187373189145 0.0095183985528315 0.0070161700594611 0.0011983302812497</parameter>
+      <parameter id="wastewaterConcentrationTimes.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.0010160787300281 0.0037558047574254 0.0064955307848226 0.0092352568122199 0.0119749828396171 0.0147147088670144 0.0174544348944117 0.0201941609218089 0.0229338869492062 0.0256736129766034 0.0284133390040007 0.031153065031398 0.0338927910587952 0.0366325170861925 0.0393722431135897 0.042111969140987 0.0448516951683843 0.0475914211957815 0.0503311472231788 0.053070873250576 0.0558105992779733 0.0585503253053706 0.0612900513327678 0.0640297773601651 0.0667695033875623 0.0695092294149596 0.0722489554423569 0.0749886814697541 0.0777284074971514 0.0804681335245486 0.0832078595519459 0.0859475855793432 0.0886873116067404 0.0914270376341377 0.0941667636615349 0.0969064896889322 0.0996462157163295 0.1023859417437267 0.105125667771124 0.1078653937985212 0.1106051198259185 0.1133448458533158 0.116084571880713 0.1188242979081103 0.1215640239355076 0.1243037499629048 0.1270434759903021 0.1297832020176993 0.1325229280450966 0.1352626540724939 0.1380023800998911 0.1407421061272884 0.1434818321546856 0.1462215581820829 0.1489612842094801 0.1517010102368774 0.1544407362642747 0.1571804622916719 0.1599201883190692 0.1626599143464664 0.1653996403738637 0.168139366401261 0.1708790924286582 0.1736188184560555 0.1763585444834527 0.17909827051085 0.1818379965382473 0.1845777225656446 0.1873174485930418 0.190057174620439 0.1927969006478363 0.1955366266752336 0.1982763527026309 0.2010160787300281 0.2037558047574253 0.2064955307848226 0.2092352568122199 0.2119749828396172 0.2147147088670144</parameter>
+      <parameter id="wastewaterConcentration.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.0875235077233582 0.0686687409639262 0.1972866515640931 0.0592747491200353 0.2483820412004647 0.0868431412231617 0.1025561546328925 0.4863586126314522 0.283852217430201 0.280240049938468 0.3955587012726363 0.4738284893138103 0.2719045097178311 0.2381089790233969 0.8042373629964621 0.937423242958145 1.6169992340964443 0.6181419264064205 0.4474794748481155 0.5270122460242181 1.2310950317674452 0.3341585072540801 1.3733518247426526 1.1015630588253051 0.6425285207845528 3.3036413238494617 4.388448904523573 2.518778283366579 1.6598905523377747 4.554005584604044 5.9954393773463766 5.209022859182476 6.112663004490793 5.231481907482283 6.454802034790614 5.245490373598082 4.216957535271513 10.4311757428069 8.986778252111181 4.484318780886582 24.468368752214623 12.21970685872092 22.24759710986868 14.353244650874306 7.435848388284957 28.504872904727808 11.731677918773888 39.11193249240768 45.47062119064654 29.25048841457168 41.74411969300586 52.67304976951933 21.24723403546115 141.05834371480836 27.25105347874364 27.37074707025392 28.068193898464614 14.100461443036854 12.925435609900608 20.10091178930001 29.83598424631644 16.25985144302715 7.950567978094147 7.931336738343461 8.991995969400445 8.212435122588074 10.162791025378905 10.977110275090237 8.822131893228246 1.5070658703347817 5.891353011104106 9.478780679164997 1.5489796426550029 0.9624098448552562 0.9601414194938788 3.5110383858642984 1.3536774146064725 0.6556833123369339 0.566899475143296 0.4511572512582358 0.1477072897306773 0.5281545424533233 0.4114001923231728 0.1166490891246334 0.0936978072633953 0.0633139740609314 0.0792903015924582 0.1093287383715729 0.0447401219847734 0.0226983066787731 0.0283639423116399 0.0526128387515607 0.0385522418316725 0.0422698172219017 0.0142310415618545 0.0052679384088561 0.003885735696216 0.0030405504494315</parameter>
+      <parameter id="wastewaterConcentrationTimes.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" lower="0.0" name="stateNode">0.0010160787300281 0.0037558047574254 0.0064955307848226 0.0092352568122199 0.0119749828396171 0.0147147088670144 0.0174544348944117 0.0201941609218089 0.0229338869492062 0.0256736129766034 0.0284133390040007 0.031153065031398 0.0338927910587952 0.0366325170861925 0.0393722431135897 0.042111969140987 0.0448516951683843 0.0475914211957815 0.0503311472231788 0.053070873250576 0.0558105992779733 0.0585503253053706 0.0612900513327678 0.0640297773601651 0.0667695033875623 0.0695092294149596 0.0722489554423569 0.0749886814697541 0.0777284074971514 0.0804681335245486 0.0832078595519459 0.0859475855793432 0.0886873116067404 0.0914270376341377 0.0941667636615349 0.0969064896889322 0.0996462157163295 0.1023859417437267 0.105125667771124 0.1078653937985212 0.1106051198259185 0.1133448458533158 0.116084571880713 0.1188242979081103 0.1215640239355076 0.1243037499629048 0.1270434759903021 0.1297832020176993 0.1325229280450966 0.1352626540724939 0.1380023800998911 0.1407421061272884 0.1434818321546856 0.1462215581820829 0.1489612842094801 0.1517010102368774 0.1544407362642747 0.1571804622916719 0.1599201883190692 0.1626599143464664 0.1653996403738637 0.168139366401261 0.1708790924286582 0.1736188184560555 0.1763585444834527 0.17909827051085 0.1818379965382473 0.1845777225656446 0.1873174485930418 0.190057174620439 0.1927969006478363 0.1955366266752336 0.1982763527026309 0.2010160787300281 0.2037558047574253 0.2064955307848226 0.2092352568122199 0.2119749828396172 0.2147147088670144 0.2174544348944117 0.2201941609218089 0.2229338869492062 0.2256736129766035 0.2284133390040007 0.231153065031398 0.2338927910587952 0.2366325170861925 0.2393722431135898 0.242111969140987 0.2448516951683843 0.2475914211957815 0.2503311472231788 0.2530708732505761 0.2558105992779733 0.2585503253053706 0.2612900513327679 0.2640297773601651 0.2667695033875624</parameter>
+      <parameter id="wastewater.scaling.Deme1:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">100</parameter>
+      <parameter id="wastewater.scaling.Deme2:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">100</parameter>
+      <parameter id="wastewater.sigma:SimDataset" spec="parameter.RealParameter" dimension="1" lower="0.0" name="stateNode">1</parameter>
+      <parameter id="PopSize.Deme1:SimDataset" spec="parameter.RealParameter" estimate="false" dimension="1" name="stateNode">50000.0</parameter>
+      <parameter id="PopSize.Deme2:SimDataset" spec="parameter.RealParameter" estimate="false" dimension="1" name="stateNode">50000.0</parameter>
+    </state>
+    <init spec="beast.base.evolution.tree.TreeParser" id="NewickTree.t:SimDataset" adjustTipHeights="false" initial="@Tree.t:SimDataset" taxa="@SimDataset" IsLabelledNewick="true" newick="((((((((leaf_0:0.15672,leaf_49:0.03873):0.05679,(leaf_90:0.06016,leaf_97:0.05614):0.01869):0.00669,(leaf_99:0.07899,((leaf_102:0.05691,leaf_130:0.03756):0.00491,leaf_127:0.04345):0.01530):0.00199):0.00274,leaf_106:0.08054):0.00453,((leaf_23:0.12330,(((leaf_52:0.08595,(leaf_53:0.06790,leaf_85:0.05479):0.01705):0.00747,leaf_122:0.05595):0.00737,leaf_120:0.06487):0.00129):0.00358,leaf_93:0.08640):0.00319):0.01380,((leaf_27:0.12405,(leaf_94:0.07040,leaf_143:0.03710):0.01509):0.01702,((leaf_76:0.07175,((leaf_86:0.06447,leaf_141:0.02686):0.00112,leaf_150:0.01926):0.00240):0.03832,leaf_154:0.05384):0.00169):0.00048):0.01800,((((((((((leaf_1:0.16143,leaf_82:0.07058):0.00616,leaf_98:0.06933):0.00075,leaf_123:0.05195):0.00539,(((((((leaf_3:0.12401,leaf_80:0.05473):0.00009,leaf_19:0.09174):0.01536,(leaf_5:0.12106,(leaf_16:0.09770,(leaf_48:0.06326,(leaf_77:0.03596,leaf_108:0.01954):0.01583):0.00884):0.00004):0.01028):0.00155,(((leaf_6:0.09348,leaf_22:0.06788):0.01998,leaf_60:0.05995):0.00211,(leaf_8:0.09132,leaf_39:0.05631):0.01508):0.01590):0.00289,leaf_66:0.07785):0.00648,((((leaf_15:0.09608,(leaf_28:0.06953,leaf_42:0.05325):0.01856):0.00349,leaf_105:0.04936):0.00400,leaf_34:0.08487):0.00198,(((leaf_30:0.06577,leaf_92:0.03166):0.00699,(leaf_58:0.04868,leaf_67:0.04484):0.00395):0.00837,leaf_78:0.05430):0.01345):0.01367):0.00079,leaf_13:0.12585):0.00278):0.00610,leaf_145:0.04857):0.00774,((leaf_4:0.14755,leaf_29:0.11172):0.01629,((leaf_7:0.15101,leaf_109:0.07523):0.00585,(((((leaf_17:0.07758,leaf_25:0.07159):0.01028,((leaf_56:0.04150,leaf_81:0.03184):0.01436,leaf_100:0.03742):0.00313):0.03115,leaf_118:0.05837):0.00053,(leaf_57:0.05348,leaf_126:0.01554):0.03691):0.00786,leaf_133:0.05761):0.00820):0.00010):0.00040):0.00506,((leaf_43:0.09629,leaf_131:0.05194):0.00323,leaf_51:0.09707):0.01782):0.00887,(leaf_68:0.10597,leaf_112:0.08453):0.00921):0.01409,(((((((((leaf_2:0.13488,((leaf_11:0.09893,leaf_45:0.06674):0.00878,leaf_31:0.08703):0.00326):0.00034,leaf_26:0.09689):0.01875,((leaf_20:0.10845,leaf_149:0.02387):0.00723,(leaf_44:0.07643,leaf_62:0.06859):0.01626):0.00554):0.00218,leaf_59:0.09323):0.01132,(leaf_61:0.09530,leaf_138:0.05092):0.00869):0.00928,(((((leaf_47:0.07738,leaf_103:0.05294):0.01367,leaf_87:0.07423):0.01484,(leaf_79:0.08901,leaf_84:0.08641):0.00388):0.00208,leaf_157:0.02916):0.00635,(((leaf_121:0.05290,leaf_156:0.01739):0.00401,leaf_158:0.01612):0.01831,leaf_148:0.05458):0.00075):0.00612):0.00322,((leaf_71:0.08512,leaf_114:0.06194):0.00793,(leaf_74:0.09232,leaf_75:0.09220):0.00027):0.01991):0.00196,(((((leaf_14:0.12422,(leaf_37:0.08991,leaf_119:0.05037):0.01047):0.01599,(leaf_128:0.05047,leaf_146:0.03764):0.01974):0.00357,(((((leaf_32:0.06335,leaf_73:0.04125):0.00759,leaf_40:0.06213):0.01574,leaf_65:0.06608):0.00557,leaf_110:0.04995):0.02916,leaf_101:0.08698):0.00649):0.00015,(leaf_38:0.07177,leaf_104:0.04378):0.04825):0.00822,(((leaf_33:0.08364,leaf_117:0.04094):0.02660,((leaf_89:0.07028,leaf_116:0.05267):0.01380,leaf_125:0.06018):0.00152):0.00116,((leaf_55:0.07829,leaf_139:0.02990):0.01222,leaf_132:0.04849):0.01080):0.02081):0.00030):0.00261,(((((((leaf_9:0.09587,leaf_12:0.09446):0.01651,leaf_107:0.05109):0.00865,leaf_41:0.08824):0.01156,leaf_46:0.09908):0.01313,(((leaf_54:0.10022,leaf_113:0.07102):0.00642,leaf_160:0.02333):0.00185,((leaf_64:0.09433,leaf_91:0.08272):0.00135,leaf_142:0.04969):0.00765):0.00057):0.00066,((((leaf_18:0.11733,leaf_135:0.04363):0.00226,leaf_96:0.07386):0.00460,leaf_137:0.05006):0.00181,leaf_63:0.09472):0.01068):0.00733,(((leaf_70:0.07043,(leaf_115:0.01941,leaf_124:0.01343):0.02631):0.02673,leaf_151:0.04338):0.00318,(leaf_111:0.03021,(leaf_136:0.00743,leaf_144:0.00264):0.00413):0.04928):0.00906):0.00820):0.01143):0.00158,((leaf_10:0.13372,(((leaf_21:0.10120,leaf_95:0.05602):0.00294,leaf_134:0.03145):0.01035,leaf_35:0.09709):0.00967):0.02048,((leaf_50:0.08935,leaf_159:0.00913):0.00807,((leaf_72:0.08178,leaf_153:0.02559):0.00625,leaf_129:0.05559):0.00035):0.02197):0.02010):0.00123):0.00627,((((((leaf_24:0.06924,leaf_88:0.03301):0.04012,leaf_152:0.02561):0.00689,leaf_140:0.04425):0.00435,leaf_155:0.02793):0.00314,(leaf_36:0.09506,leaf_69:0.07961):0.01459):0.01258,(leaf_83:0.09586,leaf_147:0.05405):0.00581):0.03145):0.00000;"/>
+    <distribution id="posterior" spec="CompoundDistribution">
+      <distribution id="prior" spec="CompoundDistribution">
+        <!-- Prior on the fraction of Deme1 cases that are direct introductions, integrated
+             between the smallest and largest rate shift:
+               int m^fw_{Deme2->Deme1} I_Deme2(t) dt / int beta_Deme1(t) I_Deme1(t) dt
+             forwardMigrationIndices picks m^fw_{j->i} out of the flat migration vector at index
+             j*(n-1) + (i<j ? i : i-1); for 2 demes, Deme1 (i=0) <- Deme2 (j=1) is index 1.
+             Beta(10, 90): mean 0.10, 95% interval ~0.05-0.16.
+             Optional: recentTime="..." oldestTime="..." on <x> restrict the window (time before the
+             most recent sample, within the rate shifts); by default the full rate-shift range is used. -->
+        <prior id="IntroFractionPrior.Deme1:SimDataset" name="distribution">
+          <x id="introFraction.Deme1:SimDataset" spec="mascotdatastreams.util.IntroductionFraction"
+             spline="@splinePrev.Deme1.t:SimDataset"
+             forwardMigration="@migrationRatesSkyline.t:SimDataset">
+            <otherSpline idref="splinePrev.Deme2.t:SimDataset"/>
+            <forwardMigrationIndices id="introFractionMigrationIndex.Deme1" spec="parameter.IntegerParameter">1</forwardMigrationIndices>
+          </x>
+          <Beta id="IntroFractionBeta.Deme1" name="distr">
+            <parameter id="IntroFractionBeta.alpha.Deme1" spec="parameter.RealParameter" estimate="false" name="alpha">10.0</parameter>
+            <parameter id="IntroFractionBeta.beta.Deme1" spec="parameter.RealParameter" estimate="false" name="beta">90.0</parameter>
+          </Beta>
+        </prior>
+        <distribution id="regularizeTransmissionRate.Deme1.t:SimDataset" spec="mascotdatastreams.util.TransmissionSmallerThan">
+          <spline idref="splinePrev.Deme1.t:SimDataset"/>
+        </distribution>
+        <distribution id="regularizeTransmissionRate.Deme2.t:SimDataset" spec="mascotdatastreams.util.TransmissionSmallerThan">
+          <spline idref="splinePrev.Deme2.t:SimDataset"/>
+        </distribution>
+        <distribution id="caseCountLikelihood.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
+          <prevalenceSpline idref="splinePrev.Deme1.t:SimDataset"/>
+          <caseCounts idref="caseCounts.Deme1:SimDataset"/>
+          <caseTimes idref="caseTimes.Deme1:SimDataset"/>
+          <scaling idref="caseCounts.scaling.Deme1:SimDataset"/>
+          <distribution id="gammaPoisson.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
+        </distribution>
+        <distribution id="caseCountLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.CaseCountLikelihood">
+          <prevalenceSpline idref="splinePrev.Deme2.t:SimDataset"/>
+          <caseCounts idref="caseCounts.Deme2:SimDataset"/>
+          <caseTimes idref="caseTimes.Deme2:SimDataset"/>
+          <scaling idref="caseCounts.scaling.Deme2:SimDataset"/>
+          <distribution id="gammaPoisson.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.GammaPoisson" dispersion="@caseCounts.dispersion:SimDataset"/>
+        </distribution>
+        <distribution id="seroprevalenceLikelihood.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.SeroprevalenceLikelihood">
+          <prevalenceSpline idref="splinePrev.Deme1.t:SimDataset"/>
+          <seroPeopleTested idref="seroTestedCounts.Deme1:SimDataset"/>
+          <seroPeopleSeropositive idref="seroWithAntibodiesCounts.Deme1:SimDataset"/>
+          <seroTimes idref="seroTestedTimes.Deme1:SimDataset"/>
+          <populationSize idref="PopSize.Deme1:SimDataset"/>
+          <scaling idref="seroprevalence.scaling.Deme1:SimDataset"/>
+          <distribution id="binomial.seroprevalenceLikelihood.Deme1.t:Spec" spec="mascotdatastreams.distribution.Binomial"/>
+        </distribution>
+        <distribution id="seroprevalenceLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.SeroprevalenceLikelihood">
+          <prevalenceSpline idref="splinePrev.Deme2.t:SimDataset"/>
+          <seroPeopleTested idref="seroTestedCounts.Deme2:SimDataset"/>
+          <seroPeopleSeropositive idref="seroWithAntibodiesCounts.Deme2:SimDataset"/>
+          <seroTimes idref="seroTestedTimes.Deme2:SimDataset"/>
+          <populationSize idref="PopSize.Deme2:SimDataset"/>
+          <scaling idref="seroprevalence.scaling.Deme2:SimDataset"/>
+          <distribution id="binomial.seroprevalenceLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.Binomial"/>
+        </distribution>
+        <distribution id="wastewaterLikelihood.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.WastewaterLikelihood">
+          <prevalenceSpline idref="splinePrev.Deme1.t:SimDataset"/>
+          <concentrations idref="wastewaterConcentration.Deme1:SimDataset"/>
+          <concentrationTimes idref="wastewaterConcentrationTimes.Deme1:SimDataset"/>
+          <populationSize idref="PopSize.Deme1:SimDataset"/>
+          <scaling idref="wastewater.scaling.Deme1:SimDataset"/>
+          <distribution id="logNormal.wastewaterLikelihood.Deme1.t:SimDataset" spec="mascotdatastreams.distribution.LogNormal" sd="@wastewater.sigma:SimDataset"/>
+        </distribution>
+        <distribution id="wastewaterLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.WastewaterLikelihood">
+          <prevalenceSpline idref="splinePrev.Deme2.t:SimDataset"/>
+          <concentrations idref="wastewaterConcentration.Deme2:SimDataset"/>
+          <concentrationTimes idref="wastewaterConcentrationTimes.Deme2:SimDataset"/>
+          <populationSize idref="PopSize.Deme2:SimDataset"/>
+          <scaling idref="wastewater.scaling.Deme2:SimDataset"/>
+          <distribution id="logNormal.wastewaterLikelihood.Deme2.t:SimDataset" spec="mascotdatastreams.distribution.LogNormal" sd="@wastewater.sigma:SimDataset"/>
+        </distribution>
+        <distribution id="Mascot.t:SimDataset" spec="mascotdatastreams.distribution.MascotLogPflag" tree="@Tree.t:SimDataset" compute_likelihood="true">
+          <dynamics id="StructuredSkyline.t:SimDataset" spec="mascotdatastreams.distribution.StructuredSkylinePrevalence" dimension="2" forwardsMigration="@migrationRatesSkyline.t:SimDataset" fromBeauti="true" maxRate="1000">
+            <NeDynamics id="NeDynamicsList.t:SimDataset" spec="mascot.util.InitializedNeDynamicsList">
+              <neDynamics id="NeDynamics.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.SplinePrevalenceToNe">
+                <spline id="splinePrev.Deme1.t:SimDataset" spec="mascotdatastreams.dynamics.Spline" clipTransRate="false">
+                  <logInfected idref="SkylinePrev.Deme1.t:SimDataset"/>
+                  <rateShifts id="SkygrowthRateShifts" spec="mascot.dynamics.RateShifts">0.0000 0.0268 0.0536 0.0803 0.1071 0.1339 0.1607 0.1874 0.2142 0.2410 0.2678</rateShifts>
+                  <gridRateShifts id="SplineGridRateShifts" spec="mascot.dynamics.RateShifts">0.0000 0.0003 0.0005 0.0008 0.0011 0.0013 0.0016 0.0019 0.0021 0.0024 0.0027 0.0029 0.0032 0.0035 0.0037 0.0040 0.0043 0.0046 0.0048 0.0051 0.0054 0.0056 0.0059 0.0062 0.0064 0.0067 0.0070 0.0072 0.0075 0.0078 0.0080 0.0083 0.0086 0.0088 0.0091 0.0094 0.0096 0.0099 0.0102 0.0104 0.0107 0.0110 0.0112 0.0115 0.0118 0.0120 0.0123 0.0126 0.0129 0.0131 0.0134 0.0137 0.0139 0.0142 0.0145 0.0147 0.0150 0.0153 0.0155 0.0158 0.0161 0.0163 0.0166 0.0169 0.0171 0.0174 0.0177 0.0179 0.0182 0.0185 0.0187 0.0190 0.0193 0.0195 0.0198 0.0201 0.0204 0.0206 0.0209 0.0212 0.0214 0.0217 0.0220 0.0222 0.0225 0.0228 0.0230 0.0233 0.0236 0.0238 0.0241 0.0244 0.0246 0.0249 0.0252 0.0254 0.0257 0.0260 0.0262 0.0265 0.0268 0.0270 0.0273 0.0276 0.0278 0.0281 0.0284 0.0287 0.0289 0.0292 0.0295 0.0297 0.0300 0.0303 0.0305 0.0308 0.0311 0.0313 0.0316 0.0319 0.0321 0.0324 0.0327 0.0329 0.0332 0.0335 0.0337 0.0340 0.0343 0.0345 0.0348 0.0351 0.0353 0.0356 0.0359 0.0361 0.0364 0.0367 0.0370 0.0372 0.0375 0.0378 0.0380 0.0383 0.0386 0.0388 0.0391 0.0394 0.0396 0.0399 0.0402 0.0404 0.0407 0.0410 0.0412 0.0415 0.0418 0.0420 0.0423 0.0426 0.0428 0.0431 0.0434 0.0436 0.0439 0.0442 0.0444 0.0447 0.0450 0.0453 0.0455 0.0458 0.0461 0.0463 0.0466 0.0469 0.0471 0.0474 0.0477 0.0479 0.0482 0.0485 0.0487 0.0490 0.0493 0.0495 0.0498 0.0501 0.0503 0.0506 0.0509 0.0511 0.0514 0.0517 0.0519 0.0522 0.0525 0.0528 0.0530 0.0533 0.0536 0.0538 0.0541 0.0544 0.0546 0.0549 0.0552 0.0554 0.0557 0.0560 0.0562 0.0565 0.0568 0.0570 0.0573 0.0576 0.0578 0.0581 0.0584 0.0586 0.0589 0.0592 0.0594 0.0597 0.0600 0.0602 0.0605 0.0608 0.0611 0.0613 0.0616 0.0619 0.0621 0.0624 0.0627 0.0629 0.0632 0.0635 0.0637 0.0640 0.0643 0.0645 0.0648 0.0651 0.0653 0.0656 0.0659 0.0661 0.0664 0.0667 0.0669 0.0672 0.0675 0.0677 0.0680 0.0683 0.0685 0.0688 0.0691 0.0694 0.0696 0.0699 0.0702 0.0704 0.0707 0.0710 0.0712 0.0715 0.0718 0.0720 0.0723 0.0726 0.0728 0.0731 0.0734 0.0736 0.0739 0.0742 0.0744 0.0747 0.0750 0.0752 0.0755 0.0758 0.0760 0.0763 0.0766 0.0768 0.0771 0.0774 0.0777 0.0779 0.0782 0.0785 0.0787 0.0790 0.0793 0.0795 0.0798 0.0801 0.0803 0.0806 0.0809 0.0811 0.0814 0.0817 0.0819 0.0822 0.0825 0.0827 0.0830 0.0833 0.0835 0.0838 0.0841 0.0843 0.0846 0.0849 0.0852 0.0854 0.0857 0.0860 0.0862 0.0865 0.0868 0.0870 0.0873 0.0876 0.0878 0.0881 0.0884 0.0886 0.0889 0.0892 0.0894 0.0897 0.0900 0.0902 0.0905 0.0908 0.0910 0.0913 0.0916 0.0918 0.0921 0.0924 0.0926 0.0929 0.0932 0.0935 0.0937 0.0940 0.0943 0.0945 0.0948 0.0951 0.0953 0.0956 0.0959 0.0961 0.0964 0.0967 0.0969 0.0972 0.0975 0.0977 0.0980 0.0983 0.0985 0.0988 0.0991 0.0993 0.0996 0.0999 0.1001 0.1004 0.1007 0.1009 0.1012 0.1015 0.1018 0.1020 0.1023 0.1026 0.1028 0.1031 0.1034 0.1036 0.1039 0.1042 0.1044 0.1047 0.1050 0.1052 0.1055 0.1058 0.1060 0.1063 0.1066 0.1068 0.1071 0.1074 0.1076 0.1079 0.1082 0.1084 0.1087 0.1090 0.1092 0.1095 0.1098 0.1101 0.1103 0.1106 0.1109 0.1111 0.1114 0.1117 0.1119 0.1122 0.1125 0.1127 0.1130 0.1133 0.1135 0.1138 0.1141 0.1143 0.1146 0.1149 0.1151 0.1154 0.1157 0.1159 0.1162 0.1165 0.1167 0.1170 0.1173 0.1176 0.1178 0.1181 0.1184 0.1186 0.1189 0.1192 0.1194 0.1197 0.1200 0.1202 0.1205 0.1208 0.1210 0.1213 0.1216 0.1218 0.1221 0.1224 0.1226 0.1229 0.1232 0.1234 0.1237 0.1240 0.1242 0.1245 0.1248 0.1250 0.1253 0.1256 0.1259 0.1261 0.1264 0.1267 0.1269 0.1272 0.1275 0.1277 0.1280 0.1283 0.1285 0.1288 0.1291 0.1293 0.1296 0.1299 0.1301 0.1304 0.1307 0.1309 0.1312 0.1315 0.1317 0.1320 0.1323 0.1325 0.1328 0.1331 0.1333 0.1336 0.1339 0.1342 0.1344 0.1347 0.1350 0.1352 0.1355 0.1358 0.1360 0.1363 0.1366 0.1368 0.1371 0.1374 0.1376 0.1379 0.1382 0.1384 0.1387 0.1390 0.1392 0.1395 0.1398 0.1400 0.1403 0.1406 0.1408 0.1411 0.1414 0.1417 0.1419 0.1422 0.1425 0.1427 0.1430 0.1433 0.1435 0.1438 0.1441 0.1443 0.1446 0.1449 0.1451 0.1454 0.1457 0.1459 0.1462 0.1465 0.1467 0.1470 0.1473 0.1475 0.1478 0.1481 0.1483 0.1486 0.1489 0.1491 0.1494 0.1497 0.1500 0.1502 0.1505 0.1508 0.1510 0.1513 0.1516 0.1518 0.1521 0.1524 0.1526 0.1529 0.1532 0.1534 0.1537 0.1540 0.1542 0.1545 0.1548 0.1550 0.1553 0.1556 0.1558 0.1561 0.1564 0.1566 0.1569 0.1572 0.1574 0.1577 0.1580 0.1583 0.1585 0.1588 0.1591 0.1593 0.1596 0.1599 0.1601 0.1604 0.1607 0.1609 0.1612 0.1615 0.1617 0.1620 0.1623 0.1625 0.1628 0.1631 0.1633 0.1636 0.1639 0.1641 0.1644 0.1647 0.1649 0.1652 0.1655 0.1657 0.1660 0.1663 0.1666 0.1668 0.1671 0.1674 0.1676 0.1679 0.1682 0.1684 0.1687 0.1690 0.1692 0.1695 0.1698 0.1700 0.1703 0.1706 0.1708 0.1711 0.1714 0.1716 0.1719 0.1722 0.1724 0.1727 0.1730 0.1732 0.1735 0.1738 0.1741 0.1743 0.1746 0.1749 0.1751 0.1754 0.1757 0.1759 0.1762 0.1765 0.1767 0.1770 0.1773 0.1775 0.1778 0.1781 0.1783 0.1786 0.1789 0.1791 0.1794 0.1797 0.1799 0.1802 0.1805 0.1807 0.1810 0.1813 0.1815 0.1818 0.1821 0.1824 0.1826 0.1829 0.1832 0.1834 0.1837 0.1840 0.1842 0.1845 0.1848 0.1850 0.1853 0.1856 0.1858 0.1861 0.1864 0.1866 0.1869 0.1872 0.1874 0.1877 0.1880 0.1882 0.1885 0.1888 0.1890 0.1893 0.1896 0.1898 0.1901 0.1904 0.1907 0.1909 0.1912 0.1915 0.1917 0.1920 0.1923 0.1925 0.1928 0.1931 0.1933 0.1936 0.1939 0.1941 0.1944 0.1947 0.1949 0.1952 0.1955 0.1957 0.1960 0.1963 0.1965 0.1968 0.1971 0.1973 0.1976 0.1979 0.1981 0.1984 0.1987 0.1990 0.1992 0.1995 0.1998 0.2000 0.2003 0.2006 0.2008 0.2011 0.2014 0.2016 0.2019 0.2022 0.2024 0.2027 0.2030 0.2032 0.2035 0.2038 0.2040 0.2043 0.2046 0.2048 0.2051 0.2054 0.2056 0.2059 0.2062 0.2065 0.2067 0.2070 0.2073 0.2075 0.2078 0.2081 0.2083 0.2086 0.2089 0.2091 0.2094 0.2097 0.2099 0.2102 0.2105 0.2107 0.2110 0.2113 0.2115 0.2118 0.2121 0.2123 0.2126 0.2129 0.2131 0.2134 0.2137 0.2139 0.2142 0.2145 0.2148 0.2150 0.2153 0.2156 0.2158 0.2161 0.2164 0.2166 0.2169 0.2172 0.2174 0.2177 0.2180 0.2182 0.2185 0.2188 0.2190 0.2193 0.2196 0.2198 0.2201 0.2204 0.2206 0.2209 0.2212 0.2214 0.2217 0.2220 0.2222 0.2225 0.2228 0.2231 0.2233 0.2236 0.2239 0.2241 0.2244 0.2247 0.2249 0.2252 0.2255 0.2257 0.2260 0.2263 0.2265 0.2268 0.2271 0.2273 0.2276 0.2279 0.2281 0.2284 0.2287 0.2289 0.2292 0.2295 0.2297 0.2300 0.2303 0.2305 0.2308 0.2311 0.2314 0.2316 0.2319 0.2322 0.2324 0.2327 0.2330 0.2332 0.2335 0.2338 0.2340 0.2343 0.2346 0.2348 0.2351 0.2354 0.2356 0.2359 0.2362 0.2364 0.2367 0.2370 0.2372 0.2375 0.2378 0.2380 0.2383 0.2386 0.2389 0.2391 0.2394 0.2397 0.2399 0.2402 0.2405 0.2407 0.2410 0.2413 0.2415 0.2418 0.2421 0.2423 0.2426 0.2429 0.2431 0.2434 0.2437 0.2439 0.2442 0.2445 0.2447 0.2450 0.2453 0.2455 0.2458 0.2461 0.2463 0.2466 0.2469 0.2472 0.2474 0.2477 0.2480 0.2482 0.2485 0.2488 0.2490 0.2493 0.2496 0.2498 0.2501 0.2504 0.2506 0.2509 0.2512 0.2514 0.2517 0.2520 0.2522 0.2525 0.2528 0.2530 0.2533 0.2536 0.2538 0.2541 0.2544 0.2546 0.2549 0.2552 0.2555 0.2557 0.2560 0.2563 0.2565 0.2568 0.2571 0.2573 0.2576 0.2579 0.2581 0.2584 0.2587 0.2589 0.2592 0.2595 0.2597 0.2600 0.2603 0.2605 0.2608 0.2611 0.2613 0.2616 0.2619 0.2621 0.2624 0.2627 0.2629 0.2632 0.2635 0.2638 0.2640 0.2643 0.2646 0.2648 0.2651 0.2654 0.2656 0.2659 0.2662 0.2664 0.2667 0.2670 0.2672 0.2675 0.2678</gridRateShifts>
+                  <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
+                </spline>
+              </neDynamics>
+              <neDynamics id="NeDynamics.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.SplinePrevalenceToNe">
+                <spline id="splinePrev.Deme2.t:SimDataset" spec="mascotdatastreams.dynamics.Spline" clipTransRate="false">
+                  <logInfected idref="SkylinePrev.Deme2.t:SimDataset"/>
+                  <rateShifts idref="SkygrowthRateShifts"/>
+                  <gridRateShifts idref="SplineGridRateShifts"/>
+                  <uninfectiousRate idref="uninfectiousRate.t:SimDataset"/>
+                </spline>
+              </neDynamics>
+            </NeDynamics>
+            <rateShifts idref="SplineGridRateShifts"/>
+            <indicators id="indicatorsSkyline.t:SimDataset" spec="parameter.BooleanParameter" dimension="2" estimate="false">true</indicators>
+            <typeTrait id="typeTraitSet.t:SimDataset" spec="mascot.util.InitializedTraitSet" traitname="type" value="leaf_0=I0,leaf_1=I0,leaf_10=I0,leaf_100=I0,leaf_101=I0,leaf_102=I1,leaf_103=I1,leaf_104=I1,leaf_105=I0,leaf_106=I1,leaf_107=I0,leaf_108=I0,leaf_109=I1,leaf_11=I0,leaf_110=I1,leaf_111=I1,leaf_112=I1,leaf_113=I1,leaf_114=I1,leaf_115=I1,leaf_116=I1,leaf_117=I1,leaf_118=I1,leaf_119=I1,leaf_12=I0,leaf_120=I1,leaf_121=I1,leaf_122=I1,leaf_123=I0,leaf_124=I1,leaf_125=I1,leaf_126=I0,leaf_127=I1,leaf_128=I1,leaf_129=I1,leaf_13=I0,leaf_130=I1,leaf_131=I1,leaf_132=I1,leaf_133=I1,leaf_134=I0,leaf_135=I1,leaf_136=I1,leaf_137=I1,leaf_138=I1,leaf_139=I1,leaf_14=I1,leaf_140=I1,leaf_141=I1,leaf_142=I1,leaf_143=I1,leaf_144=I1,leaf_145=I1,leaf_146=I1,leaf_147=I1,leaf_148=I1,leaf_149=I0,leaf_15=I0,leaf_150=I1,leaf_151=I1,leaf_152=I1,leaf_153=I1,leaf_154=I1,leaf_155=I1,leaf_156=I1,leaf_157=I1,leaf_158=I1,leaf_159=I1,leaf_16=I0,leaf_160=I1,leaf_17=I0,leaf_18=I1,leaf_19=I0,leaf_2=I0,leaf_20=I0,leaf_21=I1,leaf_22=I0,leaf_23=I1,leaf_24=I0,leaf_25=I0,leaf_26=I0,leaf_27=I1,leaf_28=I0,leaf_29=I1,leaf_3=I0,leaf_30=I0,leaf_31=I0,leaf_32=I0,leaf_33=I1,leaf_34=I0,leaf_35=I1,leaf_36=I0,leaf_37=I1,leaf_38=I1,leaf_39=I0,leaf_4=I1,leaf_40=I0,leaf_41=I0,leaf_42=I0,leaf_43=I0,leaf_44=I0,leaf_45=I0,leaf_46=I1,leaf_47=I1,leaf_48=I0,leaf_49=I0,leaf_5=I0,leaf_50=I1,leaf_51=I0,leaf_52=I0,leaf_53=I0,leaf_54=I0,leaf_55=I0,leaf_56=I0,leaf_57=I0,leaf_58=I0,leaf_59=I1,leaf_6=I0,leaf_60=I0,leaf_61=I0,leaf_62=I0,leaf_63=I0,leaf_64=I1,leaf_65=I1,leaf_66=I0,leaf_67=I0,leaf_68=I1,leaf_69=I1,leaf_7=I0,leaf_70=I1,leaf_71=I1,leaf_72=I1,leaf_73=I0,leaf_74=I0,leaf_75=I0,leaf_76=I1,leaf_77=I0,leaf_78=I0,leaf_79=I1,leaf_8=I0,leaf_80=I0,leaf_81=I0,leaf_82=I0,leaf_83=I1,leaf_84=I1,leaf_85=I0,leaf_86=I1,leaf_87=I1,leaf_88=I0,leaf_89=I0,leaf_9=I0,leaf_90=I0,leaf_91=I1,leaf_92=I0,leaf_93=I1,leaf_94=I1,leaf_95=I1,leaf_96=I1,leaf_97=I1,leaf_98=I0,leaf_99=I1">
+              <taxa id="TaxonSet.1" spec="TaxonSet" alignment="@SimDataset"/>
+            </typeTrait>
+          </dynamics>
+          <structuredTreeIntervals id="StructuredTreeIntervals.t:SimDataset" spec="mascot.distribution.StructuredTreeIntervals" tree="@Tree.t:SimDataset"/>
+        </distribution>
+        <prior id="CaseCountDispersionPrior.s:SimDataset" name="distribution">
+          <x id="caseCounts.dispersionPrior:SimDataset" spec="mascot.util.Final" arg="@caseCounts.dispersion:SimDataset"/>
+          <LogNormal id="LogNormalDistributionModel.3" name="distr">
+            <parameter id="RealParameter.100" spec="parameter.RealParameter" estimate="false" name="M">-1.0</parameter>
+            <parameter id="RealParameter.101" spec="parameter.RealParameter" estimate="false" name="S">0.5</parameter>
+          </LogNormal>
+        </prior>
+        <prior id="CaseCountsScaling.Deme1.Prior:SimDataset" name="distribution" x="@caseCounts.scaling.Deme1:SimDataset">
+          <LogNormal id="CaseCountsScaling.Deme1.LogNormal" name="distr">
+            <parameter id="CaseCountsScaling.Deme1.MeanLog" spec="parameter.RealParameter" estimate="false" name="M">-3.0</parameter>
+            <parameter id="CaseCountsScaling.Deme1.SDLog" spec="parameter.RealParameter" estimate="false" name="S">0.5</parameter>
+          </LogNormal>
+        </prior>
+        <prior id="CaseCountsScaling.Deme2.Prior:SimDataset" name="distribution" x="@caseCounts.scaling.Deme2:SimDataset">
+          <LogNormal id="CaseCountsScaling.Deme2.LogNormal" name="distr">
+            <parameter id="CaseCountsScaling.Deme2.MeanLog" spec="parameter.RealParameter" estimate="false" name="M">-3.0</parameter>
+            <parameter id="CaseCountsScaling.Deme2.SDLog" spec="parameter.RealParameter" estimate="false" name="S">0.5</parameter>
+          </LogNormal>
+        </prior>
+        <prior id="WastewaterScaling.Deme1.Prior:SimDataset" name="distribution" x="@wastewater.scaling.Deme1:SimDataset">
+          <LogNormal id="WastewaterScaling.Deme1.LogNormal" name="distr">
+            <parameter id="WastewaterScaling.Deme1.MeanLog" spec="parameter.RealParameter" estimate="false" name="M">4.5</parameter>
+            <parameter id="WastewaterScaling.Deme1.SDLog" spec="parameter.RealParameter" estimate="false" name="S">0.5</parameter>
+          </LogNormal>
+        </prior>
+        <prior id="WastewaterScaling.Deme2.Prior:SimDataset" name="distribution" x="@wastewater.scaling.Deme2:SimDataset">
+          <LogNormal id="WastewaterScaling.Deme2.LogNormal" name="distr">
+            <parameter id="WastewaterScaling.Deme2.MeanLog" spec="parameter.RealParameter" estimate="false" name="M">4.5</parameter>
+            <parameter id="WastewaterScaling.Deme2.SDLog" spec="parameter.RealParameter" estimate="false" name="S">0.5</parameter>
+          </LogNormal>
+        </prior>
+        <prior id="WastewaterSigmaPrior.s:SimDataset" name="distribution" x="@wastewater.sigma:SimDataset">
+          <LogNormal id="WastewaterSigmaLogNormal" name="distr">
+            <parameter id="WastewaterSigmaMeanLog" spec="parameter.RealParameter" estimate="false" name="M">-0.7</parameter>
+            <parameter id="WastewaterSigmaSDLog" spec="parameter.RealParameter" estimate="false" name="S">0.3</parameter>
+          </LogNormal>
+        </prior>
+        <prior id="migrationRatesSkylinePrior.t:SimDataset" name="distribution" x="@migrationRatesSkyline.t:SimDataset">
+          <LogNormal id="LogNormal.3" name="distr">
+            <parameter id="RealParameter.8" spec="parameter.RealParameter" estimate="false" name="M">0.5</parameter>
+            <parameter id="RealParameter.88" spec="parameter.RealParameter" estimate="false" name="S">0.5</parameter>
+          </LogNormal>
+        </prior>
+      </distribution>
+    </distribution>
+    <operator id="AVMNOperator.Mascot.SimDataset" spec="kernel.AdaptableVarianceMultivariateNormalOperator" allowNonsense="true" beta="0.1" burnin="400" initial="800" weight="2.0">
+      <transformations id="AVMNSumTransform.Mascot.SimDataset" spec="operator.kernel.Transform$LogConstrainedSumTransform"/>
+      <transformations id="AVMNLogTransform.Mascot.SimDataset" spec="operator.kernel.Transform$LogTransform">
+        <parameter idref="migrationRatesSkyline.t:SimDataset" name="f"/>
+        <parameter idref="caseCounts.scaling.Deme1:SimDataset" name="f"/>
+        <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="f"/>
+        <parameter idref="caseCounts.dispersion:SimDataset" name="f"/>
+        <parameter idref="wastewater.scaling.Deme1:SimDataset" name="f"/>
+        <parameter idref="wastewater.scaling.Deme2:SimDataset" name="f"/>
+        <parameter idref="wastewater.sigma:SimDataset" name="f"/>
+      </transformations>
+      <transformations id="AVMNNoTransform.Mascot.SimDataset" spec="operator.kernel.Transform$NoTransform">
+        <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="f"/>
+        <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="f"/>
+      </transformations>
+    </operator>
+    <operator id="UpDownPrevScaling.Deme1:SimDataset" spec="mascotdatastreams.operators.UpDownLogScaleOperator" scaleFactor="0.2" weight="1.5" optimise="true">
+      <upLogParameter idref="SkylinePrev.Deme1.t:SimDataset"/>
+      <downRealParameter idref="caseCounts.scaling.Deme1:SimDataset"/>
+      <downRealParameter idref="wastewater.scaling.Deme1:SimDataset"/>
+    </operator>
+    <operator id="UpDownPrevScaling.Deme2:SimDataset" spec="mascotdatastreams.operators.UpDownLogScaleOperator" scaleFactor="0.2" weight="1.5" optimise="true">
+      <upLogParameter idref="SkylinePrev.Deme2.t:SimDataset"/>
+      <downRealParameter idref="caseCounts.scaling.Deme2:SimDataset"/>
+      <downRealParameter idref="wastewater.scaling.Deme2:SimDataset"/>
+    </operator>
+    <operator id="CaseCountsDispersionScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@caseCounts.dispersion:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.5"/>
+    <operator id="WastewaterSigmaScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@wastewater.sigma:SimDataset" scaleFactor="0.5" upper="10.0" weight="0.5"/>
+    <operator id="migrationRatesScaler.s:SimDataset" spec="AdaptableOperatorSampler" weight="1.0">
+      <parameter idref="migrationRatesSkyline.t:SimDataset"/>
+      <operator idref="AVMNOperator.Mascot.SimDataset"/>
+      <operator id="migrationRatesScalerX.s:SimDataset" spec="kernel.BactrianScaleOperator" parameter="@migrationRatesSkyline.t:SimDataset" scaleFactor="0.5" upper="10.0" weight="1.0"/>
+    </operator>
+    <operator id="SkylinePrev.Deme1.Scaler.t:SimDataset" spec="AdaptableOperatorSampler" weight="1.0">
+      <parameter idref="SkylinePrev.Deme1.t:SimDataset"/>
+      <operator id="SkylinePrev.Deme1.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme1.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
+      <operator idref="AVMNOperator.Mascot.SimDataset"/>
+    </operator>
+    <operator id="SkylinePrev.Deme2.Scaler.t:SimDataset" spec="AdaptableOperatorSampler" weight="1.0">
+      <parameter idref="SkylinePrev.Deme2.t:SimDataset"/>
+      <operator id="SkylinePrev.Deme2.ScalerX.t:SimDataset" spec="operator.kernel.BactrianRandomWalkOperator" parameter="@SkylinePrev.Deme2.t:SimDataset" scaleFactor="0.5" weight="1.0"/>
+      <operator idref="AVMNOperator.Mascot.SimDataset"/>
+    </operator>
+    <operator id="SkylinePrev.Deme1.ScalerXX.t:SimDataset" spec="mascotdatastreams.operators.BactrianRandomWalkBlockOperator" parameter="@SkylinePrev.Deme1.t:SimDataset" scaleFactor="0.2" weight="0.5"/>
+    <operator id="SkylinePrev.Deme2.ScalerXX.t:SimDataset" spec="mascotdatastreams.operators.BactrianRandomWalkBlockOperator" parameter="@SkylinePrev.Deme2.t:SimDataset" scaleFactor="0.2" weight="0.5"/>
+    <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
+      <log idref="posterior"/>
+      <log idref="prior"/>
+      <log idref="introFraction.Deme1:SimDataset"/>
+      <log idref="IntroFractionPrior.Deme1:SimDataset"/>
+      <log id="TreeHeight.t:SimDataset" spec="beast.base.evolution.tree.TreeStatLogger" tree="@Tree.t:SimDataset"/>
+      <log idref="caseCountLikelihood.Deme1.t:SimDataset"/>
+      <log idref="caseCountLikelihood.Deme2.t:SimDataset"/>
+      <parameter idref="caseCounts.scaling.Deme1:SimDataset" name="log"/>
+      <parameter idref="caseCounts.scaling.Deme2:SimDataset" name="log"/>
+      <parameter idref="caseCounts.dispersion:SimDataset" name="log"/>
+      <log idref="seroprevalenceLikelihood.Deme1.t:SimDataset" name="log"/>
+      <log idref="seroprevalenceLikelihood.Deme2.t:SimDataset" name="log"/>
+      <log idref="wastewaterLikelihood.Deme1.t:SimDataset" name="log"/>
+      <log idref="wastewaterLikelihood.Deme2.t:SimDataset" name="log"/>
+      <parameter idref="wastewater.scaling.Deme1:SimDataset" name="log"/>
+      <parameter idref="wastewater.scaling.Deme2:SimDataset" name="log"/>
+      <parameter idref="wastewater.sigma:SimDataset" name="log"/>
+      <log idref="Mascot.t:SimDataset"/>
+      <log id="nrEventslogger.t:SimDataset" spec="mascot.logger.MigrationCountLogger">
+        <mappedMascot id="mascotEventsTreelog.t:SimDataset" spec="mascot.distribution.MappedMascot" dynamics="@StructuredSkyline.t:SimDataset" structuredTreeIntervals="@StructuredTreeIntervals.t:SimDataset" tree="@Tree.t:SimDataset"/>
+      </log>
+      <log idref="StructuredSkyline.t:SimDataset"/>
+      <parameter idref="SkylinePrev.Deme1.t:SimDataset" name="log"/>
+      <parameter idref="SkylinePrev.Deme2.t:SimDataset" name="log"/>
+    </logger>
+    <logger id="screenlog" spec="Logger" logEvery="1000">
+      <log idref="posterior"/>
+      <log idref="prior"/>
+    </logger>
+    <logger id="treelog.t:SimDataset" spec="Logger" fileName="$(filebase)-$(tree).trees" logEvery="1000" mode="tree">
+      <log id="TreeWithMetaDataLogger.t:SimDataset" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:SimDataset"/>
+    </logger>
+    <logger id="typedTreelogger.t:SimDataset" spec="Logger" fileName="$(filebase).$(tree).trees" logEvery="1000" mode="tree">
+      <log id="structuredTreelog.t:SimDataset" spec="mascotdatastreams.logger.StructuredTreeLogger" mascotLogPflag="@Mascot.t:SimDataset"/>
+    </logger>
+    <logger id="typedEventsTreelogger.t:SimDataset" spec="Logger" fileName="$(filebase).$(tree).events.trees" logEvery="1000" mode="tree">
+      <log idref="mascotEventsTreelog.t:SimDataset"/>
+    </logger>
+    <logger id="NeDynamicsLogger.Deme1.t:SimDataset" spec="Logger" fileName="$(filebase).NeDynamics.Deme1.log" logEvery="1000">
+      <log idref="NeDynamics.Deme1.t:SimDataset"/>
+    </logger>
+    <logger id="NeDynamicsLogger.Deme2.t:SimDataset" spec="Logger" fileName="$(filebase).NeDynamics.Deme2.log" logEvery="1000">
+      <log idref="NeDynamics.Deme2.t:SimDataset"/>
+    </logger>
+    <logger id="cumulativeIncidenceLogger.Deme1.t:SimDataset" spec="Logger" fileName="$(filebase).cumulativeIncidence.Deme1.log" logEvery="1000">
+      <log spec="mascotdatastreams.logger.CumulativeIncidenceLogger">
+        <seroprevalenceLikelihood idref="seroprevalenceLikelihood.Deme1.t:SimDataset"/>
+      </log>
+    </logger>
+    <logger id="cumulativeIncidenceLogger.Deme2.t:SimDataset" spec="Logger" fileName="$(filebase).cumulativeIncidence.Deme2.log" logEvery="1000">
+      <log spec="mascotdatastreams.logger.CumulativeIncidenceLogger">
+        <seroprevalenceLikelihood idref="seroprevalenceLikelihood.Deme2.t:SimDataset"/>
+      </log>
+    </logger>
+    <operatorschedule id="OperatorSchedule" spec="OperatorSchedule"/>
+  </run>
+</beast>
