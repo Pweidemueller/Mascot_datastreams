@@ -202,7 +202,8 @@ public class SeroprevalenceLikelihood extends Distribution {
             return logP;
         }
         // Default to last grid time since everything is represented relative to most recent sample
-        // we want to calculate cumulative cases from the first infection (around tree root) to the observation time  
+        // it would be better to calculate cumulative cases from the first infection (around tree root) to the observation time
+        // but for now we'll just calculate from the grid end time (furthest in the past) which might be more later or earlier than the tree root
         double EarliestTime = prevalenceSpline.getGridEnd(); 
         RealParameter EarliestTimeParam = EarliestTimeInput.get();
         if (EarliestTimeParam != null) {
